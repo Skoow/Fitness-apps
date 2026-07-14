@@ -24,7 +24,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // À changer à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=X.Y sur la balise <script src="../engine.js?v=X.Y"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION='1.2';
+var ENGINE_VERSION='1.3';
 
 function startApp(CONFIG){
 
@@ -274,25 +274,8 @@ function render(){
   if(!el)return;
   el.innerHTML=buildHTML();
   bindEvents();
-  positionVersionBadge();
   var scrollEl=document.getElementById('stats-scroll');
   if(scrollEl)scrollEl.scrollLeft=scrollEl.scrollWidth;
-}
-
-// Le numéro de version doit rester à un endroit fixe de l'écran (voir
-// versionBadgeHTML) — jamais suivre le décalage horizontal du tiroir (voir
-// #app-shell dans buildHTML). Sa position verticale, elle, doit correspondre
-// au bas du rectangle d'en-tête (#hdr-band), dont la hauteur varie d'une
-// personne à l'autre (badge programme présent ou non, etc.) — on la mesure
-// donc à chaque rendu plutôt que de deviner une valeur fixe. translateX
-// étant purement horizontal, cette mesure reste juste même si le tiroir est
-// ouvert au moment du calcul.
-function positionVersionBadge(){
-  var hdr=document.getElementById('hdr-band');
-  var badge=document.getElementById('version-badge');
-  if(!hdr||!badge)return;
-  var r=hdr.getBoundingClientRect();
-  badge.style.top=(r.bottom-20)+'px';
 }
 
 function bindEvents(){
@@ -428,7 +411,17 @@ function buildHTML(){
     +'</div>'
     +'<div class="dlbar">'
     +'<div><div class="dll">&#128197; '+CONFIG.deadlineLabel+'</div><div class="dld">'+CONFIG.deadlineDateText+'</div></div>'
-    +'<div style="text-align:right">'+jleftHTML()+'</div>'
+    +'<div style="text-align:right">'+jleftHTML()
+      // Le numéro de version reste dans le flux normal du rectangle d'en-tête
+      // (donc toujours correctement placé en bas, sous le J–N, quelle que
+      // soit la hauteur réelle du rectangle chez cette personne — pas besoin
+      // de mesurer quoi que ce soit en JS). Le seul souci est que ce
+      // rectangle fait partie de #app-shell, qui se décale de -DRAWER_WIDTH
+      // à l'ouverture du tiroir : on annule ce décalage juste pour cet
+      // élément avec un translateX inverse, pour qu'il ne suive pas ce
+      // glissement horizontal (les transforms imbriqués s'additionnent).
+      +'<div style="font-size:9px;font-weight:700;color:'+CONFIG.noSideIconColor+';margin-top:2px;transform:translateX('+(S.menuOpen?DRAWER_WIDTH:0)+'px)">v'+ENGINE_VERSION+'</div>'
+    +'</div>'
     +'</div></div>'
     +(isData?'<div style="text-align:center;padding:10px 14px 0;font-size:11px;color:'+CONFIG.noSideIconColor+'">&#8249; Touche ton prénom pour revenir en arrière</div>':'')
     +mainContent;
@@ -437,11 +430,7 @@ function buildHTML(){
   // mobile native — le panneau (voir drawerHTML) glisse alors depuis le bord
   // droit dans l'espace libéré. Le wrapper overflow-x:hidden évite qu'un
   // scroll horizontal apparaisse pendant le décalage.
-  // Le numéro de version (versionBadgeHTML) est rendu à côté, PAS à
-  // l'intérieur de #app-shell : il doit rester à un endroit fixe de l'écran,
-  // jamais suivre ce décalage horizontal (voir positionVersionBadge).
   return menuButtonHTML()
-    +versionBadgeHTML()
     +drawerHTML()
     +(S.menuOpen?'<div id="menu-overlay" style="position:fixed;inset:0;z-index:59;background:transparent"></div>':'')
     +'<div style="overflow-x:hidden">'
@@ -465,23 +454,11 @@ var DRAWER_WIDTH=250;
 // la barre système et devient impossible à toucher.
 // Le header réserve 64px à droite (voir "padding-right" dans buildHTML) pour
 // que le badge programme et le J–N ne passent jamais dessous.
-// Ce bouton ne montre que le logo — le numéro de version est un élément
-// séparé (voir versionBadgeHTML), positionné indépendamment.
+// Ce bouton ne montre que le logo — le numéro de version est affiché dans
+// le rectangle d'en-tête (voir shellContent dans buildHTML).
 function menuButtonHTML(){
   var icon=S.menuOpen?'&#10005;':'&#9776;';
   return '<button id="btn-menu" style="position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:61;background:transparent;border:none;font-size:30px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px 8px">'+icon+'</button>';
-}
-
-// Numéro de version : visuellement en bas à droite du rectangle d'en-tête
-// (sous le compte à rebours J–N), mais c'est un élément fixe INDÉPENDANT du
-// contenu qui se décale à l'ouverture du tiroir (#app-shell dans
-// buildHTML) — il ne doit jamais glisser vers la gauche avec le reste,
-// seulement rester à sa place, quitte à être recouvert par le tiroir une
-// fois ouvert. Le "top" exact est calculé après coup (voir
-// positionVersionBadge) car la hauteur du rectangle d'en-tête varie d'une
-// personne à l'autre ; la valeur ici n'est qu'un repli avant ce calcul.
-function versionBadgeHTML(){
-  return '<div id="version-badge" style="position:fixed;top:120px;right:16px;z-index:58;font-size:9px;font-weight:700;color:'+CONFIG.noSideIconColor+';pointer-events:none">v'+ENGINE_VERSION+'</div>';
 }
 
 // Tiroir latéral (droite) façon appli mobile : toujours dans le DOM (pour
