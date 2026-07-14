@@ -179,6 +179,8 @@ function bindEvents(){
   if(btnMenu)btnMenu.addEventListener('click',function(){S.menuOpen=!S.menuOpen;render();});
   var btnMenuData=document.getElementById('btn-menu-data');
   if(btnMenuData)btnMenuData.addEventListener('click',function(){S.mode='data';S.menuOpen=false;render();});
+  var btnMenuHome=document.getElementById('btn-menu-home');
+  if(btnMenuHome)btnMenuHome.addEventListener('click',function(){S.mode='today';S.openDays={};S.openDays[TI]=true;S.menuOpen=false;render();});
   var hdrBand=document.getElementById('hdr-band');
   if(hdrBand)hdrBand.addEventListener('click',function(){
     if(S.mode==='data'){S.mode='today';S.openDays={};S.openDays[TI]=true;render();}
@@ -250,48 +252,54 @@ function buildHTML(){
       +'<div class="days">'+daysHTML+'</div>';
   }
   return menuButtonHTML()+menuPanelHTML()
-    +'<div class="hdr" id="hdr-band" style="'+(isData?'cursor:pointer':'')+'">'
+    +'<div class="hdr" id="hdr-band" style="padding-right:64px;'+(isData?'cursor:pointer':'')+'">'
     +'<div class="hdr-top">'
     +'<div class="ttl">'+CONFIG.title+' <span style="color:'+CONFIG.genderSymbolColor+'">'+CONFIG.genderSymbol+'</span></div>'
     +programBadgeHTML()
     +'</div>'
-    +(isData?'':'<div class="dlbar">'
-      +'<div><div class="dll">&#128197; '+CONFIG.deadlineLabel+'</div><div class="dld">'+CONFIG.deadlineDateText+'</div></div>'
-      +'<div style="text-align:right">'+jleftHTML()+'</div>'
-      +'</div>')
-    +'</div>'
+    +'<div class="dlbar">'
+    +'<div><div class="dll">&#128197; '+CONFIG.deadlineLabel+'</div><div class="dld">'+CONFIG.deadlineDateText+'</div></div>'
+    +'<div style="text-align:right">'+jleftHTML()+'</div>'
+    +'</div></div>'
+    +(isData?'<div style="text-align:center;padding:10px 14px 0;font-size:11px;color:'+CONFIG.noSideIconColor+'">&#8249; Touche le bandeau du haut pour revenir</div>':'')
     +mainContent;
 }
 
-// Menu ☰ en haut à droite (fixe, au-dessus de tout, sur toutes les pages).
-// Premier niveau : une petite liste déroulante (pour l'instant une seule
-// ligne). Cliquer dessus ouvre une page dédiée en plein écran (S.mode='data')
-// — le bandeau du haut reste affiché et sert de bouton retour (voir
-// bindEvents : cliquer dessus en mode 'data' revient à l'accueil).
+// Menu ☰ en haut à droite : fixe (ne bouge pas au scroll), toujours au-dessus
+// du reste. Le header réserve 64px à droite (voir "padding-right" ci-dessus)
+// pour que le badge programme et le J–N ne passent jamais dessous.
+// Premier niveau : une petite liste déroulante (Accueil / Importer-Exporter).
+// Cliquer sur "Importer / Exporter" ouvre une page dédiée en plein écran
+// (S.mode='data') — jamais l'action directement depuis le petit menu.
 function menuButtonHTML(){
-  return '<button id="btn-menu" style="position:fixed;top:16px;right:14px;z-index:60;background:transparent;border:none;font-size:22px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px">&#9776;</button>';
+  return '<button id="btn-menu" style="position:fixed;top:14px;right:14px;z-index:60;background:transparent;border:none;font-size:30px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px 8px">&#9776;</button>';
 }
 
 function menuPanelHTML(){
   if(!S.menuOpen)return'';
-  return '<div class="dc" style="position:fixed;top:56px;right:14px;z-index:59;padding:6px;width:230px;max-width:calc(100vw - 28px);box-shadow:0 10px 30px rgba(0,0,0,.35)">'
-    +'<button id="btn-menu-data" style="width:100%;text-align:left;background:transparent;border:none;padding:12px 10px;font-size:13px;font-weight:600;color:'+CONFIG.exerciseNameColor+';cursor:pointer;display:flex;align-items:center;gap:8px">&#128190; Importer / Exporter mes données</button>'
+  var c=CONFIG.exerciseNameColor;
+  var itemStyle='width:100%;text-align:left;background:transparent;border:none;padding:12px 10px;font-size:13px;font-weight:600;color:'+c+';cursor:pointer;display:flex;align-items:center;gap:8px';
+  return '<div class="dc" style="position:fixed;top:66px;right:14px;z-index:59;padding:6px;width:230px;max-width:calc(100vw - 28px);box-shadow:0 10px 30px rgba(0,0,0,.35)">'
+    +'<button id="btn-menu-home" style="'+itemStyle+'">&#127968; Accueil</button>'
+    +'<button id="btn-menu-data" style="'+itemStyle+'">&#128190; Importer / Exporter mes données</button>'
     +'</div>';
 }
 
 // Page dédiée (remplace la liste des jours) : import en haut, export en bas.
 function dataPageHTML(){
   var c=CONFIG.noSideIconColor;
-  var actionBtn='font-size:12px;font-weight:700;width:100%;justify-content:center';
-  return '<div style="text-align:center;padding:8px 14px 4px;font-size:11px;color:'+c+'">&#8249; Touche le bandeau du haut pour revenir</div>'
-    +'<div class="days" style="padding-top:6px">'
-    +'<div class="dc" style="padding:16px">'
-      +'<div style="font-size:11px;font-weight:800;letter-spacing:1px;color:'+c+';margin-bottom:10px">&#11014;&#65039; IMPORTER MES DONNÉES</div>'
+  var ac=CONFIG.accentColor;
+  var actionBtn='font-size:13px;font-weight:700;width:100%;justify-content:center;background:'+ac+'18;border-color:'+ac+';color:'+ac+';padding:12px';
+  return '<div class="days" style="padding-top:14px">'
+    +'<div class="dc" style="padding:18px">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:20px">&#11014;&#65039;</span><span style="font-size:12px;font-weight:800;letter-spacing:1px;color:'+c+'">IMPORTER MES DONNÉES</span></div>'
+      +'<div style="font-size:11px;color:'+c+';margin-bottom:12px;line-height:1.4">Restaure une sauvegarde, ou récupère tes données depuis une ancienne version de l’app.</div>'
       +'<button class="mbtn" id="btn-import" style="'+actionBtn+'">Choisir un fichier</button>'
       +'<input type="file" id="import-file" accept="application/json" style="display:none">'
     +'</div>'
-    +'<div class="dc" style="padding:16px">'
-      +'<div style="font-size:11px;font-weight:800;letter-spacing:1px;color:'+c+';margin-bottom:10px">&#11015;&#65039; EXPORTER MES DONNÉES</div>'
+    +'<div class="dc" style="padding:18px">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:20px">&#11015;&#65039;</span><span style="font-size:12px;font-weight:800;letter-spacing:1px;color:'+c+'">EXPORTER MES DONNÉES</span></div>'
+      +'<div style="font-size:11px;color:'+c+';margin-bottom:12px;line-height:1.4">Télécharge une sauvegarde de tous tes poids, à garder de ton côté.</div>'
       +'<button class="mbtn" id="btn-export" style="'+actionBtn+'">Télécharger</button>'
     +'</div>'
     +'</div>';
