@@ -108,6 +108,48 @@ function countsTowardProgress(ex){
   return true;
 }
 
+// ── STATS HEBDOMADAIRES ──────────────────────────────────────────────────────
+// À chaque changement de semaine détecté (voir plus bas), on prend une photo
+// de la semaine qui vient de se terminer : % d'assiduité (cases cochées /
+// total attendu sur TOUT le programme, tous les jours confondus) et % des
+// exercices dont le poids a augmenté depuis la photo précédente. Le score
+// affiché est la moyenne des deux (50/50). Une semaine où l'app n'a jamais
+// été ouverte n'a simplement aucune photo — le graphique la saute.
+function computeWeekCompletion(doneSnapshot){
+  var tot=0,dc=0;
+  for(var i=0;i<CONFIG.days.length;i++){
+    var day=CONFIG.days[i];
+    for(var j=0;j<day.exercises.length;j++){
+      var ex=day.exercises[j];
+      if(!countsTowardProgress(ex))continue;
+      tot++;
+      if(doneSnapshot[ex.id])dc++;
+    }
+  }
+  return tot>0?Math.round(dc/tot*100):0;
+}
+function computeWeightScore(history,weights){
+  if(!history.length)return 50; // pas de semaine précédente à comparer -> neutre
+  var prevWeights=history[history.length-1].weights||{};
+  var up=0,total=0;
+  for(var id in weights){
+    var cur=weights[id],prev=prevWeights[id];
+    if(!cur||cur==='—'||prev===undefined)continue;
+    total++;
+    if(parseFloat(cur)>parseFloat(prev))up++;
+  }
+  return total>0?Math.round(up/total*100):50;
+}
+function recordWeeklySnapshot(doneSnapshot){
+  var history=ld(K('statsHistory'),[]);
+  var completion=computeWeekCompletion(doneSnapshot);
+  var weightScore=computeWeightScore(history,S.weights);
+  var score=Math.round((completion+weightScore)/2);
+  history.push({date:getParisDate(),completion:completion,weightScore:weightScore,score:score,weights:S.weights});
+  if(history.length>52)history=history.slice(history.length-52);
+  sv(K('statsHistory'),history);
+}
+
 // ── STATE ──────────────────────────────────────────────────────────────────
 var TI=computeDayIndex(getWeekday());
 var DL=new Date(CONFIG.deadline+'T12:00:00');
@@ -117,16 +159,21 @@ var DL=new Date(CONFIG.deadline+'T12:00:00');
 var JLEFT_RAW=Math.floor((DL-getParisNow())/86400000);
 var JLEFT=Math.max(0,JLEFT_RAW);
 var WK=getWK();
+var storedWK=ld(K('doneWeek'),null);
+var storedDone=ld(K('done'),{});
 var S={
   mode:'today',
   menuOpen:false,
   openDays:{},
   weights:ld(K('weights'),{}),
   weightDates:ld(K('weightDates'),{}),
-  done:ld(K('doneWeek'),null)===WK?ld(K('done'),{}):{},
+  done:storedWK===WK?storedDone:{},
 };
 S.openDays[TI]=true;
-if(ld(K('doneWeek'),null)!==WK){sv(K('doneWeek'),WK);sv(K('done'),{});}
+if(storedWK!==WK){
+  if(storedWK!==null)recordWeeklySnapshot(storedDone);
+  sv(K('doneWeek'),WK);sv(K('done'),{});
+}
 
 // ── RENDER ─────────────────────────────────────────────────────────────────
 function render(){
@@ -141,6 +188,8 @@ function bindEvents(){
   var btnWeek=document.getElementById('btn-week');
   if(btnToday)btnToday.addEventListener('click',function(){S.mode='today';S.openDays={};S.openDays[TI]=true;render();});
   if(btnWeek)btnWeek.addEventListener('click',function(){S.mode='week';S.openDays={};render();});
+  var btnStats=document.getElementById('btn-stats');
+  if(btnStats)btnStats.addEventListener('click',function(){S.mode='stats';render();});
   var dhs=document.querySelectorAll('.dh');
   dhs.forEach(function(dh){
     dh.addEventListener('click',function(){
@@ -225,31 +274,33 @@ function programBadgeHTML(){
 
 function buildHTML(){
   var isData=S.mode==='data';
+  var isStats=S.mode==='stats';
   var mainContent;
   if(isData){
     mainContent=dataPageHTML();
   }else{
     var isRest=TI<0;
     var td=isRest?(CONFIG.restDay.fallbackDay?CONFIG.days[0]:null):CONFIG.days[TI];
-    var daysHTML;
-    if(S.mode==='today'){
-      if(isRest){
-        daysHTML=CONFIG.restDay.html+(CONFIG.restDay.showNextDayPreview?dayHTML(CONFIG.days[0],0,false):'');
-      }else{
-        daysHTML=dayHTML(td,TI,true);
-      }
+    var bodyHTML2;
+    if(isStats){
+      bodyHTML2=statsPageHTML();
+    }else if(S.mode==='today'){
+      bodyHTML2='<div class="days">'+(isRest?(CONFIG.restDay.html+(CONFIG.restDay.showNextDayPreview?dayHTML(CONFIG.days[0],0,false):'')):dayHTML(td,TI,true))+'</div>';
     }else{
-      daysHTML=CONFIG.days.map(function(d,i){return dayHTML(d,i,false);}).join('');
+      bodyHTML2='<div class="days">'+CONFIG.days.map(function(d,i){return dayHTML(d,i,false);}).join('')+'</div>';
     }
     var todayBtnStyle=S.mode==='today'
       ?(td?('background:'+td.color+'18;border-color:'+td.color+';color:'+td.color):'background:rgba(107,107,120,.2);border-color:#6b6b78;color:#6b6b78')
       :'';
     var weekBtnStyle=S.mode==='week'?('background:'+CONFIG.accentColor+'26;border-color:'+CONFIG.accentColor+';color:'+CONFIG.accentColor):'';
+    var statsColor='#a855f7';
+    var statsBtnStyle=isStats?('background:'+statsColor+'26;border-color:'+statsColor+';color:'+statsColor):('border-color:'+statsColor+'50;color:'+statsColor);
     mainContent='<div class="mtog">'
       +'<button class="mbtn" id="btn-today" style="'+todayBtnStyle+'">&#128205; AUJOURD’HUI</button>'
       +'<button class="mbtn" id="btn-week" style="'+weekBtnStyle+'">&#128198; SEMAINE</button>'
+      +'<button class="mbtn" id="btn-stats" style="'+statsBtnStyle+'">&#128200; STAT</button>'
       +'</div>'
-      +'<div class="days">'+daysHTML+'</div>';
+      +bodyHTML2;
   }
   return menuButtonHTML()+menuPanelHTML()
     +'<div class="hdr" id="hdr-band" style="padding-right:64px;'+(isData?'cursor:pointer':'')+'">'
@@ -303,6 +354,63 @@ function dataPageHTML(){
       +'<button class="mbtn" id="btn-export" style="'+actionBtn+'">Télécharger</button>'
     +'</div>'
     +'</div>';
+}
+
+// Page "STAT" : graphique des 8 dernières semaines ayant une photo (voir
+// recordWeeklySnapshot). Une semaine où l'app n'a pas été ouverte n'a pas de
+// photo et n'apparaît donc simplement pas — la ligne relie les points réels.
+function statsPageHTML(){
+  var history=ld(K('statsHistory'),[]).slice(-8);
+  var c=CONFIG.noSideIconColor;
+  return '<div class="days" style="padding-top:14px">'
+    +'<div class="dc" style="padding:18px">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1px;color:'+c+';margin-bottom:14px">&#128200; TA PROGRESSION (8 DERNIÈRES SEMAINES)</div>'
+    +statsChartSVG(history)
+    +'<div style="font-size:10.5px;color:'+c+';margin-top:14px;line-height:1.5">Score = moyenne entre l’assiduité (séances cochées sur tout le programme) et la progression des charges (% d’exercices dont le poids a augmenté depuis la semaine d’avant). Une nouvelle photo est prise chaque semaine.</div>'
+    +'</div>'
+    +'</div>';
+}
+
+function shortDateFR(iso){
+  var p=iso.split('-');
+  return p[2]+'/'+p[1];
+}
+
+function statsChartSVG(history){
+  var c=CONFIG.noSideIconColor;
+  if(history.length===0){
+    return '<div style="text-align:center;padding:24px 10px;color:'+c+';font-size:12px">Pas encore de données — reviens dans une semaine ou deux, une photo est prise à chaque changement de semaine.</div>';
+  }
+  var ac='#a855f7';
+  var w=320,h=180,padL=26,padR=10,padT=22,padB=26;
+  var innerW=w-padL-padR,innerH=h-padT-padB;
+  var n=history.length;
+  var stepX=n>1?innerW/(n-1):0;
+  function xAt(i){return padL+(n>1?i*stepX:innerW/2);}
+  function yAt(score){return padT+innerH-(score/100*innerH);}
+  var pts=[];
+  for(var i=0;i<n;i++)pts.push(xAt(i)+','+yAt(history[i].score));
+  var pointsStr=pts.join(' ');
+  var areaStr=pointsStr+' '+xAt(n-1)+','+(padT+innerH)+' '+xAt(0)+','+(padT+innerH);
+  var gridlines=[0,25,50,75,100].map(function(v){
+    return '<line x1="'+padL+'" y1="'+yAt(v)+'" x2="'+(w-padR)+'" y2="'+yAt(v)+'" stroke="'+c+'" stroke-opacity=".15" stroke-width="1"/>'
+      +'<text x="2" y="'+(yAt(v)+3)+'" font-size="8" fill="'+c+'">'+v+'</text>';
+  }).join('');
+  var marks=history.map(function(hpt,i){
+    return '<circle cx="'+xAt(i)+'" cy="'+yAt(hpt.score)+'" r="3.5" fill="'+ac+'"/>'
+      +'<text x="'+xAt(i)+'" y="'+(yAt(hpt.score)-9)+'" font-size="9" font-weight="700" fill="'+ac+'" text-anchor="middle">'+hpt.score+'</text>'
+      +'<text x="'+xAt(i)+'" y="'+(padT+innerH+16)+'" font-size="8" fill="'+c+'" text-anchor="middle">'+shortDateFR(hpt.date)+'</text>';
+  }).join('');
+  return '<svg viewBox="0 0 '+w+' '+h+'" style="width:100%;height:auto;display:block;overflow:visible">'
+    +'<defs><linearGradient id="statsGrad" x1="0" y1="0" x2="0" y2="1">'
+    +'<stop offset="0%" stop-color="'+ac+'" stop-opacity=".35"/>'
+    +'<stop offset="100%" stop-color="'+ac+'" stop-opacity="0"/>'
+    +'</linearGradient></defs>'
+    +gridlines
+    +(n>1?'<polygon points="'+areaStr+'" fill="url(#statsGrad)"/>':'')
+    +(n>1?'<polyline points="'+pointsStr+'" fill="none" stroke="'+ac+'" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>':'')
+    +marks
+    +'</svg>';
 }
 
 // Chaque poids exporté a toujours une date : la vraie si on la connaît,
@@ -494,7 +602,7 @@ setInterval(function(){
   var newJLEFT_RAW=Math.floor((DL-getParisNow())/86400000);
   if(newJLEFT_RAW!==JLEFT_RAW){JLEFT_RAW=newJLEFT_RAW;JLEFT=Math.max(0,JLEFT_RAW);changed=true;}
   var nwk=getWK();
-  if(ld(K('doneWeek'),null)!==nwk){S.done={};sv(K('doneWeek'),nwk);sv(K('done'),{});changed=true;}
+  if(ld(K('doneWeek'),null)!==nwk){recordWeeklySnapshot(S.done);S.done={};sv(K('doneWeek'),nwk);sv(K('done'),{});changed=true;}
   if(changed)render();
 },300000);
 
