@@ -372,11 +372,28 @@ function exHTML(ex,day){
     +'</div>'+wRow+'</div>';
 }
 
+// Revérifie périodiquement tout ce qui dépend de la date/heure (jour affiché,
+// décompte de deadline, reset hebdomadaire des cases) pour que l'app se mette
+// à jour toute seule si le téléphone reste ouvert dessus sans rechargement.
 setInterval(function(){
+  var changed=false;
+  var newTI=computeDayIndex(getWeekday());
+  if(newTI!==TI){TI=newTI;S.openDays[TI]=true;changed=true;}
+  var newJLEFT_RAW=Math.floor((DL-getParisNow())/86400000);
+  if(newJLEFT_RAW!==JLEFT_RAW){JLEFT_RAW=newJLEFT_RAW;JLEFT=Math.max(0,JLEFT_RAW);changed=true;}
   var nwk=getWK();
-  if(ld(K('doneWeek'),null)!==nwk){S.done={};sv(K('doneWeek'),nwk);sv(K('done'),{});render();}
+  if(ld(K('doneWeek'),null)!==nwk){S.done={};sv(K('doneWeek'),nwk);sv(K('done'),{});changed=true;}
+  if(changed)render();
 },300000);
 
 window.addEventListener('DOMContentLoaded',function(){render();});
+
+// PWA hors-ligne : un seul service worker partagé (à la racine du dépôt)
+// pour les 3 apps, mis en cache "stale-while-revalidate".
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('../sw.js',{scope:'../'}).catch(function(){});
+  });
+}
 
 }
