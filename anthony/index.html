@@ -210,9 +210,11 @@ var CONFIG={
   },
   absBanner:null,
   categoryColors:{cardio:'#2ecc71'},
-  // Objectifs personnels de la page STAT (aucun souci de santé particulier
-  // -> barre plus exigeante que la valeur par défaut du moteur).
-  statsTarget:{assiduityTargetPct:100,weightProgressTargetPct:30,weightLookbackDays:14},
+  // Objectifs personnels de la page STAT (pas de souci de santé particulier
+  // -> barre plus exigeante que Mikael/Myriam, mais avec une marge : le
+  // droit de rater ~1 exercice sur 10 (90% au lieu de 100%) et un peu plus
+  // de temps pour montrer une progression de charge (18j au lieu de 14).
+  statsTarget:{assiduityTargetPct:90,weightProgressTargetPct:30,weightLookbackDays:18},
   icons:ICONS,
   days:P
 };
