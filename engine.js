@@ -20,7 +20,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // incrémenter à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=N sur la balise <script src="../engine.js?v=N"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION=3;
+var ENGINE_VERSION=4;
 
 function startApp(CONFIG){
 
@@ -140,6 +140,33 @@ function statsTarget(name,dflt){
   return (CONFIG.statsTarget&&CONFIG.statsTarget[name]!=null)?CONFIG.statsTarget[name]:dflt;
 }
 
+// Nombre total d'exercices comptabilisables sur TOUTE la semaine (tous les
+// jours du programme), pour convertir un nombre d'exercices "ratables" en
+// pourcentage — reste correct même si le programme change de taille.
+function computeWeekTotalCountable(){
+  var tot=0;
+  for(var i=0;i<CONFIG.days.length;i++){
+    var day=CONFIG.days[i];
+    for(var j=0;j<day.exercises.length;j++){
+      if(countsTowardProgress(day.exercises[j]))tot++;
+    }
+  }
+  return tot;
+}
+
+// Objectif d'assiduité : une personne peut fournir soit un pourcentage
+// direct (CONFIG.statsTarget.assiduityTargetPct), soit — plus parlant —
+// un nombre d'exercices qu'elle a le droit de rater par semaine
+// (CONFIG.statsTarget.assiduityAllowedMisses), converti ici en pourcentage.
+function assiduityTargetPercent(){
+  var misses=statsTarget('assiduityAllowedMisses',null);
+  if(misses!=null){
+    var total=computeWeekTotalCountable();
+    return total>0?Math.max(1,Math.round((total-misses)/total*100)):ASSIDUITY_TARGET_PCT_DEFAULT;
+  }
+  return statsTarget('assiduityTargetPct',ASSIDUITY_TARGET_PCT_DEFAULT);
+}
+
 // % de complétion sur les jours déjà passés cette semaine (0-100, brut).
 function computeLiveCompletion(){
   var weekday=getWeekday();
@@ -162,7 +189,7 @@ function computeLiveCompletion(){
 }
 function computeAssiduityScore(){
   var raw=computeLiveCompletion();
-  var target=statsTarget('assiduityTargetPct',ASSIDUITY_TARGET_PCT_DEFAULT);
+  var target=assiduityTargetPercent();
   return Math.round(raw/target*100);
 }
 function computeWeightScore(history){
