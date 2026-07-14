@@ -24,7 +24,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // À changer à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=X.Y sur la balise <script src="../engine.js?v=X.Y"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION='1.6';
+var ENGINE_VERSION='1.7';
 
 function startApp(CONFIG){
 
@@ -799,6 +799,9 @@ function blkHTML(block,day){
 // contrôles (ex : un par côté) sans dupliquer cette logique.
 // La couleur (vert/orange/rouge selon l'ancienneté, cf. getWCol) est le seul
 // rappel de progression : pas de suggestion de poids chiffrée.
+// Le poids n'est affiché qu'une seule fois, dans le menu déroulant lui-même
+// (couleur du texte/bordure = fraîcheur, vert/orange/rouge) — pas de badge
+// répétant "X kg" à côté, qui n'ajoutait rien de plus que de la répétition.
 function weightCtrl(key,ec,sideLabel,isDB){
   var w=S.weights[key]||'';
   var opts=isDB?WOPT.db:WOPT.mc;
@@ -808,7 +811,6 @@ function weightCtrl(key,ec,sideLabel,isDB){
   return '<div class="wrow">'
     +(sideLabel?'<span class="wside" style="color:'+ec+'">'+sideLabel+'</span>':'<span style="font-size:11px;color:'+CONFIG.noSideIconColor+'">&#9878;</span>')
     +'<select class="wsel" data-id="'+key+'" style="color:'+(hasW?wc:CONFIG.noSideIconColor)+';border-color:'+(hasW?wc+'60':'#2a2a30')+'">'+selOpts+'</select>'
-    +(hasW?'<span class="wval" style="color:'+wc+';background:'+wc+'18;border-color:'+wc+'40">'+w+' kg</span>':'')
     +'</div>';
 }
 
