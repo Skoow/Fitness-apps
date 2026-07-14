@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Myriam">
+<title>Myriam</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+body{
+  background:#f8f4f9;
+  color:#3d2b4e;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+  min-height:100vh;
+  padding-bottom:100px;
+  padding-top:env(safe-area-inset-top,24px)
+}
+button,select{font-family:inherit;cursor:pointer}
+select{-webkit-appearance:none;appearance:none}
+
+/* ── HEADER ─────────────────────────────── */
+.hdr{
+  background:#fff;
+  border-bottom:1px solid #f0e6f6;
+  padding:28px 16px 16px;
+  box-shadow:0 2px 16px rgba(200,160,220,.1)
+}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ttl{
+  font-family:Impact,sans-serif;
+  font-size:clamp(2rem,8vw,3rem);
+  letter-spacing:3px;
+  line-height:.95;
+  color:#2d1b3e
+}
+.ttl span{color:#e91e8c}
+
+
+/* ── DEADLINE ───────────────────────────── */
+.dlbar{
+  margin-top:12px;
+  background:linear-gradient(135deg,#fff0f7,#f9f0ff);
+  border:1px solid #f5d0e8;
+  border-radius:14px;
+  padding:10px 14px;
+  display:flex;align-items:center;justify-content:space-between
+}
+.dll{font-size:9px;color:#c090b0;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}
+.dld{font-size:13px;color:#c04080;font-weight:700;margin-top:2px}
+.dlc{font-family:Impact,sans-serif;font-size:1.8rem;line-height:1}
+.dls{font-size:9px;color:#c090b0;font-weight:600}
+
+/* ── MODE TOGGLE ────────────────────────── */
+.mtog{display:flex;gap:8px;padding:12px 14px 6px}
+.mbtn{
+  flex:1;padding:10px 12px;border-radius:12px;
+  border:1.5px solid #edd8f5;
+  background:#fff;
+  color:#b080c8;
+  font-size:11px;font-weight:800;letter-spacing:.5px;
+  display:flex;align-items:center;justify-content:center;gap:5px
+}
+
+/* ── DAYS ───────────────────────────────── */
+.days{display:flex;flex-direction:column;gap:10px;padding:4px 14px 20px}
+
+.dc{
+  background:#fff;
+  border-radius:18px;
+  overflow:hidden;
+  border:1.5px solid #f0e4f8;
+  box-shadow:0 3px 16px rgba(180,120,210,.07)
+}
+.dh{
+  display:flex;align-items:center;gap:12px;
+  padding:14px;cursor:pointer;
+  user-select:none;-webkit-user-select:none
+}
+.dbox{
+  width:48px;height:48px;border-radius:14px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  flex-shrink:0;position:relative
+}
+.dlbl{font-family:Impact,sans-serif;font-size:.85rem;letter-spacing:1px;line-height:1.1;text-align:center}
+.tdot{position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;border:2px solid #fff}
+.di{flex:1}
+.dn{font-family:Impact,sans-serif;font-size:1.05rem;letter-spacing:1.5px;line-height:1;color:#2d1b3e}
+.ds{font-size:11px;color:#c0a8d0;margin-top:3px;font-weight:500}
+.dpb{margin-top:7px;height:3px;background:#f0e4f8;border-radius:2px;overflow:hidden}
+.dpf{height:100%;border-radius:2px}
+.dchev{font-size:20px;color:#d0b8e4;transition:transform .2s;flex-shrink:0}
+.dcnt{font-size:10px;font-weight:700;color:#c0a8d0}
+.dbody{border-top:1px solid #f5edfb}
+
+/* ── SUPERSET ───────────────────────────── */
+.ssblk{border-radius:14px;overflow:hidden;margin:8px 0}
+.sshdr{padding:8px 12px;display:flex;align-items:center}
+.sslbl{font-size:11px;font-weight:800;letter-spacing:.8px}
+.ssbetween{padding:2px 12px 2px 80px;display:flex;align-items:center}
+.ssarr{font-size:9.5px;font-weight:700}
+.ssftr{padding:6px 12px 9px 28px}
+.ssftr span{font-size:10.5px;font-weight:700}
+.sswrap{position:relative;padding-left:10px}
+.ssnum{position:absolute;left:2px;top:16px;width:16px;height:16px;border-radius:50%;color:#fff;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;z-index:2}
+
+/* ── EXERCISE ROWS ──────────────────────── */
+.exrow{border-bottom:1px solid #faf4fd}
+.extap{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:12px 14px 9px;
+  cursor:pointer;user-select:none;-webkit-user-select:none
+}
+.exicon{
+  width:62px;height:62px;flex-shrink:0;
+  border-radius:14px;border:1.5px solid #efe0f8;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;background:#fdf8ff
+}
+.excnt{flex:1;min-width:0}
+.exnm{font-size:13px;font-weight:700;color:#2d1b3e;line-height:1.2}
+.exst{font-size:12px;color:#c0a8d0;margin-top:3px}
+.exst strong{color:#7a4a9e;font-weight:700}
+.extip{font-size:10.5px;color:#cdb8de;margin-top:3px;line-height:1.45}
+.exbadges{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.bdg{
+  font-size:9.5px;font-weight:800;letter-spacing:.6px;
+  text-transform:uppercase;padding:2px 8px;
+  border-radius:20px;border:1px solid
+}
+.ba{color:#5888e8;border-color:rgba(88,136,232,.3);background:rgba(88,136,232,.07)}
+.bs{color:#d07828;border-color:rgba(208,120,40,.3);background:rgba(208,120,40,.07)}
+.bf{color:#d04090;border-color:rgba(208,64,144,.3);background:rgba(208,64,144,.07)}
+.bc{color:#28a860;border-color:rgba(40,168,96,.3);background:rgba(40,168,96,.07)}
+.bi{color:#9050c8;border-color:rgba(144,80,200,.3);background:rgba(144,80,200,.07)}
+.bd{color:#28a860;border-color:rgba(40,168,96,.3);background:rgba(40,168,96,.1)}
+.bga{color:#20b8a8;border-color:rgba(32,184,168,.3);background:rgba(32,184,168,.07)}
+.bw{color:#f59e0b;border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.07)}
+.babs{color:#a855f7;border-color:rgba(168,85,247,.3);background:rgba(168,85,247,.07)}
+/* ── ABS SECTION ──────────────────────────────── */
+.absshdr{background:rgba(168,85,247,.06);border-top:1.5px solid rgba(168,85,247,.15);padding:7px 14px;display:flex;align-items:center;gap:8px}
+.absstxt{font-size:10px;font-weight:900;letter-spacing:1px;color:#a855f7;text-transform:uppercase}
+
+/* ── WARMUP BANNER ──────────────────────────────── */
+.wbanner{
+  background:linear-gradient(135deg,#fff8e1,#fffde7);
+  border-bottom:2px solid #ffd54f;
+  padding:11px 14px;
+  display:flex;align-items:center;gap:12px
+}
+.wbico{font-size:24px;flex-shrink:0}
+.wbtitle{font-size:10px;font-weight:900;letter-spacing:1.2px;color:#f59e0b;text-transform:uppercase}
+.wbsub{font-size:11px;color:#a07020;margin-top:3px;line-height:1.4}
+.exck{
+  width:26px;height:26px;flex-shrink:0;
+  border-radius:50%;border:2px solid #e8d4f4;
+  display:flex;align-items:center;justify-content:center;
+  margin-top:4px;font-size:13px;font-weight:900;color:transparent
+}
+
+/* ── WEIGHT ROW ─────────────────────────── */
+.wrow{display:flex;align-items:center;gap:8px;padding:0 14px 10px 88px;flex-wrap:wrap}
+.wsel{
+  flex:1;min-width:120px;
+  background:#fdf8ff;border-radius:10px;
+  font-size:13px;font-weight:600;
+  padding:7px 10px;outline:none;
+  border:1.5px solid #e8d4f4;color:#b090c8
+}
+.wval{
+  font-size:12px;font-weight:700;
+  padding:4px 10px;border-radius:20px;
+  white-space:nowrap;border:1.5px solid
+}
+.sugg{
+  margin:0 14px 10px 88px;
+  background:rgba(40,168,96,.06);
+  border:1px solid rgba(40,168,96,.2);
+  border-radius:10px;padding:6px 10px;
+  font-size:11px;color:#28a860;font-weight:600
+}
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="../engine.js?v=1"></script>
+<script>
+var ICONS={
+    bench:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><rect x="6" y="14" width="3" height="32" fill="C" opacity=".5"/><rect x="55" y="14" width="3" height="32" fill="C" opacity=".5"/><rect x="3" y="22" width="58" height="2" rx="1" fill="C"/><rect x="2" y="18" width="4" height="10" rx="1" fill="C"/><rect x="58" y="18" width="4" height="10" rx="1" fill="C"/><circle cx="48" cy="34" r="3.5" fill="C"/><path d="M46 37L26 34L26 40L46 43Z" fill="C" opacity=".85"/><path d="M30 36Q28 28 30 22" stroke="C" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M34 38Q32 30 34 22" stroke="C" stroke-width="3" fill="none" stroke-linecap="round"/>',
+    incline:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><path d="M12 52L30 20L42 20L42 52Z" fill="C" opacity=".2"/><path d="M12 52L30 20" stroke="C" stroke-width="2.5"/><path d="M30 20L42 20" stroke="C" stroke-width="2.5"/><circle cx="40" cy="24" r="3.5" fill="C"/><path d="M38 27L22 42L25 45L41 30Z" fill="C" opacity=".85"/><rect x="18" y="10" width="3" height="12" rx="1" fill="C"/><rect x="14" y="14" width="3" height="4" fill="C"/><rect x="22" y="14" width="3" height="4" fill="C"/><rect x="43" y="10" width="3" height="12" rx="1" fill="C"/><rect x="39" y="14" width="3" height="4" fill="C"/><rect x="47" y="14" width="3" height="4" fill="C"/>',
+    chestPress:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><rect x="18" y="6" width="28" height="46" rx="3" fill="C" opacity=".1" stroke="C" stroke-width="1.5"/><rect x="24" y="12" width="16" height="28" rx="2" fill="C" opacity=".3"/><circle cx="10" cy="18" r="3" fill="C"/><path d="M10 21Q8 30 12 38" stroke="C" stroke-width="3" stroke-linecap="round" fill="none"/><circle cx="54" cy="18" r="3" fill="C"/><path d="M54 21Q56 30 52 38" stroke="C" stroke-width="3" stroke-linecap="round" fill="none"/><circle cx="32" cy="22" r="3.5" fill="C"/><path d="M29 25L29 40L35 40L35 25Z" fill="C" opacity=".9"/><path d="M29 28L14 30" stroke="C" stroke-width="2.5" stroke-linecap="round"/><path d="M35 28L50 30" stroke="C" stroke-width="2.5" stroke-linecap="round"/>',
+    pecFly:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><rect x="28" y="14" width="8" height="22" rx="1" fill="C" opacity=".3"/><circle cx="8" cy="12" r="3" fill="C"/><path d="M8 15Q6 24 14 34" stroke="C" stroke-width="3" stroke-linecap="round" fill="none"/><rect x="13" y="32" width="4" height="5" rx="1" fill="C"/><circle cx="56" cy="12" r="3" fill="C"/><path d="M56 15Q58 24 50 34" stroke="C" stroke-width="3" stroke-linecap="round" fill="none"/><rect x="47" y="32" width="4" height="5" rx="1" fill="C"/><circle cx="32" cy="20" r="3.5" fill="C"/><path d="M29 23L29 38L35 38L35 23Z" fill="C" opacity=".9"/><path d="M29 26L15 33" stroke="C" stroke-width="2.5" stroke-linecap="round"/><path d="M35 26L49 33" stroke="C" stroke-width="2.5" stroke-linecap="round"/>',
+    tricepsPush:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><rect x="28" y="4" width="8" height="10" rx="1" fill="C" opacity=".4"/><line x1="32" y1="13" x2="32" y2="26" stroke="C" stroke-width="1.5" stroke-dasharray="2,1"/><rect x="18" y="26" width="28" height="2.5" rx="1" fill="C"/><rect x="16" y="24" width="4" height="6" rx="1" fill="C"/><rect x="44" y="24" width="4" height="6" rx="1" fill="C"/><circle cx="32" cy="20" r="3.5" fill="C"/><path d="M29 23L29 42L35 42L35 23Z" fill="C" opacity=".9"/>',
+    overhead:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><rect x="26" y="4" width="12" height="6" rx="1.5" fill="C"/><rect x="22" y="2" width="4" height="10" rx="1" fill="C"/><rect x="38" y="2" width="4" height="10" rx="1" fill="C"/><circle cx="24" cy="18" r="2" fill="C"/><circle cx="40" cy="18" r="2" fill="C"/><path d="M24 18L28 10" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M40 18L36 10" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M24 18L30 28" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M40 18L34 28" stroke="C" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="26" r="3.5" fill="C"/><path d="M29 29L29 44L35 44L35 29Z" fill="C" opacity=".9"/>',
+    pullup:'<rect x="4" y="6" width="56" height="3" rx="1" fill="C"/><rect x="4" y="6" width="3" height="50" fill="C" opacity=".4"/><rect x="57" y="6" width="3" height="50" fill="C" opacity=".4"/><circle cx="22" cy="10" r="2" fill="C"/><circle cx="42" cy="10" r="2" fill="C"/><rect x="18" y="42" width="28" height="6" rx="2" fill="C" opacity=".5"/><circle cx="32" cy="18" r="3.5" fill="C"/><path d="M29 21L29 34L35 34L35 21Z" fill="C" opacity=".9"/><path d="M29 22L22 14" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M22 14L22 10" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M35 22L42 14" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M42 14L42 10" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M30 34L26 42" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M34 34L38 42" stroke="C" stroke-width="3" stroke-linecap="round"/>',
+    latPull:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><rect x="6" y="4" width="52" height="3" rx="1" fill="C"/><line x1="16" y1="8" x2="16" y2="26" stroke="C" stroke-width="1.5" stroke-dasharray="2,1"/><line x1="48" y1="8" x2="48" y2="26" stroke="C" stroke-width="1.5" stroke-dasharray="2,1"/><path d="M14 26Q16 30 22 28L42 28Q48 30 50 26" stroke="C" stroke-width="3" fill="none" stroke-linecap="round"/><rect x="10" y="24" width="4" height="6" rx="1" fill="C"/><rect x="50" y="24" width="4" height="6" rx="1" fill="C"/><circle cx="32" cy="26" r="3.5" fill="C"/><path d="M29 29L29 42L35 42L35 29Z" fill="C" opacity=".9"/><path d="M29 30L16 28" stroke="C" stroke-width="2.5" stroke-linecap="round"/><path d="M35 30L48 28" stroke="C" stroke-width="2.5" stroke-linecap="round"/>',
+    seatedRow:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><rect x="46" y="10" width="14" height="40" rx="2" fill="C" opacity=".15" stroke="C" stroke-width="1"/><circle cx="52" cy="32" r="3" fill="none" stroke="C" stroke-width="1.5"/><rect x="38" y="26" width="6" height="18" rx="1" fill="C" opacity=".5"/><line x1="48" y1="32" x2="34" y2="34" stroke="C" stroke-width="1.5" stroke-dasharray="2,1"/><rect x="30" y="32" width="4" height="6" rx="1" fill="C"/><rect x="4" y="48" width="42" height="4" rx="1" fill="C" opacity=".3"/><circle cx="22" cy="28" r="3.5" fill="C"/><path d="M19 31L19 44L25 44L25 31Z" fill="C" opacity=".9"/><path d="M19 32L30 34" stroke="C" stroke-width="2.5" stroke-linecap="round"/>',
+    pullover:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><rect x="28" y="4" width="8" height="10" rx="1" fill="C" opacity=".4"/><line x1="32" y1="13" x2="32" y2="26" stroke="C" stroke-width="1.5" stroke-dasharray="2,1"/><rect x="20" y="26" width="24" height="2.5" rx="1" fill="C"/><rect x="18" y="24" width="4" height="6" rx="1" fill="C"/><rect x="42" y="24" width="4" height="6" rx="1" fill="C"/><circle cx="32" cy="20" r="3.5" fill="C"/><path d="M29 23L29 40L35 40L35 23Z" fill="C" opacity=".9"/><path d="M29 25L20 28" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M35 25L44 28" stroke="C" stroke-width="3" stroke-linecap="round"/>',
+    barbellRow:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><rect x="4" y="40" width="56" height="2.5" rx="1" fill="C"/><rect x="2" y="36" width="4" height="10" rx="1" fill="C"/><rect x="58" y="36" width="4" height="10" rx="1" fill="C"/><circle cx="42" cy="16" r="3.5" fill="C"/><path d="M40 19L26 32L30 35L44 22Z" fill="C" opacity=".9"/><path d="M28 33L24 48" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M32 33L32 48" stroke="C" stroke-width="3" stroke-linecap="round"/>',
+    preacher:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><path d="M12 56L26 24L46 24L46 56Z" fill="C" opacity=".2"/><path d="M12 56L26 24" stroke="C" stroke-width="2.5"/><path d="M26 24L46 24" stroke="C" stroke-width="2.5"/><rect x="18" y="18" width="28" height="2.5" rx="1" fill="C"/><circle cx="38" cy="14" r="3.5" fill="C"/><path d="M35 17L35 34L41 34L41 17Z" fill="C" opacity=".9"/><path d="M32 20L26 30" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M36 30L44 20" stroke="C" stroke-width="3" stroke-linecap="round"/>',
+    squat:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><rect x="6" y="4" width="3" height="52" fill="C" opacity=".5"/><rect x="55" y="4" width="3" height="52" fill="C" opacity=".5"/><rect x="4" y="20" width="56" height="2.5" rx="1" fill="C"/><rect x="2" y="16" width="5" height="10" rx="1" fill="C"/><rect x="57" y="16" width="5" height="10" rx="1" fill="C"/><circle cx="32" cy="16" r="3.5" fill="C"/><path d="M30 19L28 30L34 30L36 19Z" fill="C" opacity=".9"/><path d="M28 30L18 38" stroke="C" stroke-width="4" stroke-linecap="round"/><path d="M34 30L46 38" stroke="C" stroke-width="4" stroke-linecap="round"/><path d="M18 38L16 52" stroke="C" stroke-width="3.5" stroke-linecap="round"/><path d="M46 38L48 52" stroke="C" stroke-width="3.5" stroke-linecap="round"/>',
+    legPress:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><line x1="4" y1="56" x2="24" y2="8" stroke="C" stroke-width="2.5" opacity=".5"/><line x1="30" y1="8" x2="60" y2="56" stroke="C" stroke-width="2.5" opacity=".5"/><rect x="14" y="4" width="5" height="10" rx="1" fill="C"/><rect x="36" y="4" width="5" height="10" rx="1" fill="C"/><rect x="40" y="26" width="16" height="16" rx="2" fill="C" opacity=".25"/><circle cx="46" cy="22" r="3.5" fill="C"/><path d="M43 25L43 42L49 42L49 25Z" fill="C" opacity=".9"/><path d="M43 30L30 14" stroke="C" stroke-width="3.5" stroke-linecap="round"/><path d="M49 30L36 14" stroke="C" stroke-width="3.5" stroke-linecap="round"/>',
+    legCurl:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><rect x="4" y="12" width="56" height="38" rx="3" fill="C" opacity=".1" stroke="C" stroke-width="1"/><rect x="6" y="24" width="48" height="5" rx="1" fill="C" opacity=".4"/><circle cx="42" cy="38" r="2" fill="C"/><rect x="8" y="36" width="14" height="4" rx="1" fill="C" opacity=".6"/><path d="M42 38L36 18" stroke="C" stroke-width="4" stroke-linecap="round"/><circle cx="52" cy="22" r="3" fill="C"/><rect x="30" y="24" width="24" height="5" rx="1" fill="C" opacity=".9"/>',
+    legExt:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><rect x="6" y="10" width="52" height="42" rx="3" fill="C" opacity=".1" stroke="C" stroke-width="1"/><rect x="12" y="30" width="28" height="5" rx="1" fill="C" opacity=".4"/><circle cx="36" cy="40" r="2" fill="C"/><rect x="8" y="38" width="18" height="4" rx="1" fill="C" opacity=".6"/><path d="M36 40L10 40" stroke="C" stroke-width="4" stroke-linecap="round"/><circle cx="42" cy="22" r="3" fill="C"/><path d="M39 25L39 34L45 34L45 25Z" fill="C" opacity=".9"/>',
+    calf:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><rect x="20" y="8" width="24" height="5" rx="1" fill="C" opacity=".5"/><rect x="16" y="5" width="6" height="11" rx="1" fill="C"/><rect x="42" y="5" width="6" height="11" rx="1" fill="C"/><rect x="12" y="48" width="40" height="5" rx="1" fill="C" opacity=".4"/><circle cx="32" cy="20" r="3.5" fill="C"/><path d="M29 23L29 42L35 42L35 23Z" fill="C" opacity=".9"/><path d="M30 42L26 48" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M34 42L38 48" stroke="C" stroke-width="3" stroke-linecap="round"/>',
+    shoulderPress:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><rect x="10" y="6" width="44" height="48" rx="3" fill="C" opacity=".1" stroke="C" stroke-width="1"/><rect x="26" y="12" width="12" height="26" rx="1" fill="C" opacity=".3"/><rect x="4" y="18" width="8" height="4" rx="1" fill="C"/><rect x="52" y="18" width="8" height="4" rx="1" fill="C"/><circle cx="32" cy="22" r="3.5" fill="C"/><path d="M29 25L29 38L35 38L35 25Z" fill="C" opacity=".9"/><path d="M29 26L10 20" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M35 26L54 20" stroke="C" stroke-width="3" stroke-linecap="round"/>',
+    lateralRaise:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><circle cx="32" cy="14" r="3.5" fill="C"/><path d="M29 17L29 36L35 36L35 17Z" fill="C" opacity=".9"/><path d="M29 20L12 24" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M35 20L52 24" stroke="C" stroke-width="3" stroke-linecap="round"/><rect x="4" y="20" width="16" height="4" rx="1" fill="C"/><rect x="4" y="16" width="5" height="12" rx="1" fill="C"/><rect x="15" y="16" width="5" height="12" rx="1" fill="C"/><rect x="44" y="20" width="16" height="4" rx="1" fill="C"/><rect x="44" y="16" width="5" height="12" rx="1" fill="C"/><rect x="55" y="16" width="5" height="12" rx="1" fill="C"/>',
+    rearDelt:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><circle cx="32" cy="10" r="3.5" fill="C"/><path d="M28 13L28 24L36 24L36 13Z" fill="C" opacity=".9"/><path d="M28 18L10 18" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M36 18L54 18" stroke="C" stroke-width="3" stroke-linecap="round"/><rect x="2" y="14" width="14" height="4" rx="1" fill="C"/><rect x="2" y="10" width="5" height="12" rx="1" fill="C"/><rect x="11" y="10" width="5" height="12" rx="1" fill="C"/><rect x="48" y="14" width="14" height="4" rx="1" fill="C"/><rect x="48" y="10" width="5" height="12" rx="1" fill="C"/><rect x="57" y="10" width="5" height="12" rx="1" fill="C"/>',
+    facePull:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><rect x="48" y="4" width="12" height="52" rx="1" fill="C" opacity=".2" stroke="C" stroke-width="1"/><circle cx="54" cy="16" r="3" fill="none" stroke="C" stroke-width="1.5"/><path d="M48 16L32 22" stroke="C" stroke-width="1.5" stroke-dasharray="2,1"/><path d="M48 16L32 28" stroke="C" stroke-width="1.5" stroke-dasharray="2,1"/><rect x="28" y="20" width="4" height="4" rx="1" fill="C"/><rect x="28" y="26" width="4" height="4" rx="1" fill="C"/><circle cx="16" cy="18" r="3.5" fill="C"/><path d="M13 21L13 40L19 40L19 21Z" fill="C" opacity=".9"/><path d="M13 22L22 20" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M22 20L28 22" stroke="C" stroke-width="3" stroke-linecap="round"/>',
+    hipAbduct:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><rect x="4" y="12" width="56" height="40" rx="3" fill="C" opacity=".1" stroke="C" stroke-width="1"/><rect x="40" y="16" width="8" height="18" rx="1" fill="C" opacity=".3"/><rect x="4" y="30" width="14" height="5" rx="1" fill="C" opacity=".6"/><rect x="46" y="30" width="14" height="5" rx="1" fill="C" opacity=".6"/><circle cx="32" cy="22" r="3.5" fill="C"/><path d="M29 25L29 34L35 34L35 25Z" fill="C" opacity=".9"/><path d="M29 34L12 34" stroke="C" stroke-width="4" stroke-linecap="round"/><path d="M35 34L52 34" stroke="C" stroke-width="4" stroke-linecap="round"/>',
+    glueKick:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><rect x="34" y="4" width="22" height="52" rx="2" fill="C" opacity=".15" stroke="C" stroke-width="1"/><rect x="4" y="26" width="34" height="4" rx="1" fill="C" opacity=".4"/><circle cx="14" cy="14" r="3" fill="C"/><path d="M14 17L14 30" stroke="C" stroke-width="4" stroke-linecap="round"/><path d="M14 30L12 44" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M14 30L28 36" stroke="C" stroke-width="4" stroke-linecap="round"/><path d="M28 36L38 28" stroke="C" stroke-width="4" stroke-linecap="round"/>',
+    pullThrough:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><rect x="46" y="26" width="12" height="28" rx="1" fill="C" opacity=".2" stroke="C" stroke-width="1"/><circle cx="52" cy="36" r="3" fill="none" stroke="C" stroke-width="1.5"/><path d="M48 36Q32 38 26 34" stroke="C" stroke-width="1.5" stroke-dasharray="2,1"/><rect x="22" y="32" width="4" height="6" rx="1" fill="C"/><circle cx="14" cy="10" r="3.5" fill="C"/><path d="M14 13L24 30L28 32L18 15Z" fill="C" opacity=".9"/><path d="M22 30L18 52" stroke="C" stroke-width="3.5" stroke-linecap="round"/><path d="M26 30L30 52" stroke="C" stroke-width="3.5" stroke-linecap="round"/>',
+    abMachine:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><rect x="8" y="10" width="48" height="44" rx="3" fill="C" opacity=".1" stroke="C" stroke-width="1"/><rect x="38" y="14" width="8" height="18" rx="1" fill="C" opacity=".3"/><rect x="16" y="36" width="28" height="4" rx="1" fill="C" opacity=".4"/><rect x="8" y="20" width="14" height="4" rx="1" fill="C" opacity=".6"/><rect x="38" y="20" width="14" height="4" rx="1" fill="C" opacity=".6"/><circle cx="32" cy="18" r="3.5" fill="C"/><path d="M29 21Q26 28 24 32" stroke="C" stroke-width="4" stroke-linecap="round"/><path d="M35 21Q38 28 40 32" stroke="C" stroke-width="4" stroke-linecap="round"/>',
+    stairs:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><path d="M4 54L14 54L14 44L26 44L26 34L38 34L38 24L50 24L50 14L60 14" fill="none" stroke="C" stroke-width="2" stroke-linejoin="round"/><rect x="4" y="48" width="10" height="6" fill="C" opacity=".25"/><rect x="14" y="38" width="12" height="6" fill="C" opacity=".3"/><rect x="26" y="28" width="12" height="6" fill="C" opacity=".35"/><rect x="38" y="18" width="12" height="6" fill="C" opacity=".4"/><circle cx="22" cy="30" r="3" fill="C"/><path d="M19 33L19 42L25 42L25 33Z" fill="C" opacity=".9"/><path d="M19 42L30 34" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M25 42L20 50" stroke="C" stroke-width="3" stroke-linecap="round"/>',
+    inclineTreadmill:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><rect x="4" y="46" width="56" height="8" rx="2" fill="C" opacity=".2" stroke="C" stroke-width="1"/><path d="M10 46L22 20L56 20L56 46Z" fill="C" opacity=".3"/><path d="M10 46L22 20" stroke="C" stroke-width="2.5"/><path d="M22 20L56 20" stroke="C" stroke-width="2.5"/><line x1="20" y1="14" x2="14" y2="46" stroke="C" stroke-width="2.5"/><rect x="14" y="10" width="42" height="6" rx="1" fill="C" opacity=".4"/><circle cx="36" cy="16" r="3" fill="C"/><path d="M33 19L33 30L39 30L39 19Z" fill="C" opacity=".9"/><path d="M33 30L28 40" stroke="C" stroke-width="3" stroke-linecap="round"/>'
+};
+var P=[
+  {id:"j1",label:"LUN",name:"Fessiers A",sub:"Grand fessier · Jonction ischio-fessière · Ischios",color:"#e91e8c",exercises:[
+    {id:"j1_warmup",  name:"Échauffement — Marche tapis ou elliptique",           icon:"inclineTreadmill",cat:"warmup",  reps:"5 min",              tip:"Marche légère ou elliptique allure douce · Chauffe les jambes et les hanches avant la séance"},
+    {id:"j1_abs",     name:"Gainage latéral — activation",                         icon:"squat",           cat:"gainage", reps:"3 × 35 sec / côté",  banner:'before',bannerStyle:'abs',  tip:"SUR LE CÔTÉ · Appui avant-bras latéral · Corps aligné · Active les fessiers latéraux et les obliques avant la séance · Aucun appui sur le coccyx"},
+    {id:"j1_squat",isDB:true,   name:"Squat profond — gobelet haltère",                      icon:"squat",           cat:"free",    reps:"4 × 8-10 reps",      tip:"DEBOUT · Pieds largeur épaules pointes ouvertes · Descends profond sous parallèle · Dos droit · Genoux poussés vers l extérieur · Remonte en serrant fort les fessiers · Grand fessier + quads + adducteurs · Charge progressive · Adapté coccyx"},
+    {id:"j1_rdl",isDB:true,     name:"Deadlift roumain haltères — pause en bas",             icon:"barbellRow",      cat:"free",    reps:"4 × 10 reps",         tip:"DEBOUT · Haltères lourds · Pousse les hanches vers l arrière · Dos PLAT · Descends jusqu au bas du tibia · Pause 2 sec en bas fessier + ischios en étirement maximal · Remonte en serrant fort · Jonction ischio-fessière · Bourrelet sous la fesse · Aucun stress coccyx"},
+    {id:"j1_lunge",isDB:true,   name:"Fente avant — pause en bas",                           icon:"squat",           cat:"free",    reps:"3 × 10 reps / jambe", tip:"DEBOUT · Haltères légers dans les mains · Grand pas en avant · Descends lentement · Pause 2 sec genou arrière proche du sol · Grand fessier en étirement profond · Repousse fort sur le talon avant pour revenir · Grand fessier + dessous de fesse · Côté faible en premier · Aucun appui sur banc"},
+    {id:"j1_pullth",  name:"Cable pull-through debout",                             icon:"pullThrough",     cat:"assist",  reps:"3 × 12 reps",         tip:"DEBOUT · Poulie basse · Corde entre les jambes · Penche le buste dos plat · Reviens debout en contractant fort les fessiers · Maintiens 2 sec en haut · Remplace le hip thrust · Jonction ischio-fessière · Adapté coccyx · Redescends lentement"},
+    {id:"j1_legcurl", name:"Leg curl couché face ventre — tempo lent",             icon:"legCurl",         cat:"assist",  reps:"3 × 12 reps",         tip:"FACE VENTRE sur la machine · Ramène les talons en 2 sec · Maintiens 2 sec en haut · Redescends en 3 sec · Ne soulève pas les hanches · Ischios + dessous des fesses · Lisse la jonction ischio-fessière · La contraction tenue est la clé"},
+    {id:"j1_iso",isBW:true,     name:"Squat isométrique dos au mur — maintien",              icon:"squat",           cat:"free",    reps:"3 × 30-40 sec",       isIso:true,  tip:"🎯 ISOLATION · DEBOUT dos appuyé contre un mur · Descends jusqu à cuisses parallèles au sol · Maintiens la position genoux alignés au-dessus des chevilles · Dessus des genoux · Galbe quads en isométrie · Respire normalement · Aucune position assise"},
+    {id:"j1_cardio",  name:"Cardio fin — Marche non inclinée",                     icon:"inclineTreadmill",cat:"cardio",  reps:"25-30 min",           tip:"Après la séance · Marche plat allure modérée · Zone 60-65% FC max · Récupération active sans impact"},
+  ]},
+  {id:"j2",label:"MAR",name:"Haut du corps A",sub:"Dos · Biceps · Triceps · Abdos",color:"#3d8bff",exercises:[
+    {id:"j2_warmup",   name:"Échauffement — Marche tapis ou elliptique",           icon:"inclineTreadmill",cat:"warmup",  reps:"5 min",              tip:"Marche légère ou elliptique · Chauffe les épaules et le dos avant la séance"},
+    {id:"j2_abs_act",  name:"Gainage avant sur avant-bras — activation",           icon:"squat",           cat:"gainage", reps:"3 × 35 sec",          banner:'before',bannerStyle:'abs',  tip:"FACE VENTRE · Appui avant-bras + orteils · Corps droit · Active le core avant les tirages · Ne laisse pas les hanches tomber"},
+    {id:"j2_latpull",  name:"Tirage vertical prise large — poulie haute, à genoux",icon:"latPull",         cat:"assist",  reps:"4 × 10 reps",         tip:"À GENOUX face à la poulie haute fesses sur les talons · Prise large · Tire vers la poitrine en écrasant les coudes vers les hanches · Contracte les dorsaux fort en bas · Remonte lentement bras quasi tendus · Grand dorsal · Affine sous les aisselles et les flancs"},
+    {id:"j2_row",      name:"Tirage horizontal poulie basse — debout, buste penché",icon:"seatedRow",      cat:"assist",  reps:"4 × 12 reps",         tip:"DEBOUT légère flexion des genoux buste penché en avant dos plat · Prise neutre · Tire les coudes vers les côtes en pinçant les omoplates · Maintiens 1 sec · Relâche lentement · Milieu du dos · Épaisseur · Aucune position assise"},
+    {id:"j2_pullover", name:"Pull-over poulie haute — debout, bras tendus",        icon:"latPull",         cat:"assist",  reps:"3 × 12 reps",         tip:"DEBOUT face à la poulie haute bras tendus · Tire la barre vers les cuisses en gardant les bras tendus · Pause 1 sec en bas (dorsal contracté) · Remonte lentement les bras au-dessus de la tête jusqu à étirement complet · Affine les flancs · Sous-aisselles"},
+    {id:"j2_triceps1", name:"Extension triceps poulie haute — 1 bras",             icon:"tricepsPush",     cat:"assist",  reps:"3 × 15 reps / bras",  tip:"DEBOUT poulie haute 1 seul bras · Coude fixe contre le corps · Pousse vers le bas · Rotation de la paume vers l extérieur en bas · Maintiens 1 sec · Remonte lentement jusqu à étirement complet · Triceps long + latéral · Bras faible en premier"},
+    {id:"j2_curl1",    name:"Curl biceps poulie basse — 1 bras",                   icon:"preacher",        cat:"assist",  reps:"3 × 12 reps / bras",  tip:"DEBOUT face à la poulie basse · 1 bras · Coude fixe collé au corps · Monte en tournant la paume vers l épaule · Maintiens 1 sec en haut · Redescends en 3 sec jusqu à extension complète · Bras faible en premier"},
+    {id:"j2_triceps2",isDB:true, name:"Extension triceps haltère au-dessus de la tête — debout",icon:"tricepsPush",  cat:"free",    reps:"3 × 12 reps",         tip:"DEBOUT · 1 haltère léger à 2 mains · Descends le haltère derrière la nuque · Pause 1 sec (étirement tête longue) · Pousse vers le haut coudes près des oreilles · Maintiens 1 sec en haut · Tête longue du triceps"},
+    {id:"j2_iso",isDB:true,      name:"Curl biceps haltères — prise marteau",                icon:"preacher",        cat:"free",    reps:"3 × 12 reps",         isIso:true,  tip:"🎯 ISOLATION · DEBOUT · Haltères en prise neutre paumes face à face · Monte en gardant le coude fixe · Maintiens 1 sec en haut · Redescends lentement jusqu à extension complète · Biceps + avant-bras"},
+    {id:"j2_bloc1",    name:"Crunch câble poulie haute — à genoux",                icon:"squat",           cat:"gainage", reps:"3 × 15 reps",         banner:'after',bannerStyle:'abs', tip:"À GENOUX fesses sur les talons poids du buste sur les cuisses · Corde poulie haute · Enroule le buste vers le bas en contractant les abdos · Descend en 2 sec · Remonte lentement · Pause 1 sec en haut · Abdominaux supérieurs · V abdominal"},
+    {id:"j2_bloc2",    name:"Dead bug — bas du ventre",                             icon:"squat",           cat:"gainage", reps:"3 × 10 reps / côté",  banner:'after',bannerStyle:'abs', tip:"Allongée sur le dos · Bras tendus vers le plafond genoux pliés à 90° · Étends le bras droit + jambe gauche vers le sol sans toucher · Dos collé au sol · Expire en descendant · Bas du ventre · Transverse · V abdominal"},
+    {id:"j2_bloc3",    name:"Rotation russe debout — câble poulie basse",          icon:"stairs",          cat:"gainage", reps:"3 × 15 reps / côté",  banner:'after',bannerStyle:'abs', tip:"DEBOUT dos droit face perpendiculaire à la poulie basse · Tiens la poignée à 2 mains devant le ventre · Tourne le buste d un côté à l autre en gardant les hanches fixes · Contrôle le retour · Obliques · Taille affinée · Aucune position assise"},
+    {id:"j2_bloc4",    name:"Planche avant sur avant-bras — gainage complet",      icon:"squat",           cat:"gainage", reps:"3 × 30-40 sec",       banner:'after',bannerStyle:'abs', tip:"Face ventre appui avant-bras + orteils · Corps droit fessiers contractés · Rentre le ventre vers la colonne · Respire normalement · Sangle abdominale complète · Renforce le transverse · Aucun appui sur le coccyx"},
+    {id:"j2_cardio",   name:"Cardio fin — Marche non inclinée",                    icon:"inclineTreadmill",cat:"cardio",  reps:"25-30 min",           tip:"Après la séance · Marche plat allure modérée · Zone 60-65% FC max · Respiration confortable"},
+  ]},
+  {id:"j3",label:"JEU",name:"Fessiers B",sub:"Petit & Moyen Fessier · Culotte de Cheval",color:"#a855f7",exercises:[
+    {id:"j3_warmup",  name:"Échauffement — Marche tapis ou elliptique",            icon:"inclineTreadmill",cat:"warmup",  reps:"5 min",              tip:"Marche légère ou elliptique · Chauffe les jambes et les hanches avant la séance"},
+    {id:"j3_abs",     name:"Planche avant — activation",                            icon:"squat",           cat:"gainage", reps:"3 × 35 sec",          banner:'before',bannerStyle:'abs',  tip:"FACE VENTRE · Avant-bras + orteils · Corps droit · Active le core avant les squats · Ne laisse pas les hanches tomber"},
+    {id:"j3_sumo",isDB:true,    name:"Squat sumo haltère",                                    icon:"squat",           cat:"free",    reps:"4 × 10 reps",         tip:"DEBOUT · Pieds très écartés pointes vers l extérieur · Haltère à 2 mains · Descends lentement sous parallèle · Genoux poussés vers l extérieur · Remonte en serrant · Intérieur cuisses + grand fessier + adducteurs · Adapté coccyx"},
+    {id:"j3_lunge",isDB:true,   name:"Fente avant statique — pause genou avant",             icon:"squat",           cat:"free",    reps:"3 × 10 reps / jambe", tip:"DEBOUT · Grand pas en avant position fixe · Haltères légers ou mains libres · Descends lentement · Pause 2 sec genou avant à 90° fessier en étirement · Remonte en poussant sur le talon avant sans avancer · Grand fessier en étirement · Affine la cuisse · Aucun appui sur banc"},
+    {id:"j3_abduc",   name:"Abduction câble debout — lente avec rotation",         icon:"hipAbduct",       cat:"assist",  reps:"3 × 15 reps / côté",  tip:"DEBOUT · Sangle cheville · Face à la poulie · Tourne légèrement la pointe du pied vers le bas en écartant · Écarte la jambe à 45° · Contracte fort le moyen fessier en haut · Maintiens 2 sec · Redescends lentement · Resserre la culotte de cheval · Galbe latéral"},
+    {id:"j3_kick",    name:"Kickback câble — arc vers le haut + rotation interne", icon:"glueKick",        cat:"assist",  reps:"3 × 12 reps / côté",  tip:"DEBOUT · Sangle cheville · Face à la poulie · Envoie la jambe en arrière ET vers le haut en tournant la pointe vers l intérieur · Contracte fort le haut du grand fessier + petit fessier · Maintiens 2 sec · Redescends lentement · Profil bombé · Resserre la jonction sous la fesse"},
+    {id:"j3_iso",     name:"Abduction câble + Kickback enchaînés",                 icon:"glueKick",        cat:"assist",  reps:"3 × 10+10 reps / côté",isIso:true, tip:"🎯 ISOLATION · DEBOUT · 10 abductions latérales avec rotation (pointe vers le bas · moyen fessier) puis sans poser 10 kickbacks arc vers le haut rotation interne (petit + grand fessier) · Maintiens 1 sec à chaque contraction · Côté gauche complet puis côté droit · Bombé"},
+    {id:"j3_lunge2",isDB:true,  name:"Fente avant statique — buste droit",                   icon:"squat",           cat:"free",    reps:"3 × 12 reps / jambe", tip:"DEBOUT · Pas en avant fixe · Haltères légers ou mains libres · Descends et remonte sur place sans avancer · Buste droit · Quads de la jambe avant · Galbe et affinement de la cuisse · Tempo contrôlé · Adapté coccyx"},
+    {id:"j3_cardio",  name:"Cardio fin — Marche inclinée",                         icon:"inclineTreadmill",cat:"cardio",  reps:"25-30 min",           tip:"Après la séance · Marche inclinée 6-8% · Zone 60-65% FC max · Active le moyen fessier en plus du cardio · Allure modérée"},
+  ]},
+  {id:"j4",label:"VEN",name:"Haut du corps B",sub:"Épaules · Poitrine · Bras · Abdos",color:"#ff6b35",exercises:[
+    {id:"j4_warmup",   name:"Échauffement — Marche tapis ou elliptique",           icon:"inclineTreadmill",cat:"warmup",  reps:"5 min",              tip:"Marche légère ou elliptique · Chauffe les épaules et le dos avant la séance"},
+    {id:"j4_abs_act",  name:"Gainage avant sur avant-bras — activation",           icon:"squat",           cat:"gainage", reps:"3 × 35 sec",          banner:'before',bannerStyle:'abs',  tip:"FACE VENTRE · Appui avant-bras + orteils · Corps droit · Active le core avant les développés · Ne laisse pas les hanches tomber"},
+    {id:"j4_press",isDB:true,    name:"Développé militaire haltères — debout",               icon:"shoulderPress",   cat:"free",    reps:"4 × 10 reps",         tip:"DEBOUT · Haltères à hauteur d oreilles · Pousse vers le haut · Redescends à hauteur mâchoire · Core serré · Deltoïde antérieur + supérieur · Épaules dessinées et rondes · Charge progressive"},
+    {id:"j4_latera",   name:"Élévations latérales câble — pause en bas",           icon:"lateralRaise",    cat:"assist",  reps:"3 × 15 reps / côté",  tip:"DEBOUT · Poulie basse · 1 bras · Pause 1 sec bras le long du corps (étirement) · Monte jusqu à hauteur épaule · Descends en 3 sec · Coude légèrement fléchi · Deltoïde latéral · Épaules dessinées"},
+    {id:"j4_ecarte",   name:"Écarté poulie basse — 1 bras, bras montant",          icon:"lateralRaise",    cat:"assist",  reps:"3 × 15 reps / bras",  tip:"DEBOUT · Poulie basse · 1 poignée · Bras tendu vers le bas et l arrière · Pause 1 sec étirement pectoral · Monte le bras en arc vers l avant et le haut jusqu à hauteur poitrine · Contracte la poitrine en haut · Bras faible en premier · Pectoral supérieur · Aucune position assise"},
+    {id:"j4_kickback", name:"Kickback triceps poulie basse — 1 bras, tempo lent",  icon:"tricepsPush",     cat:"assist",  reps:"3 × 15 reps / bras",  tip:"DEBOUT face à la poulie basse penchée légèrement en avant · Coude fixe à hauteur du dos · Étend le bras vers l arrière · Rotation de la paume vers le plafond en haut · Maintiens 2 sec · Reviens lentement · Triceps latéral · Affine le dessous du bras · Aucun appui sur banc"},
+    {id:"j4_curl",     name:"Curl biceps câble — debout",                          icon:"preacher",        cat:"assist",  reps:"3 × 12 reps",         tip:"DEBOUT · Poulie basse barre droite · Coudes fixes contre le corps · Monte en contractant fort · Maintiens 1 sec en haut · Redescends lentement jusqu à extension complète · Biceps · Tension constante grâce au câble"},
+    {id:"j4_iso",isDB:true,      name:"Extension triceps haltère au-dessus de la tête — debout",icon:"tricepsPush",  cat:"free",    reps:"3 × 12 reps",         isIso:true,  tip:"🎯 ISOLATION · DEBOUT · 1 haltère léger à 2 mains · Descends le haltère derrière la nuque · Pause 1 sec (étirement tête longue) · Pousse vers le haut coudes près des oreilles · Maintiens 1 sec en haut · Tête longue du triceps · Priorité sur le bras qui pend"},
+    {id:"j4_bloc1",    name:"Crunch câble poulie haute — à genoux",                icon:"squat",           cat:"gainage", reps:"3 × 15 reps",         banner:'after',bannerStyle:'abs', tip:"À GENOUX fesses sur les talons poids du buste sur les cuisses · Corde poulie haute · Enroule le buste vers le bas en contractant les abdos · Descend en 2 sec · Remonte lentement · Pause 1 sec en haut · Abdominaux supérieurs · V abdominal"},
+    {id:"j4_bloc2",    name:"Dead bug — bas du ventre",                            icon:"squat",           cat:"gainage", reps:"3 × 10 reps / côté",  banner:'after',bannerStyle:'abs', tip:"Allongée sur le dos · Bras tendus vers le plafond genoux pliés à 90° · Étends le bras droit + jambe gauche vers le sol sans toucher · Dos collé au sol · Expire en descendant · Bas du ventre · Transverse · V abdominal"},
+    {id:"j4_bloc3",    name:"Rotation russe debout — câble poulie basse",          icon:"stairs",          cat:"gainage", reps:"3 × 15 reps / côté",  banner:'after',bannerStyle:'abs', tip:"DEBOUT dos droit face perpendiculaire à la poulie basse · Tiens la poignée à 2 mains devant le ventre · Tourne le buste d un côté à l autre en gardant les hanches fixes · Contrôle le retour · Obliques · Taille affinée · Aucune position assise"},
+    {id:"j4_bloc4",    name:"Planche avant sur avant-bras — gainage complet",      icon:"squat",           cat:"gainage", reps:"3 × 30-40 sec",       banner:'after',bannerStyle:'abs', tip:"Face ventre appui avant-bras + orteils · Corps droit fessiers contractés · Rentre le ventre vers la colonne · Respire normalement · Sangle abdominale complète · Renforce le transverse · Aucun appui sur le coccyx"},
+    {id:"j4_cardio",   name:"Cardio fin — Marche non inclinée",                    icon:"inclineTreadmill",cat:"cardio",  reps:"25-30 min",           tip:"Après la séance · Marche plat allure modérée · Zone 60-65% FC max · Fin de semaine récupération active"},
+  ]},
+  {id:"j5",label:"SAM",name:"Maison · Corps entier",sub:"Haltères · Gainage · Optionnel",color:"#2ecc71",exercises:[
+    {id:"j5_warmup", name:"Mobilité articulaire",                               icon:"stairs",          cat:"warmup", reps:"5 min",           tip:"SANS ÉQUIPEMENT · Cercles de hanches · Cercles de bras · Balancements de jambes · Rotations du cou · Prépare les articulations en douceur"},
+    {id:"j5_squat",isDB:true,  name:"Squats haltères",                                    icon:"squat",           cat:"free",   reps:"3 × 12 reps", tip:"DEBOUT · Haltères dans les mains · Pieds largeur hanches · Descends cuisses parallèles · Remonte en contractant les fessiers"},
+    {id:"j5_bulg",isDB:true,   name:"Good morning haltère",                                icon:"barbellRow",      cat:"free",   reps:"3 × 12 reps",   tip:"DEBOUT · Haltère tenu à 2 mains contre la poitrine · Pieds largeur épaules · Penche le buste vers l avant dos PLAT · Remonte en contractant ischios et fessiers · Aucun stress coccyx · Adapté spondylarthrite"},
+    {id:"j5_row",isDB:true,    name:"Rowing penché haltères",                        icon:"barbellRow",      cat:"free",   reps:"3 × 12 reps", tip:"DEBOUT penché dos plat · Tire les haltères vers le ventre · Dos épaisseur · Coudes le long du corps · Charge légère"},
+    {id:"j5_ss5a",isDB:true,   name:"Extension de hanche debout haltère",                 icon:"glueKick",        cat:"free",   reps:"7 reps / côté", tip:"⚡ SUPER 7 · MÊMe haltère · Debout · Appui main sur mur ou chaise · Penche légèrement le buste · Pousse une jambe vers l arrière · Contracte le fessier en haut · Aucun stress coccyx · Enchaîne avec le sumo", pair:"ss5"},
+    {id:"j5_ss5b",isDB:true,   name:"Squat sumo haltère",                                 icon:"squat",           cat:"free",   reps:"7 reps",          tip:"⚡ SUPER 7 · MÊMe haltère · Pieds très écartés · Intérieur cuisses · Enchaîne directement", pair:"ss5"},
+    {id:"j5_iso",isDB:true,    name:"Kickback triceps haltère debout — très lent", icon:"tricepsPush",  cat:"free",   reps:"3 × 15 / côté", isIso:true, tip:"🎯 ISOLATION · Penché en avant dos plat · Coude FIXE au corps · Étends le bras vers l arrière TRÈS LENTEMENT · Dessous des bras · Brûle jusqu au bout"},
+  ]},
+];
+
+var CONFIG={
+  personId:'myriam',
+  storagePrefix:'myriam_',
+  title:'MYRIAM',
+  genderSymbol:'♀',
+  genderSymbolColor:'#e91e8c',
+  accentColor:'#e91e8c',
+  programBadge:null,
+  deadline:'2026-08-13',
+  deadlineLabel:'DÉBUT DU PROGRAMME',
+  deadlineDateText:'14 Juin 2026',
+  deadlineZero:{icon:'❌',title:'CHANGER',sub:'LE PROGRAMME',color:'#e91e8c',size:'1rem'},
+  jleftUrgentColor:'#e91e8c',
+  jleftNormalColor:'#a855f7',
+  restDay:{
+    html:'<div style="text-align:center;padding:28px 16px 12px;color:#c090b0"><div style="font-size:36px;margin-bottom:8px">🌿</div><div style="font-weight:700;font-size:15px;color:#9070a0;margin-bottom:4px">Jour de repos</div><div style="font-size:12px">Prochaine séance demain — Lundi</div></div>',
+    fallbackDay:true,
+    showNextDayPreview:true
+  },
+  cardioCountsTowardProgress:false,
+  defaultReps:'3 × 12 reps',
+  cardioRepsText:'5 min',
+  warmupRepsText:'5 min',
+  suggestionMode:'nextOption',
+  weightOptions:{
+    db:['—','6','8','10','12','14','16','18','20','22','24','26','28','30','32','34','36','38','40','42','44','46','48','50'],
+    mc:['—','4.5','9','11','14','18','23','25','27','32','36','39','41','45','50','52','54','59','64','66','68','73','77','79','82','86','91','93','100','107','113']
+  },
+  weightColors:{none:'#8a7a9a',fresh:'#2ecc71',aging:'#f39c12',old:'#e74c3c'},
+  noSideIconColor:'#8a7a9a',
+  exerciseNameColor:'#1a0a2e',
+  exckBorderColor:'#e0d0f0',
+  exckDoneColor:'#fff',
+  showRepsChip:true,
+  supersetHeaderText:'⚡ SUPER 7 · 7 reps · Même équipement',
+  supersetFooterText:'Repos 60-90s après les 2 exercices · puis recommencer · 3 séries',
+  supersetColor:function(block){return block.cat==='free'?'#ff6b35':'#3d8bff';},
+  bonusBanner:{icon:null,defaultLabel:'',repsText:''},
+  absBanner:{
+    icon:'💪',
+    title:'ABDOMINAUX · OBLIGATOIRE',
+    titleColor:'#0284c7',
+    subColor:'#0369a1',
+    style:'background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-bottom:2px solid #0ea5e9'
+  },
+  icons:ICONS,
+  days:P,
+  dayMap:{0:0,1:1,2:2,3:2,4:3,5:4},
+  resetCheckIntervalMs:300000
+};
+startApp(CONFIG);
+</script>
+</body>
+</html>
