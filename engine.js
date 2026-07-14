@@ -20,7 +20,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // incrémenter à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=N sur la balise <script src="../engine.js?v=N"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION=4;
+var ENGINE_VERSION=5;
 
 function startApp(CONFIG){
 
@@ -192,6 +192,10 @@ function computeAssiduityScore(){
   var target=assiduityTargetPercent();
   return Math.round(raw/target*100);
 }
+// Renvoie null tant qu'il n'y a pas assez de recul pour comparer (pas assez
+// de jours d'historique, ou aucun poids comparable) — jamais une valeur
+// neutre inventée, qui tirerait artificiellement le score global vers le
+// bas alors qu'on n'a simplement encore aucune donnée sur cet axe.
 function computeWeightScore(history){
   var lookback=statsTarget('weightLookbackDays',WEIGHT_PROGRESS_LOOKBACK_DAYS_DEFAULT);
   var target=statsTarget('weightProgressTargetPct',WEIGHT_PROGRESS_TARGET_PCT_DEFAULT);
@@ -200,7 +204,7 @@ function computeWeightScore(history){
   for(var i=history.length-1;i>=0;i--){
     if(new Date(history[i].date+'T12:00:00')<=targetDate){ref=history[i];break;}
   }
-  if(!ref)return 50; // pas encore assez de recul -> neutre
+  if(!ref)return null; // pas encore assez de recul -> pas de donnée sur cet axe
   var refWeights=ref.weights||{};
   var up=0,total=0;
   for(var id in S.weights){
@@ -209,7 +213,7 @@ function computeWeightScore(history){
     total++;
     if(parseFloat(cur)>parseFloat(prev))up++;
   }
-  if(total===0)return 50;
+  if(total===0)return null; // rien de comparable non plus -> pas de donnée
   var pct=up/total*100;
   return Math.min(WEIGHT_SCORE_CAP,Math.round(pct/target*100));
 }
@@ -217,12 +221,15 @@ function computeWeightScore(history){
 // tant qu'on est le même jour — sinon cocher un exercice l'après-midi
 // n'apparaîtrait dans les stats que le lendemain). Une fois le jour passé,
 // son entrée devient définitive et n'est plus jamais retouchée.
+// Tant que la charge n'a pas encore de donnée (voir computeWeightScore),
+// le score du jour = l'assiduité seule, jamais une moyenne avec une valeur
+// inventée.
 function recordDailySnapshotIfNeeded(){
   var today=getParisDate();
   var history=ld(K('statsHistory'),[]);
   var completion=computeAssiduityScore();
   var weightScore=computeWeightScore(history);
-  var score=Math.round((completion+weightScore)/2);
+  var score=weightScore===null?completion:Math.round((completion+weightScore)/2);
   var entry={date:today,completion:completion,weightScore:weightScore,score:score,weights:S.weights};
   if(history.length&&history[history.length-1].date===today){
     history[history.length-1]=entry;
@@ -453,9 +460,23 @@ function scoreColorFor(score){
   return CONFIG.weightColors.old;
 }
 
-// Compare le score du jour à celui d'il y a ~7 jours pour une phrase simple.
+// Moyenne simple du score sur les N derniers jours d'historique disponibles
+// (pas forcément N jours calendaires si l'app n'a pas été ouverte tous les
+// jours — sur ce que l'on a réellement). Sert à donner une vue plus posée
+// que le score du jour seul, qui peut être bruité (voir statsStatusLine).
+function rollingAverage(history,n){
+  if(history.length===0)return null;
+  var slice=history.slice(-n);
+  var sum=0;
+  for(var i=0;i<slice.length;i++)sum+=slice[i].score;
+  return Math.round(sum/slice.length);
+}
+
+// Compare le score du jour à celui d'il y a ~7 jours pour une phrase courte
+// et colorée (verte/orange/grise) plutôt qu'un paragraphe.
 function statsStatusLine(history){
-  if(history.length<2)return 'Continue, l’historique se construit.';
+  var c=CONFIG.noSideIconColor;
+  if(history.length<2)return {text:'Continue, l’historique se construit.',color:c};
   var last=history[history.length-1];
   var targetDate=new Date(getParisNow().getTime()-7*86400000);
   var ref=null;
@@ -464,24 +485,34 @@ function statsStatusLine(history){
   }
   if(!ref)ref=history[0];
   var diff=last.score-ref.score;
-  if(diff>=6)return '&#128200; En progression sur les 7 derniers jours.';
-  if(diff<=-6)return '&#128201; En baisse — pense à venir un peu plus souvent ou à monter tes charges.';
-  return '&#8594; Stable sur les 7 derniers jours.';
+  if(diff>=6)return {text:'&#128200; En progression',color:CONFIG.weightColors.fresh};
+  if(diff<=-6)return {text:'&#128201; En baisse — viens un peu plus souvent ou monte tes charges',color:CONFIG.weightColors.old};
+  return {text:'&#8594; Stable',color:c};
 }
 
 function statsPageHTML(){
   var history=ld(K('statsHistory'),[]);
   var c=CONFIG.noSideIconColor;
   var last=history.length?history[history.length-1]:null;
-  var bigScore=last?('<div style="text-align:center;margin-bottom:2px"><span style="font-family:Impact,sans-serif;font-size:2.6rem;color:'+scoreColorFor(last.score)+'">'+last.score+'%</span></div>'
-    +'<div style="text-align:center;font-size:11px;color:'+c+';margin-bottom:14px">'+statsStatusLine(history)+'</div>'):'';
+  var bigScore='';
+  if(last){
+    var status=statsStatusLine(history);
+    var avg7=rollingAverage(history,7);
+    var avg30=rollingAverage(history,30);
+    bigScore='<div style="text-align:center;margin-bottom:2px"><span style="font-family:Impact,sans-serif;font-size:2.6rem;color:'+scoreColorFor(last.score)+'">'+last.score+'%</span></div>'
+      +'<div style="text-align:center;font-size:11.5px;font-weight:700;color:'+status.color+';margin-bottom:10px">'+status.text+'</div>'
+      +'<div style="display:flex;justify-content:center;gap:18px;margin-bottom:14px">'
+        +'<div style="text-align:center"><div style="font-size:15px;font-weight:800;color:'+scoreColorFor(avg7)+'">'+avg7+'%</div><div style="font-size:9px;color:'+c+'">moy. 7j</div></div>'
+        +'<div style="text-align:center"><div style="font-size:15px;font-weight:800;color:'+scoreColorFor(avg30)+'">'+avg30+'%</div><div style="font-size:9px;color:'+c+'">moy. 30j</div></div>'
+      +'</div>';
+  }
   return '<div class="days" style="padding-top:14px">'
     +'<div class="dc" style="padding:18px">'
     +'<div style="font-size:11px;font-weight:800;letter-spacing:1px;color:'+c+';margin-bottom:6px">&#128200; TA PROGRESSION</div>'
     +bigScore
-    +'<div style="font-size:10px;color:'+c+';margin-bottom:12px">Glisse pour remonter dans l’historique &#8226; pointillé = 100&#37; (ton objectif)</div>'
+    +'<div style="font-size:10px;color:'+c+';margin-bottom:12px">Glisse pour l’historique &#8226; pointillé = ton objectif</div>'
     +statsChartSVG(history)
-    +'<div style="font-size:10.5px;color:'+c+';margin-top:14px;line-height:1.5">Score = moyenne entre l’assiduité (jours déjà passés cette semaine, par rapport à ton objectif personnel) et la progression des charges (comparée à il y a quelques jours, par rapport à ton objectif personnel). Peut dépasser 100&#37; si tu fais mieux que ton objectif sur l’un des deux. Une photo est prise chaque jour, pour toujours.</div>'
+    +'<div style="font-size:10px;color:'+c+';margin-top:14px;line-height:1.4">Assiduité + progression des charges, par rapport à tes objectifs perso. Peut dépasser 100&#37; si tu fais mieux que prévu.</div>'
     +'</div>'
     +'</div>';
 }
