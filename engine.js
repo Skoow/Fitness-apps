@@ -20,7 +20,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // incrémenter à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=N sur la balise <script src="../engine.js?v=N"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION=7;
+var ENGINE_VERSION=8;
 
 function startApp(CONFIG){
 
@@ -382,11 +382,16 @@ function buildHTML(){
     }else{
       bodyHTML2='<div class="days">'+CONFIG.days.map(function(d,i){return dayHTML(d,i,false);}).join('')+'</div>';
     }
-    var todayBtnStyle=S.mode==='today'
-      ?(td?('background:'+td.color+'18;border-color:'+td.color+';color:'+td.color):'background:rgba(107,107,120,.2);border-color:#6b6b78;color:#6b6b78')
-      :'';
-    var weekBtnStyle=S.mode==='week'?('background:'+CONFIG.accentColor+'26;border-color:'+CONFIG.accentColor+';color:'+CONFIG.accentColor):'';
+    // Les 3 boutons gardent toujours leur couleur d'identité (bleu/orange/
+    // violet), même non sélectionnés (bordure/texte à faible opacité) — et
+    // ressortent en couleur pleine (fond + bordure + texte vifs) une fois
+    // sélectionnés. Couleurs fixes, partagées par les 3 personnes (comme
+    // pour STAT), pas une donnée personnelle.
+    var todayColor='#3d8bff';
+    var weekColor='#f5a623';
     var statsColor='#a855f7';
+    var todayBtnStyle=S.mode==='today'?('background:'+todayColor+'26;border-color:'+todayColor+';color:'+todayColor):('border-color:'+todayColor+'50;color:'+todayColor);
+    var weekBtnStyle=S.mode==='week'?('background:'+weekColor+'26;border-color:'+weekColor+';color:'+weekColor):('border-color:'+weekColor+'50;color:'+weekColor);
     var statsBtnStyle=isStats?('background:'+statsColor+'26;border-color:'+statsColor+';color:'+statsColor):('border-color:'+statsColor+'50;color:'+statsColor);
     mainContent='<div class="mtog">'
       +'<button class="mbtn" id="btn-today" style="'+todayBtnStyle+'">&#128205; AUJOURD’HUI</button>'
@@ -438,10 +443,16 @@ var DRAWER_WIDTH=250;
 // vérifier qu'une mise à jour est bien arrivée sur le téléphone.
 // Le header réserve 64px à droite (voir "padding-right" dans buildHTML) pour
 // que le badge programme et le J–N ne passent jamais dessous.
+// Un seul rectangle fixe : le logo ☰/✕ en haut, le numéro de version en
+// plus petit juste en dessous — toujours le même élément, jamais retiré du
+// DOM ni caché derrière le tiroir (voir z-index), donc la version reste
+// visible même pendant l'ouverture du menu.
 function menuButtonHTML(){
   var icon=S.menuOpen?'&#10005;':'&#9776;';
-  return '<button id="btn-menu" style="position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:61;background:transparent;border:none;font-size:30px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px 8px">'+icon+'</button>'
-    +'<div style="position:fixed;top:calc(58px + env(safe-area-inset-top,0px));right:16px;z-index:61;font-size:25px;font-weight:800;line-height:1;color:'+CONFIG.noSideIconColor+';pointer-events:none">v'+ENGINE_VERSION+'</div>';
+  return '<button id="btn-menu" style="position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:14px;z-index:61;background:transparent;border:none;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:4px 8px;display:flex;flex-direction:column;align-items:center;gap:1px">'
+    +'<span style="font-size:28px;line-height:1">'+icon+'</span>'
+    +'<span style="font-size:10px;font-weight:800;line-height:1;color:'+CONFIG.noSideIconColor+'">v'+ENGINE_VERSION+'</span>'
+    +'</button>';
 }
 
 // Tiroir latéral (droite) façon appli mobile : toujours dans le DOM (pour
