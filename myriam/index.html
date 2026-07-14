@@ -304,15 +304,11 @@ var CONFIG={
     fallbackDay:true,
     showNextDayPreview:true
   },
-  cardioCountsTowardProgress:false,
+  excludedFromProgress:['warmup','cardio'],
   defaultReps:'3 × 12 reps',
   cardioRepsText:'5 min',
   warmupRepsText:'5 min',
-  suggestionMode:'nextOption',
-  weightOptions:{
-    db:['—','6','8','10','12','14','16','18','20','22','24','26','28','30','32','34','36','38','40','42','44','46','48','50'],
-    mc:['—','4.5','9','11','14','18','23','25','27','32','36','39','41','45','50','52','54','59','64','66','68','73','77','79','82','86','91','93','100','107','113']
-  },
+  noWeightCategories:['cardio','warmup','gainage'],
   weightColors:{none:'#8a7a9a',fresh:'#2ecc71',aging:'#f39c12',old:'#e74c3c'},
   noSideIconColor:'#8a7a9a',
   exerciseNameColor:'#1a0a2e',
@@ -330,10 +326,19 @@ var CONFIG={
     subColor:'#0369a1',
     style:'background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-bottom:2px solid #0ea5e9'
   },
+  categoryColors:{cardio:'#2ecc71',warmup:'#f59e0b'},
+  // Son mercredi n'est pas une séance à part : il affiche par avance la
+  // séance du jeudi (index 2 pour les deux). Cas particulier à elle seule —
+  // ni Anthony ni Mikael n'ont besoin de ce genre de correspondance, donc
+  // cette fonction ne vit que dans SA config, pas dans le moteur.
+  resolveDayIndex:function(weekday){
+    var map={0:0,1:1,3:2,4:3,5:4}; // Lun,Mar,Ven,Sam -> leur propre séance
+    if(map[weekday]!==undefined)return map[weekday];
+    if(weekday===2)return 2; // Mer -> montre par avance J3 (Jeudi)
+    return -1; // Dim -> repos
+  },
   icons:ICONS,
-  days:P,
-  dayMap:{0:0,1:1,2:2,3:2,4:3,5:4},
-  resetCheckIntervalMs:300000
+  days:P
 };
 startApp(CONFIG);
 </script>

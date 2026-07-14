@@ -170,14 +170,18 @@ var CONFIG={
     fallbackDay:false,
     showNextDayPreview:false
   },
-  cardioCountsTowardProgress:true,
   defaultReps:'4×12 reps',
   cardioRepsText:'',
-  suggestionMode:'nextOption',
-  weightOptions:{
-    db:['—','6','8','10','12','14','16','18','20','22','24','26','28','30','32','34','36','38','40','42','44','46','48','50'],
-    mc:['—','4.5','9','11','14','18','23','25','27','32','36','39','41','45','50','52','54','59','64','66','68','73','77','79','82','86','91','93','100','107','113']
+  // Charge Gauche/Droite séparée : Mikael a un bras et une jambe diminués et
+  // ne peut pas forcer pareil des deux côtés. Seul son programme a besoin de
+  // deux contrôles de poids (un par côté) — logique propre à sa config,
+  // réutilisant le weightCtrl partagé du moteur pour chaque côté.
+  renderWeightRow:function(ex,ec,weightCtrl){
+    if(!ex.side)return weightCtrl(ex.id,ec,'',ex.isDB);
+    var sl=ex.side==='leg'?['Jambe G','Jambe D']:['Bras G','Bras D'];
+    return weightCtrl(ex.id+'_g',ec,sl[0],ex.isDB)+weightCtrl(ex.id+'_d',ec,sl[1],ex.isDB);
   },
+  extraBadge:function(ex){return ex.side?'<span class="bdg bf">🩹 '+(ex.side==='leg'?'Jambe G/D':'Bras G/D')+'</span>':'';},
   weightColors:{none:'#666',fresh:'#2ecc71',aging:'#f5a623',old:'#e53e3e'},
   noSideIconColor:'#555',
   exerciseNameColor:'#efefef',
@@ -194,9 +198,7 @@ var CONFIG={
   },
   absBanner:null,
   icons:ICONS,
-  days:P,
-  dayMap:null,
-  resetCheckIntervalMs:3600000
+  days:P
 };
 startApp(CONFIG);
 </script>

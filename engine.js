@@ -1,11 +1,25 @@
 // ── MOTEUR COMMUN ────────────────────────────────────────────────────────────
 // Une seule source de vérité pour les 3 apps (Anthony / Mikael / Myriam).
+// Tout ce qui est écrit ICI est le comportement par défaut partagé par les 3.
+// Une personne dont le programme a un besoin réel (et un seul) peut le
+// redéfinir depuis SON PROPRE index.html via un des "hooks" du CONFIG
+// (resolveDayIndex, computeNextWeight, renderWeightRow, extraBadge) —
+// le moteur ne connaît alors rien du cas particulier, il délègue simplement.
+//
 // Chaque index.html fournit un objet CONFIG (voir les 3 dossiers) puis appelle
-// startApp(CONFIG). Rien d'autre ne doit changer d'un dossier à l'autre.
+// startApp(CONFIG).
+
+// Listes de poids partagées par les 3 programmes (mêmes machines/haltères de
+// salle). Si une personne avait un jour un équipement différent, sa config
+// pourrait fournir CONFIG.weightOptions pour remplacer ces valeurs.
+var WEIGHT_OPTIONS_DB=['—','6','8','10','12','14','16','18','20','22','24','26','28','30','32','34','36','38','40','42','44','46','48','50'];
+var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','39','41','45','50','52','54','59','64','66','68','73','77','79','82','86','91','93','100','107','113'];
 
 function startApp(CONFIG){
 
-// ── ICONS ──────────────────────────────────────────────────────────────────
+var WOPT=CONFIG.weightOptions||{db:WEIGHT_OPTIONS_DB,mc:WEIGHT_OPTIONS_MC};
+
+// ── ICONS (thème personnel) ──────────────────────────────────────────────────
 function mkIcon(n,c,sz){
   sz=sz||52;c=c||'#fff';
   var shapes=CONFIG.icons;
@@ -25,14 +39,18 @@ function getWK(){var d=getParisNow();return d.getFullYear()+'-W'+getISO();}
 function getWeekday(){var d=getParisNow().getDay();return d===0?6:d-1;} // 0=Lun..6=Dim
 
 // ── RÉSOLUTION DU JOUR ACTIF ─────────────────────────────────────────────────
-// TI = index dans CONFIG.days de la séance du jour (-1 = repos).
-// Si CONFIG.dayMap est fourni {weekday:index}, il fait foi (permet des cas
-// particuliers comme "mercredi affiche la séance de jeudi").
-// Sinon on cherche le jour dont le champ .dow correspond au jour de semaine.
-function computeDayIndex(weekday){
-  if(CONFIG.dayMap) return CONFIG.dayMap.hasOwnProperty(weekday)?CONFIG.dayMap[weekday]:-1;
+// Comportement par défaut (partagé) : on cherche, dans CONFIG.days, le jour
+// dont le champ .dow correspond au jour de semaine (-1 = repos).
+// Une personne dont le programme ne suit pas une simple correspondance
+// jour->séance (ex : un jour qui affiche par avance la séance du lendemain)
+// fournit sa propre fonction CONFIG.resolveDayIndex(weekday) qui remplace
+// entièrement ce calcul — cette logique n'existe alors que dans SON fichier.
+function defaultResolveDayIndex(weekday){
   for(var i=0;i<CONFIG.days.length;i++){if(CONFIG.days[i].dow===weekday)return i;}
   return -1;
+}
+function computeDayIndex(weekday){
+  return (CONFIG.resolveDayIndex||defaultResolveDayIndex)(weekday);
 }
 
 // ── HELPERS ────────────────────────────────────────────────────────────────
@@ -51,7 +69,7 @@ function buildBlocks(exs){
   var blocks=[],cur=null;
   for(var i=0;i<exs.length;i++){
     var ex=exs[i];
-    if(ex.cat==='cardio'||(!ex.pair)){
+    if(!ex.pair){
       if(cur){blocks.push(cur);cur=null;}
       blocks.push({type:'solo',exercises:[ex]});
       continue;
@@ -63,9 +81,10 @@ function buildBlocks(exs){
   return blocks.map(function(b){return b.exercises.length===1?{type:'solo',cat:b.cat,exercises:b.exercises}:b;});
 }
 
+// Couleur d'icône par catégorie (ex : cardio/échauffement) — pure donnée de
+// config ; le moteur ne connaît le nom d'aucune catégorie en particulier.
 function exCol(ex,dc){
-  if(ex.cat==='cardio')return CONFIG.weightColors.fresh;
-  if(ex.cat==='warmup')return CONFIG.weightColors.aging;
+  if(CONFIG.categoryColors&&CONFIG.categoryColors[ex.cat])return CONFIG.categoryColors[ex.cat];
   return dc;
 }
 
@@ -80,12 +99,24 @@ function getWCol(id){
   return CONFIG.weightColors.old;
 }
 
-// exercices qui comptent dans la barre de progression du jour
+// Exercices qui comptent dans la barre de progression du jour. Les bannières
+// (avant/après) n'y participent jamais ; certaines catégories personnelles
+// (ex : échauffement) peuvent aussi en être exclues via la config.
 function countsTowardProgress(ex){
   if(ex.banner)return false;
-  if(ex.cat==='warmup')return false;
-  if(ex.cat==='cardio')return CONFIG.cardioCountsTowardProgress;
+  if(CONFIG.excludedFromProgress&&CONFIG.excludedFromProgress.indexOf(ex.cat)>=0)return false;
   return true;
+}
+
+// Suggestion de progression : par défaut on propose la valeur suivante dans
+// la liste de poids. Une personne peut fournir CONFIG.computeNextWeight pour
+// un autre calcul (ex : +2,5 kg fixe).
+function defaultComputeNextWeight(w,opts){
+  var idx=opts.indexOf(w);
+  return (idx>0&&idx<opts.length-1)?opts[idx+1]:'';
+}
+function computeNextWeight(w,opts){
+  return (CONFIG.computeNextWeight||defaultComputeNextWeight)(w,opts);
 }
 
 // ── STATE ──────────────────────────────────────────────────────────────────
@@ -289,20 +320,17 @@ function blkHTML(block,day){
     +'</div>';
 }
 
+// Rendu d'un contrôle de poids (une charge). Exposé aux hooks de config
+// (voir renderWeightRow) pour qu'une personne puisse composer plusieurs
+// contrôles (ex : un par côté) sans dupliquer cette logique.
 function weightCtrl(key,ec,sideLabel,isDB){
   var w=S.weights[key]||'';
   var hist=S.hist[key]||[];
   var last=hist.length>0?hist[hist.length-1]:null;
-  var opts=isDB?CONFIG.weightOptions.db:CONFIG.weightOptions.mc;
+  var opts=isDB?WOPT.db:WOPT.mc;
   var hasW=!!(w&&w!=='—');
   var wc=hasW?getWCol(key):CONFIG.weightColors.none;
-  var newW='';
-  if(CONFIG.suggestionMode==='nextOption'){
-    var idx=opts.indexOf(w);
-    newW=(idx>0&&idx<opts.length-1)?opts[idx+1]:'';
-  }else{
-    newW=w?(parseFloat(w)+2.5).toFixed(1):'';
-  }
+  var newW=computeNextWeight(w,opts);
   var showSugg=hasW&&newW&&last&&last.completedCount>=3&&last.weight===w;
   var selOpts=opts.map(function(o){return '<option value="'+o+'"'+(o===(w||'—')?' selected':'')+'>'+(o==='—'?'Sélectionner kg':o+' kg')+'</option>';}).join('');
   return '<div class="wrow">'
@@ -311,6 +339,23 @@ function weightCtrl(key,ec,sideLabel,isDB){
     +(hasW?'<span class="wval" style="color:'+wc+';background:'+wc+'18;border-color:'+wc+'40">'+w+' kg</span>':'')
     +'</div>'
     +(showSugg?'<div class="sugg">&#128200; '+(sideLabel?sideLabel+' : ':'')+'Tu tiens '+w+'kg depuis 3 fois &mdash; essaie <strong>'+newW+' kg</strong></div>':'');
+}
+
+// Par défaut : un seul contrôle de poids par exercice. Une personne dont
+// certains exercices se chargent différemment à gauche/droite fournit
+// CONFIG.renderWeightRow(ex, ec, weightCtrl) pour composer plusieurs
+// contrôles — cette logique n'existe alors que dans SON fichier.
+function defaultRenderWeightRow(ex,ec){
+  return weightCtrl(ex.id,ec,'',ex.isDB);
+}
+function renderWeightRow(ex,ec){
+  return (CONFIG.renderWeightRow||defaultRenderWeightRow)(ex,ec,weightCtrl);
+}
+
+// Badges additionnels propres à une personne (ex : "Unilatéral" chez
+// Anthony, "Bras/Jambe G/D" chez Mikael). Rien par défaut.
+function extraBadgeHTML(ex){
+  return CONFIG.extraBadge?(CONFIG.extraBadge(ex)||''):'';
 }
 
 function exHTML(ex,day){
@@ -322,22 +367,12 @@ function exHTML(ex,day){
     :ex.cat==='free'?'<span class="bdg bf">🔴 Libre</span>'
     :ex.cat==='cardio'?'<span class="bdg bc">🏃 Cardio</span>':'';
   var isoB=ex.isIso?'<span class="bdg bi">🎯 Isolation</span>':'';
-  var uniB=ex.isUni?'<span class="bdg bun">💪 Unilatéral</span>':'';
-  var sideB=ex.side?'<span class="bdg bf">🩹 '+(ex.side==='leg'?'Jambe G/D':'Bras G/D')+'</span>':'';
   var doneB=done?'<span class="bdg bd">✓ Fait</span>':'';
   var repsChip=CONFIG.showRepsChip
     ?'<div style="margin-top:5px"><span style="display:inline-block;padding:4px 12px;border-radius:8px;border:2px solid '+(done?'rgba(46,204,113,.5)':ec+'80')+';background:'+(done?'rgba(46,204,113,.12)':ec+'18')+';color:'+(done?CONFIG.weightColors.fresh:ec)+';font-size:11.5px;font-weight:900;letter-spacing:.3px">'+reps+'</span></div>'
     :'';
-  var noWeight=ex.cat==='cardio'||ex.cat==='warmup'||ex.isBW;
-  var wRow='';
-  if(!noWeight){
-    if(ex.side){
-      var sl=ex.side==='leg'?['Jambe G','Jambe D']:['Bras G','Bras D'];
-      wRow=weightCtrl(ex.id+'_g',ec,sl[0],ex.isDB)+weightCtrl(ex.id+'_d',ec,sl[1],ex.isDB);
-    }else{
-      wRow=weightCtrl(ex.id,ec,'',ex.isDB);
-    }
-  }
+  var noWeight=ex.isBW||(CONFIG.noWeightCategories&&CONFIG.noWeightCategories.indexOf(ex.cat)>=0);
+  var wRow=noWeight?'':renderWeightRow(ex,ec);
   return '<div class="exrow">'
     +'<div class="extap" data-id="'+ex.id+'" style="background:'+(done?'rgba(46,204,113,.06)':'transparent')+'">'
     +'<div class="exicon" style="background:'+(done?'rgba(46,204,113,.1)':'#111113')+';border-color:'+(done?'rgba(46,204,113,.3)':'#252528')+'">'+mkIcon(ex.icon,done?CONFIG.weightColors.fresh:ec,52)+'</div>'
@@ -345,7 +380,7 @@ function exHTML(ex,day){
     +'<div class="exnm" style="color:'+(done?CONFIG.weightColors.fresh:CONFIG.exerciseNameColor)+'">'+ex.name+'</div>'
     +repsChip
     +'<div class="extip">'+ex.tip+'</div>'
-    +'<div class="exbadges">'+catB+isoB+uniB+sideB+doneB+'</div>'
+    +'<div class="exbadges">'+catB+isoB+extraBadgeHTML(ex)+doneB+'</div>'
     +'</div>'
     +'<div class="exck" style="background:'+(done?CONFIG.weightColors.fresh:'transparent')+';border-color:'+(done?CONFIG.weightColors.fresh:CONFIG.exckBorderColor)+';color:'+(done?CONFIG.exckDoneColor:'transparent')+'">✓</div>'
     +'</div>'+wRow+'</div>';
@@ -354,7 +389,7 @@ function exHTML(ex,day){
 setInterval(function(){
   var nwk=getWK();
   if(ld(K('doneWeek'),null)!==nwk){S.done={};sv(K('doneWeek'),nwk);sv(K('done'),{});render();}
-},CONFIG.resetCheckIntervalMs||3600000);
+},300000);
 
 window.addEventListener('DOMContentLoaded',function(){render();});
 
