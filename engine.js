@@ -20,7 +20,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // incrémenter à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=N sur la balise <script src="../engine.js?v=N"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION=2;
+var ENGINE_VERSION=3;
 
 function startApp(CONFIG){
 
@@ -116,27 +116,41 @@ function countsTowardProgress(ex){
 }
 
 // ── STATS QUOTIDIENNES ───────────────────────────────────────────────────────
-// Une photo est prise une fois par jour (pas une fois par semaine) :
-// - Assiduité : cases cochées / total attendu sur TOUT le programme, en
-//   direct (la semaine en cours, telle qu'elle avance jour après jour).
-//   Plafonnée à 100 % — avec des cases à cocher oui/non, il n'existe pas de
-//   notion de "faire plus" qu'un exercice complet.
+// Une photo est prise une fois par jour :
+// - Assiduité : cases cochées / total attendu SUR LES JOURS DÉJÀ PASSÉS
+//   cette semaine (le jour de mercredi ne compte pas encore comme "attendu"
+//   un lundi — sinon la barre retombe artificiellement à chaque début de
+//   semaine). Comparée à un objectif personnel (CONFIG.statsTarget.
+//   assiduityTargetPct) : atteindre cet objectif = 100%, faire mieux monte
+//   au-dessus, faire moins descend en dessous.
 // - Charge : % des exercices dont le poids a augmenté par rapport à il y a
-//   ~2 semaines, comparé à un objectif de base (WEIGHT_PROGRESS_TARGET_PCT).
-//   PEUT dépasser 100 % si tu progresses sur plus d'exercices que cet
-//   objectif — c'est volontaire : un gros effort sur les charges peut
-//   compenser une semaine où tu es moins venu.
-// Le score affiché est la moyenne des deux (50/50), donc lui aussi peut
-// dépasser 100 %. Rien n'est jamais recalculé pour le passé ni supprimé :
-// tout l'historique depuis le début est gardé.
-var WEIGHT_PROGRESS_LOOKBACK_DAYS=14;
-var WEIGHT_PROGRESS_TARGET_PCT=25;
+//   quelques jours/semaines (CONFIG.statsTarget.weightLookbackDays), comparé
+//   à un objectif personnel (CONFIG.statsTarget.weightProgressTargetPct).
+// Les deux objectifs sont personnels (config), pas dans le moteur : chacun a
+// un niveau de base différent. Le score affiché est la moyenne des deux
+// (50/50) — peut dépasser 100% si tu fais mieux que ton propre objectif sur
+// l'un des deux axes, ce qui peut compenser l'autre. Rien n'est jamais
+// recalculé pour le passé ni supprimé : tout l'historique est gardé.
+var WEIGHT_PROGRESS_LOOKBACK_DAYS_DEFAULT=14;
+var WEIGHT_PROGRESS_TARGET_PCT_DEFAULT=25;
+var ASSIDUITY_TARGET_PCT_DEFAULT=100;
 var WEIGHT_SCORE_CAP=200;
 
+function statsTarget(name,dflt){
+  return (CONFIG.statsTarget&&CONFIG.statsTarget[name]!=null)?CONFIG.statsTarget[name]:dflt;
+}
+
+// % de complétion sur les jours déjà passés cette semaine (0-100, brut).
 function computeLiveCompletion(){
+  var weekday=getWeekday();
+  var expectedIdx={};
+  for(var w=0;w<=weekday;w++){
+    var idx=computeDayIndex(w);
+    if(idx>=0)expectedIdx[idx]=true;
+  }
   var tot=0,dc=0;
-  for(var i=0;i<CONFIG.days.length;i++){
-    var day=CONFIG.days[i];
+  for(var idxKey in expectedIdx){
+    var day=CONFIG.days[idxKey];
     for(var j=0;j<day.exercises.length;j++){
       var ex=day.exercises[j];
       if(!countsTowardProgress(ex))continue;
@@ -144,10 +158,17 @@ function computeLiveCompletion(){
       if(S.done[ex.id])dc++;
     }
   }
-  return tot>0?Math.round(dc/tot*100):0;
+  return tot>0?Math.round(dc/tot*100):100; // rien d'attendu pour l'instant -> neutre
+}
+function computeAssiduityScore(){
+  var raw=computeLiveCompletion();
+  var target=statsTarget('assiduityTargetPct',ASSIDUITY_TARGET_PCT_DEFAULT);
+  return Math.round(raw/target*100);
 }
 function computeWeightScore(history){
-  var targetDate=new Date(getParisNow().getTime()-WEIGHT_PROGRESS_LOOKBACK_DAYS*86400000);
+  var lookback=statsTarget('weightLookbackDays',WEIGHT_PROGRESS_LOOKBACK_DAYS_DEFAULT);
+  var target=statsTarget('weightProgressTargetPct',WEIGHT_PROGRESS_TARGET_PCT_DEFAULT);
+  var targetDate=new Date(getParisNow().getTime()-lookback*86400000);
   var ref=null;
   for(var i=history.length-1;i>=0;i--){
     if(new Date(history[i].date+'T12:00:00')<=targetDate){ref=history[i];break;}
@@ -163,18 +184,25 @@ function computeWeightScore(history){
   }
   if(total===0)return 50;
   var pct=up/total*100;
-  return Math.min(WEIGHT_SCORE_CAP,Math.round(pct/WEIGHT_PROGRESS_TARGET_PCT*100));
+  return Math.min(WEIGHT_SCORE_CAP,Math.round(pct/target*100));
 }
+// Met à jour la photo du jour en cours à chaque appel (elle reste "vivante"
+// tant qu'on est le même jour — sinon cocher un exercice l'après-midi
+// n'apparaîtrait dans les stats que le lendemain). Une fois le jour passé,
+// son entrée devient définitive et n'est plus jamais retouchée.
 function recordDailySnapshotIfNeeded(){
   var today=getParisDate();
-  if(ld(K('statsDay'),null)===today)return;
   var history=ld(K('statsHistory'),[]);
-  var completion=computeLiveCompletion();
+  var completion=computeAssiduityScore();
   var weightScore=computeWeightScore(history);
   var score=Math.round((completion+weightScore)/2);
-  history.push({date:today,completion:completion,weightScore:weightScore,score:score,weights:S.weights});
-  sv(K('statsHistory'),history); // pas de troncature : historique complet gardé
-  sv(K('statsDay'),today);
+  var entry={date:today,completion:completion,weightScore:weightScore,score:score,weights:S.weights};
+  if(history.length&&history[history.length-1].date===today){
+    history[history.length-1]=entry;
+  }else{
+    history.push(entry); // pas de troncature : historique complet gardé
+  }
+  sv(K('statsHistory'),history);
 }
 
 // ── STATE ──────────────────────────────────────────────────────────────────
@@ -233,6 +261,7 @@ function bindEvents(){
       var id=this.getAttribute('data-id');
       S.done[id]=!S.done[id];
       sv(K('done'),S.done);
+      recordDailySnapshotIfNeeded();
       render();
     });
   });
@@ -249,6 +278,7 @@ function bindEvents(){
         S.weightDates[id]=getParisDate();
         sv(K('weightDates'),S.weightDates);
       }
+      recordDailySnapshotIfNeeded();
       render();
     });
     sel.addEventListener('click',function(e){e.stopPropagation();});
@@ -390,15 +420,41 @@ function dataPageHTML(){
 // horizontalement — ouvert par défaut sur les données les plus récentes,
 // on glisse vers la gauche pour remonter dans l'historique. Rien n'est
 // jamais coupé : le score peut dépasser 100 % (voir computeWeightScore).
+function scoreColorFor(score){
+  if(score>=100)return CONFIG.weightColors.fresh;
+  if(score>=70)return CONFIG.weightColors.aging;
+  return CONFIG.weightColors.old;
+}
+
+// Compare le score du jour à celui d'il y a ~7 jours pour une phrase simple.
+function statsStatusLine(history){
+  if(history.length<2)return 'Continue, l’historique se construit.';
+  var last=history[history.length-1];
+  var targetDate=new Date(getParisNow().getTime()-7*86400000);
+  var ref=null;
+  for(var i=history.length-2;i>=0;i--){
+    if(new Date(history[i].date+'T12:00:00')<=targetDate){ref=history[i];break;}
+  }
+  if(!ref)ref=history[0];
+  var diff=last.score-ref.score;
+  if(diff>=6)return '&#128200; En progression sur les 7 derniers jours.';
+  if(diff<=-6)return '&#128201; En baisse — pense à venir un peu plus souvent ou à monter tes charges.';
+  return '&#8594; Stable sur les 7 derniers jours.';
+}
+
 function statsPageHTML(){
   var history=ld(K('statsHistory'),[]);
   var c=CONFIG.noSideIconColor;
+  var last=history.length?history[history.length-1]:null;
+  var bigScore=last?('<div style="text-align:center;margin-bottom:2px"><span style="font-family:Impact,sans-serif;font-size:2.6rem;color:'+scoreColorFor(last.score)+'">'+last.score+'%</span></div>'
+    +'<div style="text-align:center;font-size:11px;color:'+c+';margin-bottom:14px">'+statsStatusLine(history)+'</div>'):'';
   return '<div class="days" style="padding-top:14px">'
     +'<div class="dc" style="padding:18px">'
     +'<div style="font-size:11px;font-weight:800;letter-spacing:1px;color:'+c+';margin-bottom:6px">&#128200; TA PROGRESSION</div>'
-    +'<div style="font-size:10px;color:'+c+';margin-bottom:12px">Glisse pour remonter dans l’historique &#8226; pointillé = 100&#37;</div>'
+    +bigScore
+    +'<div style="font-size:10px;color:'+c+';margin-bottom:12px">Glisse pour remonter dans l’historique &#8226; pointillé = 100&#37; (ton objectif)</div>'
     +statsChartSVG(history)
-    +'<div style="font-size:10.5px;color:'+c+';margin-top:14px;line-height:1.5">Score = moyenne entre l’assiduité (cases cochées sur tout le programme, en direct — plafonnée à 100&#37;) et la progression des charges (comparée à il y a 2 semaines par rapport à un objectif de base — peut dépasser 100&#37; si tu progresses plus vite que prévu). Une photo est prise chaque jour, pour toujours.</div>'
+    +'<div style="font-size:10.5px;color:'+c+';margin-top:14px;line-height:1.5">Score = moyenne entre l’assiduité (jours déjà passés cette semaine, par rapport à ton objectif personnel) et la progression des charges (comparée à il y a quelques jours, par rapport à ton objectif personnel). Peut dépasser 100&#37; si tu fais mieux que ton objectif sur l’un des deux. Une photo est prise chaque jour, pour toujours.</div>'
     +'</div>'
     +'</div>';
 }
