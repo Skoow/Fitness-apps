@@ -20,7 +20,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // incrémenter à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=N sur la balise <script src="../engine.js?v=N"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION=6;
+var ENGINE_VERSION=7;
 
 function startApp(CONFIG){
 
@@ -319,6 +319,8 @@ function bindEvents(){
   });
   var btnMenu=document.getElementById('btn-menu');
   if(btnMenu)btnMenu.addEventListener('click',function(){S.menuOpen=!S.menuOpen;render();});
+  var menuOverlay=document.getElementById('menu-overlay');
+  if(menuOverlay)menuOverlay.addEventListener('click',function(){S.menuOpen=false;render();});
   var btnMenuData=document.getElementById('btn-menu-data');
   if(btnMenuData)btnMenuData.addEventListener('click',function(){S.mode='data';S.menuOpen=false;render();});
   var hdrBand=document.getElementById('hdr-band');
@@ -393,8 +395,7 @@ function buildHTML(){
       +'</div>'
       +bodyHTML2;
   }
-  return menuButtonHTML()+menuPanelHTML()
-    +'<div class="hdr" id="hdr-band" style="padding-right:64px;'+(isData?'cursor:pointer':'')+'">'
+  var shellContent='<div class="hdr" id="hdr-band" style="padding-right:64px;'+(isData?'cursor:pointer':'')+'">'
     +'<div class="hdr-top">'
     +'<div class="ttl">'+CONFIG.title+' <span style="color:'+CONFIG.genderSymbolColor+'">'+CONFIG.genderSymbol+'</span></div>'
     +programBadgeHTML()
@@ -405,35 +406,58 @@ function buildHTML(){
     +'</div></div>'
     +(isData?'<div style="text-align:center;padding:10px 14px 0;font-size:11px;color:'+CONFIG.noSideIconColor+'">&#8249; Touche ton prénom pour revenir</div>':'')
     +mainContent;
+  // Effet "tiroir" : tout le contenu (header + corps) est dans #app-shell et
+  // se décale vers la gauche à l'ouverture du menu, comme sur une appli
+  // mobile native — le panneau (voir drawerHTML) glisse alors depuis le bord
+  // droit dans l'espace libéré. Le wrapper overflow-x:hidden évite qu'un
+  // scroll horizontal apparaisse pendant le décalage.
+  return menuButtonHTML()
+    +drawerHTML()
+    +(S.menuOpen?'<div id="menu-overlay" style="position:fixed;inset:0;z-index:59;background:transparent"></div>':'')
+    +'<div style="overflow-x:hidden">'
+    +'<div id="app-shell" style="transform:translateX('+(S.menuOpen?'-'+DRAWER_WIDTH+'px':'0')+');transition:transform .3s ease">'
+    +shellContent
+    +'</div>'
+    +'</div>';
 }
 
-// Menu ☰ en haut à droite : fixe (ne bouge pas au scroll), toujours au-dessus
-// du reste. Positionné avec env(safe-area-inset-top) en plus du décalage
-// habituel : en PWA installée sur iPhone (icône sur l'écran d'accueil), la
-// zone du haut de l'écran (encoche/horloge) n'est plus compensée par le
-// padding du <body> comme dans Safari — un élément "position:fixed" doit
-// gérer cette zone lui-même, sinon il se retrouve sous la barre système et
-// devient impossible à toucher.
-// Le header réserve 64px à droite (voir "padding-right" ci-dessus) pour que
-// le badge programme et le J–N ne passent jamais dessous.
-// Premier niveau : une petite liste déroulante (une seule ligne pour
-// l'instant, + le numéro de version tout en bas). Cliquer sur "Importer /
-// Exporter" ouvre une page dédiée en plein écran (S.mode='data') — jamais
-// l'action directement depuis le petit menu.
-// Pas de bouton "Accueil" : sur la page data, toucher son prénom en haut
-// revient au programme (voir bindEvents sur #hdr-band).
+// Largeur du tiroir (voir drawerHTML) — utilisée aussi pour calculer le
+// décalage du contenu principal dans buildHTML.
+var DRAWER_WIDTH=250;
+
+// Bouton ☰ en haut à droite : fixe (ne bouge pas au scroll ni au décalage du
+// tiroir), toujours au-dessus du reste — il devient une croix une fois le
+// tiroir ouvert, pour refermer. Positionné avec env(safe-area-inset-top) en
+// plus du décalage habituel : en PWA installée sur iPhone (icône sur l'écran
+// d'accueil), la zone du haut de l'écran (encoche/horloge) n'est plus
+// compensée par le padding du <body> comme dans Safari — un élément
+// "position:fixed" doit gérer cette zone lui-même, sinon il se retrouve sous
+// la barre système et devient impossible à toucher.
+// Le numéro de version est affiché juste en dessous, en gros (25px) et
+// toujours visible (pas besoin d'ouvrir le menu) — repère simple pour
+// vérifier qu'une mise à jour est bien arrivée sur le téléphone.
+// Le header réserve 64px à droite (voir "padding-right" dans buildHTML) pour
+// que le badge programme et le J–N ne passent jamais dessous.
 function menuButtonHTML(){
-  return '<button id="btn-menu" style="position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:60;background:transparent;border:none;font-size:30px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px 8px">&#9776;</button>';
+  var icon=S.menuOpen?'&#10005;':'&#9776;';
+  return '<button id="btn-menu" style="position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:61;background:transparent;border:none;font-size:30px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px 8px">'+icon+'</button>'
+    +'<div style="position:fixed;top:calc(58px + env(safe-area-inset-top,0px));right:16px;z-index:61;font-size:25px;font-weight:800;line-height:1;color:'+CONFIG.noSideIconColor+';pointer-events:none">v'+ENGINE_VERSION+'</div>';
 }
 
-function menuPanelHTML(){
-  if(!S.menuOpen)return'';
-  var c=CONFIG.exerciseNameColor;
-  var muted=CONFIG.noSideIconColor;
-  var itemStyle='width:100%;text-align:left;background:transparent;border:none;padding:12px 10px;font-size:13px;font-weight:600;color:'+c+';cursor:pointer';
-  return '<div class="dc" style="position:fixed;top:calc(66px + env(safe-area-inset-top,0px));right:14px;z-index:59;padding:6px;width:230px;max-width:calc(100vw - 28px);box-shadow:0 10px 30px rgba(0,0,0,.35)">'
-    +'<button id="btn-menu-data" style="'+itemStyle+'">Importer / Exporter</button>'
-    +'<div style="text-align:right;padding:6px 10px 2px;font-size:9px;color:'+muted+'">v'+ENGINE_VERSION+'</div>'
+// Tiroir latéral (droite) façon appli mobile : toujours dans le DOM (pour
+// l'animation de fermeture), simplement poussé hors écran via translateX
+// quand fermé. Réutilise la classe "hdr" (déjà définie par personne, sombre
+// ou claire selon le thème) pour le fond, plutôt qu'une couleur codée en dur
+// dans le moteur — sinon le tiroir serait noir même chez Myriam qui a un
+// thème clair. Le bouton "Importer / Exporter" réutilise "mbtn" (déjà
+// stylé/thémé) pour la même raison. Cliquer dessus ouvre la page dédiée en
+// plein écran (S.mode='data') — jamais l'action directement depuis le tiroir.
+function drawerHTML(){
+  var open=S.menuOpen;
+  return '<div class="hdr" style="position:fixed;top:0;right:0;width:'+DRAWER_WIDTH+'px;max-width:78vw;height:100dvh;z-index:60;border:none;box-shadow:'+(open?'-14px 0 34px rgba(0,0,0,.35)':'none')+';transform:translateX('+(open?'0':'100%')+');transition:transform .3s ease;padding:calc(88px + env(safe-area-inset-top,0px)) 16px 16px;display:flex;flex-direction:column;gap:10px">'
+    +'<button id="btn-menu-data" class="mbtn" style="flex:none;justify-content:flex-start;gap:10px;font-size:13.5px;padding:14px">'
+    +'<span style="font-size:18px">&#128190;</span> Importer / Exporter'
+    +'</button>'
     +'</div>';
 }
 
