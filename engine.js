@@ -20,7 +20,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // incrémenter à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=N sur la balise <script src="../engine.js?v=N"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION=5;
+var ENGINE_VERSION=6;
 
 function startApp(CONFIG){
 
@@ -404,28 +404,36 @@ function buildHTML(){
     +'<div style="text-align:right">'+jleftHTML()+'</div>'
     +'</div></div>'
     +(isData?'<div style="text-align:center;padding:10px 14px 0;font-size:11px;color:'+CONFIG.noSideIconColor+'">&#8249; Touche ton prénom pour revenir</div>':'')
-    +mainContent
-    +'<div style="text-align:right;padding:6px 14px 90px;font-size:9px;color:'+CONFIG.noSideIconColor+'">v'+ENGINE_VERSION+'</div>';
+    +mainContent;
 }
 
 // Menu ☰ en haut à droite : fixe (ne bouge pas au scroll), toujours au-dessus
-// du reste. Le header réserve 64px à droite (voir "padding-right" ci-dessus)
-// pour que le badge programme et le J–N ne passent jamais dessous.
+// du reste. Positionné avec env(safe-area-inset-top) en plus du décalage
+// habituel : en PWA installée sur iPhone (icône sur l'écran d'accueil), la
+// zone du haut de l'écran (encoche/horloge) n'est plus compensée par le
+// padding du <body> comme dans Safari — un élément "position:fixed" doit
+// gérer cette zone lui-même, sinon il se retrouve sous la barre système et
+// devient impossible à toucher.
+// Le header réserve 64px à droite (voir "padding-right" ci-dessus) pour que
+// le badge programme et le J–N ne passent jamais dessous.
 // Premier niveau : une petite liste déroulante (une seule ligne pour
-// l'instant). Cliquer dessus ouvre une page dédiée en plein écran
-// (S.mode='data') — jamais l'action directement depuis le petit menu.
+// l'instant, + le numéro de version tout en bas). Cliquer sur "Importer /
+// Exporter" ouvre une page dédiée en plein écran (S.mode='data') — jamais
+// l'action directement depuis le petit menu.
 // Pas de bouton "Accueil" : sur la page data, toucher son prénom en haut
 // revient au programme (voir bindEvents sur #hdr-band).
 function menuButtonHTML(){
-  return '<button id="btn-menu" style="position:fixed;top:14px;right:14px;z-index:60;background:transparent;border:none;font-size:30px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px 8px">&#9776;</button>';
+  return '<button id="btn-menu" style="position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:60;background:transparent;border:none;font-size:30px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px 8px">&#9776;</button>';
 }
 
 function menuPanelHTML(){
   if(!S.menuOpen)return'';
   var c=CONFIG.exerciseNameColor;
+  var muted=CONFIG.noSideIconColor;
   var itemStyle='width:100%;text-align:left;background:transparent;border:none;padding:12px 10px;font-size:13px;font-weight:600;color:'+c+';cursor:pointer';
-  return '<div class="dc" style="position:fixed;top:66px;right:14px;z-index:59;padding:6px;width:230px;max-width:calc(100vw - 28px);box-shadow:0 10px 30px rgba(0,0,0,.35)">'
+  return '<div class="dc" style="position:fixed;top:calc(66px + env(safe-area-inset-top,0px));right:14px;z-index:59;padding:6px;width:230px;max-width:calc(100vw - 28px);box-shadow:0 10px 30px rgba(0,0,0,.35)">'
     +'<button id="btn-menu-data" style="'+itemStyle+'">Importer / Exporter</button>'
+    +'<div style="text-align:right;padding:6px 10px 2px;font-size:9px;color:'+muted+'">v'+ENGINE_VERSION+'</div>'
     +'</div>';
 }
 
