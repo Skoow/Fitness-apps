@@ -24,7 +24,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // À changer à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=X.Y sur la balise <script src="../engine.js?v=X.Y"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION='1.4';
+var ENGINE_VERSION='1.5';
 
 function startApp(CONFIG){
 
@@ -411,18 +411,20 @@ function buildHTML(){
     +'</div>'
     +'<div class="dlbar">'
     +'<div><div class="dll">&#128197; '+CONFIG.deadlineLabel+'</div><div class="dld">'+CONFIG.deadlineDateText+'</div></div>'
-    +'<div style="text-align:right">'+jleftHTML()
-      // Le numéro de version reste dans le flux normal du rectangle d'en-tête
-      // (donc toujours correctement placé en bas, sous le J–N, quelle que
-      // soit la hauteur réelle du rectangle chez cette personne — pas besoin
-      // de mesurer quoi que ce soit en JS). Le seul souci est que ce
-      // rectangle fait partie de #app-shell, qui se décale de -DRAWER_WIDTH
-      // à l'ouverture du tiroir : on annule ce décalage juste pour cet
-      // élément avec un translateX inverse, pour qu'il ne suive pas ce
-      // glissement horizontal (les transforms imbriqués s'additionnent).
-      +'<div style="font-size:9px;font-weight:700;color:'+CONFIG.noSideIconColor+';margin-top:2px;transform:translateX('+(S.menuOpen?DRAWER_WIDTH:0)+'px)">v'+ENGINE_VERSION+'</div>'
+    +'<div style="text-align:right">'+jleftHTML()+'</div>'
     +'</div>'
-    +'</div></div>'
+    // Le numéro de version est en bas à droite du GRAND rectangle d'en-tête
+    // (titre + badge + deadline) — pas dans le petit encart deadline (dlbar)
+    // ci-dessus. Il reste dans le flux normal (donc toujours correctement
+    // placé en bas, quelle que soit la hauteur réelle du rectangle chez
+    // cette personne — pas besoin de mesurer quoi que ce soit en JS). Le
+    // seul souci est que ce rectangle fait partie de #app-shell, qui se
+    // décale de -DRAWER_WIDTH à l'ouverture du tiroir : on annule ce
+    // décalage juste pour cet élément avec un translateX inverse, pour qu'il
+    // ne suive pas ce glissement horizontal (les transforms imbriqués
+    // s'additionnent).
+    +'<div style="text-align:right;font-size:9px;font-weight:700;color:'+CONFIG.noSideIconColor+';margin-top:6px;transform:translateX('+(S.menuOpen?DRAWER_WIDTH:0)+'px)">v'+ENGINE_VERSION+'</div>'
+    +'</div>'
     +(isData?'<div style="text-align:center;padding:10px 14px 0;font-size:11px;color:'+CONFIG.noSideIconColor+'">&#8249; Touche ton prénom pour revenir en arrière</div>':'')
     +mainContent;
   // Effet "tiroir" : tout le contenu (header + corps) est dans #app-shell et
@@ -633,9 +635,11 @@ function statsChartSVG(history){
     +'</div>';
 }
 
-// Chaque poids exporté a toujours une date : la vraie si on la connaît,
-// sinon celle du jour de l'export — jamais laissée vide. L'export ne
-// change rien à l'affichage (pas de rechargement, on reste sur la page).
+// Export complet : poids, dates, cases cochées de la semaine et tout
+// l'historique STAT — pas juste les poids. Chaque poids exporté a toujours
+// une date : la vraie si on la connaît, sinon celle du jour de l'export —
+// jamais laissée vide. L'export ne change rien à l'affichage (pas de
+// rechargement, on reste sur la page).
 // En PWA installée sur iPhone (mode "standalone", sans barre d'adresse), un
 // lien <a download> vers un blob: ne déclenche pas toujours un vrai
 // téléchargement — Safari peut tenter de naviguer directement vers l'URL
@@ -643,20 +647,32 @@ function statsChartSVG(history){
 // utilise donc en priorité le partage natif (Web Share API avec fichier,
 // supporté depuis iOS 15) qui ouvre la feuille de partage standard
 // (Fichiers, AirDrop, Messages...) — bien plus fiable pour "sortir" un
-// fichier d'une PWA. Le lien <a download> classique reste en repli pour les
-// navigateurs qui ne supportent pas le partage de fichiers (desktop...).
+// fichier d'une PWA. IMPORTANT : partager un "title"/"text" EN PLUS du
+// fichier est un bug connu de Safari iOS — l'app cible reçoit parfois ce
+// texte à la place du fichier (nom du fichier écrit en texte, sauvegardé en
+// ".txt"). On ne partage donc QUE "files", rien d'autre. Le lien <a
+// download> classique reste en repli pour les navigateurs qui ne
+// supportent pas le partage de fichiers (desktop...).
 function exportData(){
   var today=getParisDate();
   var dates={};
   for(var id in S.weights){dates[id]=S.weightDates[id]||today;}
-  var data={app:CONFIG.personId,exportedAt:today,weights:S.weights,weightDates:dates};
-  var filename=CONFIG.personId+'-export.json';
+  var data={
+    app:CONFIG.personId,
+    exportedAt:today,
+    weights:S.weights,
+    weightDates:dates,
+    done:S.done,
+    doneWeek:ld(K('doneWeek'),null),
+    statsHistory:ld(K('statsHistory'),[])
+  };
+  var filename=CONFIG.personId+'.json';
   var json=JSON.stringify(data,null,2);
   if(navigator.share&&navigator.canShare&&typeof File!=='undefined'){
     try{
       var file=new File([json],filename,{type:'application/json'});
       if(navigator.canShare({files:[file]})){
-        navigator.share({files:[file],title:filename}).catch(function(){});
+        navigator.share({files:[file]}).catch(function(){});
         return;
       }
     }catch(e){}
@@ -672,12 +688,14 @@ function exportData(){
 // Même règle à l'import, en filet de sécurité : si le fichier a une date
 // connue pour un exercice, elle est gardée telle quelle ; sinon (fichier
 // d'une ancienne version qui n'enregistrait pas les dates) on prend la
-// date du jour de l'import — jamais pour écraser une vraie date.
+// date du jour de l'import — jamais pour écraser une vraie date. Les champs
+// ajoutés après coup (done, doneWeek, statsHistory) sont restaurés s'ils
+// sont présents, ignorés sinon (fichier exporté par une ancienne version).
 function importData(jsonText){
   var data;
   try{data=JSON.parse(jsonText);}catch(e){alert('Fichier invalide.');return;}
   if(!data||typeof data.weights!=='object'){alert('Fichier invalide.');return;}
-  if(!confirm('Importer ce fichier remplacera tes poids actuels par ceux du fichier. Continuer ?'))return;
+  if(!confirm('Importer ce fichier remplacera tes données actuelles par celles du fichier. Continuer ?'))return;
   var today=getParisDate();
   var importedDates=data.weightDates||{};
   for(var id in data.weights){
@@ -686,6 +704,12 @@ function importData(jsonText){
   }
   sv(K('weights'),S.weights);
   sv(K('weightDates'),S.weightDates);
+  if(data.done&&typeof data.done==='object'){
+    S.done=data.done;
+    sv(K('done'),S.done);
+  }
+  if(data.doneWeek)sv(K('doneWeek'),data.doneWeek);
+  if(Array.isArray(data.statsHistory))sv(K('statsHistory'),data.statsHistory);
   alert('Import terminé, l\'app va se relancer.');
   window.location.reload();
 }
