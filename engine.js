@@ -176,10 +176,13 @@ function bindEvents(){
   });
 }
 
+// Une fois la deadline dépassée (pour les 3), on affiche un décompte de
+// retard (J+1, J+2...) et un rappel fixe en rouge/gras/majuscules, jusqu'à
+// ce que la personne mette à jour `deadline` avec le nouveau programme.
 function jleftHTML(){
-  if(CONFIG.deadlineZero&&JLEFT_RAW<=0){
-    var z=CONFIG.deadlineZero;
-    return '<div class="dlc" style="color:'+z.color+'">J+'+(-JLEFT_RAW)+'</div><div class="dls" style="color:'+z.color+';font-weight:700">'+z.label+'</div>';
+  if(JLEFT_RAW<=0){
+    var red=CONFIG.weightColors.old;
+    return '<div class="dlc" style="color:'+red+'">J+'+(-JLEFT_RAW)+'</div><div class="dls" style="color:'+red+';font-weight:700">CHANGER LE PROGRAMME</div>';
   }
   return '<div class="dlc" style="color:'+(JLEFT<14?CONFIG.jleftUrgentColor:CONFIG.jleftNormalColor)+'">J–'+JLEFT+'</div><div class="dls">jours restants</div>';
 }
