@@ -15,12 +15,16 @@
 var WEIGHT_OPTIONS_DB=['—','2','4','6','8','10','12','14','16','18','20','22','24','26','28','30','32','34','36','38','40','42','44','46','48','50'];
 var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','39','41','45','50','52','54','59','64','66','68','73','77','79','82','86','91','93','100','107','113'];
 
-// Numéro de version affiché en bas de l'app (petit repère visuel pour
-// vérifier qu'une mise à jour est bien arrivée sur le téléphone). À
-// incrémenter à chaque fois que ce fichier change, EN MÊME TEMPS que le
-// ?v=N sur la balise <script src="../engine.js?v=N"> des 3 index.html
+// Numéro de version affiché dans l'app (petit repère visuel pour vérifier
+// qu'une mise à jour est bien arrivée sur le téléphone), au format
+// MAJEUR.MINEUR : le chiffre MINEUR s'incrémente pour chaque petit
+// changement (réajustement graphique, correctif...) — 1.1, 1.2, 1.3...
+// Le chiffre MAJEUR ne bouge que pour une évolution importante (nouvelle
+// fonctionnalité, refonte...) et repart alors avec un mineur à 0 — 2.0, 3.0...
+// À changer à chaque fois que ce fichier change, EN MÊME TEMPS que le
+// ?v=X.Y sur la balise <script src="../engine.js?v=X.Y"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION=8;
+var ENGINE_VERSION='1.1';
 
 function startApp(CONFIG){
 
@@ -407,7 +411,9 @@ function buildHTML(){
     +'</div>'
     +'<div class="dlbar">'
     +'<div><div class="dll">&#128197; '+CONFIG.deadlineLabel+'</div><div class="dld">'+CONFIG.deadlineDateText+'</div></div>'
-    +'<div style="text-align:right">'+jleftHTML()+'</div>'
+    +'<div style="text-align:right">'+jleftHTML()
+      +'<div style="font-size:9px;font-weight:700;color:'+CONFIG.noSideIconColor+';margin-top:2px">v'+ENGINE_VERSION+'</div>'
+    +'</div>'
     +'</div></div>'
     +(isData?'<div style="text-align:center;padding:10px 14px 0;font-size:11px;color:'+CONFIG.noSideIconColor+'">&#8249; Touche ton prénom pour revenir</div>':'')
     +mainContent;
@@ -438,21 +444,14 @@ var DRAWER_WIDTH=250;
 // compensée par le padding du <body> comme dans Safari — un élément
 // "position:fixed" doit gérer cette zone lui-même, sinon il se retrouve sous
 // la barre système et devient impossible à toucher.
-// Le numéro de version est affiché juste en dessous, en gros (25px) et
-// toujours visible (pas besoin d'ouvrir le menu) — repère simple pour
-// vérifier qu'une mise à jour est bien arrivée sur le téléphone.
 // Le header réserve 64px à droite (voir "padding-right" dans buildHTML) pour
 // que le badge programme et le J–N ne passent jamais dessous.
-// Un seul rectangle fixe : le logo ☰/✕ en haut, le numéro de version en
-// plus petit juste en dessous — toujours le même élément, jamais retiré du
-// DOM ni caché derrière le tiroir (voir z-index), donc la version reste
-// visible même pendant l'ouverture du menu.
+// Le numéro de version n'est plus ici : il est affiché en bas à droite du
+// rectangle d'en-tête (titre/programme/deadline), sous le compte à rebours
+// J–N — voir shellContent dans buildHTML. Ce bouton ne montre que le logo.
 function menuButtonHTML(){
   var icon=S.menuOpen?'&#10005;':'&#9776;';
-  return '<button id="btn-menu" style="position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:14px;z-index:61;background:transparent;border:none;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:4px 8px;display:flex;flex-direction:column;align-items:center;gap:1px">'
-    +'<span style="font-size:28px;line-height:1">'+icon+'</span>'
-    +'<span style="font-size:10px;font-weight:800;line-height:1;color:'+CONFIG.noSideIconColor+'">v'+ENGINE_VERSION+'</span>'
-    +'</button>';
+  return '<button id="btn-menu" style="position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:61;background:transparent;border:none;font-size:30px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px 8px">'+icon+'</button>';
 }
 
 // Tiroir latéral (droite) façon appli mobile : toujours dans le DOM (pour
