@@ -31,8 +31,12 @@ self.addEventListener('fetch',function(event){
   var isPage=event.request.mode==='navigate'||(event.request.headers.get('accept')||'').indexOf('text/html')!==-1;
 
   if(isPage){
+    // "reload" force à contourner le cache HTTP classique du navigateur (pas
+    // celui du service worker) — sans ça, fetch() peut se contenter d'une
+    // réponse déjà en cache navigateur sans vraiment revalider avec le
+    // serveur, et une mise à jour peut mettre du temps à apparaître.
     event.respondWith(
-      fetch(event.request).then(function(response){
+      fetch(event.request,{cache:'reload'}).then(function(response){
         if(response&&response.ok){
           caches.open(CACHE_NAME).then(function(cache){cache.put(event.request,response.clone());});
         }
