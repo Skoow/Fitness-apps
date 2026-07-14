@@ -24,7 +24,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // À changer à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=X.Y sur la balise <script src="../engine.js?v=X.Y"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION='1.9';
+var ENGINE_VERSION='1.10';
 
 function startApp(CONFIG){
 
@@ -433,13 +433,20 @@ function buildHTML(){
   // mobile native — le panneau (voir drawerHTML) glisse alors depuis le bord
   // droit dans l'espace libéré. Le wrapper overflow-x:hidden évite qu'un
   // scroll horizontal apparaisse pendant le décalage.
+  // #app-shell est LE seul élément qui défile (position:fixed + overflow
+  // interne), et html/body sont verrouillés (overflow:hidden, voir le CSS de
+  // chaque personne) : sur iOS Safari, un position:fixed cohabite mal avec
+  // un défilement natif du document entier (bug connu, le bouton ☰ pouvait
+  // se décaler pendant le scroll même avec translateZ(0)/will-change). En
+  // supprimant le défilement du document et en le confinant à ce conteneur
+  // dédié, le bouton (et le tiroir), qui restent SIBLINGS en dehors de ce
+  // conteneur, ne peuvent plus du tout être affectés par un scroll qui ne
+  // les concerne pas.
   return menuButtonHTML()
     +drawerHTML()
     +(S.menuOpen?'<div id="menu-overlay" style="position:fixed;inset:0;z-index:59;background:transparent"></div>':'')
-    +'<div style="overflow-x:hidden">'
-    +'<div id="app-shell" style="transform:translateX('+(S.menuOpen?'-'+DRAWER_WIDTH+'px':'0')+');transition:transform .3s ease">'
+    +'<div id="app-shell" style="position:fixed;inset:0;overflow:hidden auto;-webkit-overflow-scrolling:touch;padding-top:env(safe-area-inset-top,20px);padding-bottom:calc(28px + env(safe-area-inset-bottom,0px));transform:translateX('+(S.menuOpen?'-'+DRAWER_WIDTH+'px':'0')+');transition:transform .3s ease">'
     +shellContent
-    +'</div>'
     +'</div>';
 }
 
