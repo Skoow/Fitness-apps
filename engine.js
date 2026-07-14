@@ -119,6 +119,7 @@ var JLEFT=Math.max(0,JLEFT_RAW);
 var WK=getWK();
 var S={
   mode:'today',
+  menuOpen:false,
   openDays:{},
   weights:ld(K('weights'),{}),
   weightDates:ld(K('weightDates'),{}),
@@ -174,6 +175,10 @@ function bindEvents(){
     });
     sel.addEventListener('click',function(e){e.stopPropagation();});
   });
+  var btnMenu=document.getElementById('btn-menu');
+  if(btnMenu)btnMenu.addEventListener('click',function(){S.menuOpen=!S.menuOpen;render();});
+  var btnMenuClose=document.getElementById('btn-menu-close');
+  if(btnMenuClose)btnMenuClose.addEventListener('click',function(){S.menuOpen=false;render();});
   var btnExport=document.getElementById('btn-export');
   if(btnExport)btnExport.addEventListener('click',exportData);
   var btnImport=document.getElementById('btn-import');
@@ -229,7 +234,8 @@ function buildHTML(){
     ?(td?('background:'+td.color+'18;border-color:'+td.color+';color:'+td.color):'background:rgba(107,107,120,.2);border-color:#6b6b78;color:#6b6b78')
     :'';
   var weekBtnStyle=S.mode==='week'?('background:'+CONFIG.accentColor+'26;border-color:'+CONFIG.accentColor+';color:'+CONFIG.accentColor):'';
-  return '<div class="hdr">'
+  return menuButtonHTML()+menuPanelHTML()
+    +'<div class="hdr">'
     +'<div class="hdr-top">'
     +'<div class="ttl">'+CONFIG.title+' <span style="color:'+CONFIG.genderSymbolColor+'">'+CONFIG.genderSymbol+'</span></div>'
     +programBadgeHTML()
@@ -242,37 +248,56 @@ function buildHTML(){
     +'<button class="mbtn" id="btn-today" style="'+todayBtnStyle+'">&#128205; AUJOURD’HUI</button>'
     +'<button class="mbtn" id="btn-week" style="'+weekBtnStyle+'">&#128198; SEMAINE</button>'
     +'</div>'
-    +'<div class="days">'+daysHTML+'</div>'
-    +exportImportHTML();
+    +'<div class="days">'+daysHTML+'</div>';
 }
 
-// Sauvegarde/restauration des poids (localStorage uniquement, rien n'est
-// envoyé nulle part). Sert aussi à récupérer les données d'une ancienne
-// version de l'app (même format : {app, weights, weightDates}).
-function exportImportHTML(){
+// Menu ☰ en haut à droite (fixe, au-dessus de tout) : sauvegarde/restauration
+// des poids, en localStorage uniquement, rien n'est envoyé nulle part. Sert
+// aussi à récupérer les données d'une ancienne version de l'app (même
+// format exporté : {app, weights, weightDates}).
+function menuButtonHTML(){
+  return '<button id="btn-menu" style="position:fixed;top:16px;right:14px;z-index:60;background:transparent;border:none;font-size:22px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px">&#9776;</button>';
+}
+
+function menuPanelHTML(){
+  if(!S.menuOpen)return'';
   var c=CONFIG.noSideIconColor;
-  var btnStyle='font-size:11px;font-weight:700;color:'+c+';background:transparent;border:1px solid '+c+'50;border-radius:8px;padding:7px 12px;display:flex;align-items:center;gap:5px';
-  return '<div style="padding:18px 14px 10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">'
-    +'<button id="btn-export" style="'+btnStyle+'">&#11015;&#65039; Exporter mes données</button>'
-    +'<button id="btn-import" style="'+btnStyle+'">&#11014;&#65039; Importer mes données</button>'
-    +'<input type="file" id="import-file" accept="application/json" style="display:none">'
+  var actionBtn='font-size:12px;font-weight:700;width:100%;justify-content:center';
+  return '<div class="dc" style="position:fixed;top:56px;right:14px;z-index:59;padding:16px;width:230px;max-width:calc(100vw - 28px);display:flex;flex-direction:column;gap:14px;box-shadow:0 10px 30px rgba(0,0,0,.35)">'
+    +'<button id="btn-menu-close" style="position:absolute;top:8px;right:10px;background:transparent;border:none;font-size:16px;color:'+c+';cursor:pointer">&#10005;</button>'
+    +'<div>'
+      +'<div style="font-size:10px;font-weight:800;letter-spacing:1px;color:'+c+';margin-bottom:8px">&#11014;&#65039; IMPORTER MES DONNÉES</div>'
+      +'<button class="mbtn" id="btn-import" style="'+actionBtn+'">Choisir un fichier</button>'
+      +'<input type="file" id="import-file" accept="application/json" style="display:none">'
+    +'</div>'
+    +'<div style="border-top:1px solid '+c+'30;padding-top:14px">'
+      +'<div style="font-size:10px;font-weight:800;letter-spacing:1px;color:'+c+';margin-bottom:8px">&#11015;&#65039; EXPORTER MES DONNÉES</div>'
+      +'<button class="mbtn" id="btn-export" style="'+actionBtn+'">Télécharger</button>'
+    +'</div>'
     +'</div>';
 }
 
+// Chaque poids exporté a toujours une date : la vraie si on la connaît,
+// sinon celle du jour de l'export — jamais laissée vide.
 function exportData(){
-  var data={app:CONFIG.personId,exportedAt:getParisDate(),weights:S.weights,weightDates:S.weightDates};
+  var today=getParisDate();
+  var dates={};
+  for(var id in S.weights){dates[id]=S.weightDates[id]||today;}
+  var data={app:CONFIG.personId,exportedAt:today,weights:S.weights,weightDates:dates};
   var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
   a.href=url;a.download=CONFIG.personId+'-export.json';
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   URL.revokeObjectURL(url);
+  S.menuOpen=false;
+  render();
 }
 
-// Si le fichier importé a une date connue pour un exercice, elle est gardée
-// telle quelle. Sinon (ex : une ancienne version qui n'enregistrait pas les
-// dates) on prend la date du jour de l'import, uniquement comme filet de
-// sécurité pour ce qu'on n'a jamais su — jamais pour écraser une vraie date.
+// Même règle à l'import, en filet de sécurité : si le fichier a une date
+// connue pour un exercice, elle est gardée telle quelle ; sinon (fichier
+// d'une ancienne version qui n'enregistrait pas les dates) on prend la
+// date du jour de l'import — jamais pour écraser une vraie date.
 function importData(jsonText){
   var data;
   try{data=JSON.parse(jsonText);}catch(e){alert('Fichier invalide.');return;}
@@ -286,6 +311,7 @@ function importData(jsonText){
   }
   sv(K('weights'),S.weights);
   sv(K('weightDates'),S.weightDates);
+  S.menuOpen=false;
   render();
   alert('Import terminé.');
 }
