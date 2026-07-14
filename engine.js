@@ -24,7 +24,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // À changer à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=X.Y sur la balise <script src="../engine.js?v=X.Y"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION='1.8';
+var ENGINE_VERSION='1.9';
 
 function startApp(CONFIG){
 
@@ -861,7 +861,11 @@ function exHTML(ex,day){
     +'<div class="extip">'+ex.tip+'</div>'
     +'<div class="exbadges">'+catB+isoB+extraBadgeHTML(ex)+doneB+'</div>'
     +'</div>'
-    +'<div class="exck" style="background:'+(done?CONFIG.weightColors.fresh:'transparent')+';border-color:'+(done?CONFIG.weightColors.fresh:CONFIG.exckBorderColor)+';color:'+(done?CONFIG.exckDoneColor:'transparent')+'">✓</div>'
+    // align-self:center : centre la coche sur toute la hauteur de la rangée
+    // (sinon collée en haut quand le nom/tip/badges prennent plusieurs
+    // lignes) — comportement identique pour les 3, donc ici plutôt que
+    // dupliqué dans le CSS de chaque personne.
+    +'<div class="exck" style="align-self:center;background:'+(done?CONFIG.weightColors.fresh:'transparent')+';border-color:'+(done?CONFIG.weightColors.fresh:CONFIG.exckBorderColor)+';color:'+(done?CONFIG.exckDoneColor:'transparent')+'">✓</div>'
     +'</div>'+wRow+'</div>';
 }
 
