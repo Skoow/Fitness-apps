@@ -24,7 +24,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // À changer à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=X.Y sur la balise <script src="../engine.js?v=X.Y"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION='1.5';
+var ENGINE_VERSION='1.6';
 
 function startApp(CONFIG){
 
@@ -404,7 +404,7 @@ function buildHTML(){
       +'</div>'
       +bodyHTML2;
   }
-  var shellContent='<div class="hdr" id="hdr-band" style="padding-right:64px;'+(isData?'cursor:pointer':'')+'">'
+  var shellContent='<div class="hdr" id="hdr-band" style="padding-right:64px;position:relative;'+(isData?'cursor:pointer':'')+'">'
     +'<div class="hdr-top">'
     +'<div class="ttl">'+CONFIG.title+' <span style="color:'+CONFIG.genderSymbolColor+'">'+CONFIG.genderSymbol+'</span></div>'
     +programBadgeHTML()
@@ -413,17 +413,18 @@ function buildHTML(){
     +'<div><div class="dll">&#128197; '+CONFIG.deadlineLabel+'</div><div class="dld">'+CONFIG.deadlineDateText+'</div></div>'
     +'<div style="text-align:right">'+jleftHTML()+'</div>'
     +'</div>'
-    // Le numéro de version est en bas à droite du GRAND rectangle d'en-tête
-    // (titre + badge + deadline) — pas dans le petit encart deadline (dlbar)
-    // ci-dessus. Il reste dans le flux normal (donc toujours correctement
-    // placé en bas, quelle que soit la hauteur réelle du rectangle chez
-    // cette personne — pas besoin de mesurer quoi que ce soit en JS). Le
-    // seul souci est que ce rectangle fait partie de #app-shell, qui se
-    // décale de -DRAWER_WIDTH à l'ouverture du tiroir : on annule ce
-    // décalage juste pour cet élément avec un translateX inverse, pour qu'il
-    // ne suive pas ce glissement horizontal (les transforms imbriqués
-    // s'additionnent).
-    +'<div style="text-align:right;font-size:9px;font-weight:700;color:'+CONFIG.noSideIconColor+';margin-top:6px;transform:translateX('+(S.menuOpen?DRAWER_WIDTH:0)+'px)">v'+ENGINE_VERSION+'</div>'
+    // Le numéro de version est ANCRÉ (position:absolute) au coin bas-droit
+    // du GRAND rectangle d'en-tête lui-même (#hdr-band, passé en
+    // position:relative ci-dessus) — pas ajouté comme une ligne en plus
+    // après le petit encart deadline (ça le faisait paraître "sous" ce
+    // dernier au lieu d'être au ras du bord bas du grand rectangle). Aligné
+    // à droite comme le bouton ☰ (right:16px, à comparer à son right:14px),
+    // mais collé en bas au lieu d'en haut. Comme #hdr-band fait partie de
+    // #app-shell qui se décale de -DRAWER_WIDTH à l'ouverture du tiroir, on
+    // annule ce décalage juste pour cet élément avec un translateX inverse
+    // (les transforms imbriqués s'additionnent), pour qu'il ne suive pas ce
+    // glissement horizontal.
+    +'<div style="position:absolute;right:16px;bottom:10px;font-size:9px;font-weight:700;color:'+CONFIG.noSideIconColor+';transform:translateX('+(S.menuOpen?DRAWER_WIDTH:0)+'px)">v'+ENGINE_VERSION+'</div>'
     +'</div>'
     +(isData?'<div style="text-align:center;padding:10px 14px 0;font-size:11px;color:'+CONFIG.noSideIconColor+'">&#8249; Touche ton prénom pour revenir en arrière</div>':'')
     +mainContent;
