@@ -192,9 +192,6 @@ var CONFIG={
   },
   defaultReps:'4×15 reps',
   cardioRepsText:'',
-  // Seul Anthony suggère un incrément fixe de +2,5 kg (Mikael/Myriam
-  // proposent la valeur suivante de la liste) — logique propre à sa config.
-  computeNextWeight:function(w,opts){return w?(parseFloat(w)+2.5).toFixed(1):'';},
   // Seul Anthony a des exercices unilatéraux affichant ce badge.
   extraBadge:function(ex){return ex.isUni?'<span class="bdg bun">💪 Unilatéral</span>':'';},
   noWeightCategories:['cardio'],

@@ -12,7 +12,7 @@
 // Listes de poids partagées par les 3 programmes (mêmes machines/haltères de
 // salle). Si une personne avait un jour un équipement différent, sa config
 // pourrait fournir CONFIG.weightOptions pour remplacer ces valeurs.
-var WEIGHT_OPTIONS_DB=['—','6','8','10','12','14','16','18','20','22','24','26','28','30','32','34','36','38','40','42','44','46','48','50'];
+var WEIGHT_OPTIONS_DB=['—','2','4','6','8','10','12','14','16','18','20','22','24','26','28','30','32','34','36','38','40','42','44','46','48','50'];
 var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','39','41','45','50','52','54','59','64','66','68','73','77','79','82','86','91','93','100','107','113'];
 
 function startApp(CONFIG){
