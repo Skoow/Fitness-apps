@@ -174,6 +174,21 @@ function bindEvents(){
     });
     sel.addEventListener('click',function(e){e.stopPropagation();});
   });
+  var btnExport=document.getElementById('btn-export');
+  if(btnExport)btnExport.addEventListener('click',exportData);
+  var btnImport=document.getElementById('btn-import');
+  var fileInput=document.getElementById('import-file');
+  if(btnImport&&fileInput){
+    btnImport.addEventListener('click',function(){fileInput.click();});
+    fileInput.addEventListener('change',function(){
+      var file=fileInput.files[0];
+      if(!file)return;
+      var reader=new FileReader();
+      reader.onload=function(){importData(reader.result);};
+      reader.readAsText(file);
+      fileInput.value='';
+    });
+  }
 }
 
 // Une fois la deadline dépassée (pour les 3), on affiche un décompte de
@@ -227,7 +242,52 @@ function buildHTML(){
     +'<button class="mbtn" id="btn-today" style="'+todayBtnStyle+'">&#128205; AUJOURD’HUI</button>'
     +'<button class="mbtn" id="btn-week" style="'+weekBtnStyle+'">&#128198; SEMAINE</button>'
     +'</div>'
-    +'<div class="days">'+daysHTML+'</div>';
+    +'<div class="days">'+daysHTML+'</div>'
+    +exportImportHTML();
+}
+
+// Sauvegarde/restauration des poids (localStorage uniquement, rien n'est
+// envoyé nulle part). Sert aussi à récupérer les données d'une ancienne
+// version de l'app (même format : {app, weights, weightDates}).
+function exportImportHTML(){
+  var c=CONFIG.noSideIconColor;
+  var btnStyle='font-size:11px;font-weight:700;color:'+c+';background:transparent;border:1px solid '+c+'50;border-radius:8px;padding:7px 12px;display:flex;align-items:center;gap:5px';
+  return '<div style="padding:18px 14px 10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">'
+    +'<button id="btn-export" style="'+btnStyle+'">&#11015;&#65039; Exporter mes données</button>'
+    +'<button id="btn-import" style="'+btnStyle+'">&#11014;&#65039; Importer mes données</button>'
+    +'<input type="file" id="import-file" accept="application/json" style="display:none">'
+    +'</div>';
+}
+
+function exportData(){
+  var data={app:CONFIG.personId,exportedAt:getParisDate(),weights:S.weights,weightDates:S.weightDates};
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download=CONFIG.personId+'-export.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Si le fichier importé a une date connue pour un exercice, elle est gardée
+// telle quelle. Sinon (ex : une ancienne version qui n'enregistrait pas les
+// dates) on prend la date du jour de l'import, uniquement comme filet de
+// sécurité pour ce qu'on n'a jamais su — jamais pour écraser une vraie date.
+function importData(jsonText){
+  var data;
+  try{data=JSON.parse(jsonText);}catch(e){alert('Fichier invalide.');return;}
+  if(!data||typeof data.weights!=='object'){alert('Fichier invalide.');return;}
+  if(!confirm('Importer ce fichier remplacera tes poids actuels par ceux du fichier. Continuer ?'))return;
+  var today=getParisDate();
+  var importedDates=data.weightDates||{};
+  for(var id in data.weights){
+    S.weights[id]=data.weights[id];
+    S.weightDates[id]=importedDates[id]||today;
+  }
+  sv(K('weights'),S.weights);
+  sv(K('weightDates'),S.weightDates);
+  render();
+  alert('Import terminé.');
 }
 
 function dayHTML(day,idx,forceOpen){
