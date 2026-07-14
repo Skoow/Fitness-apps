@@ -15,6 +15,13 @@
 var WEIGHT_OPTIONS_DB=['—','2','4','6','8','10','12','14','16','18','20','22','24','26','28','30','32','34','36','38','40','42','44','46','48','50'];
 var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','39','41','45','50','52','54','59','64','66','68','73','77','79','82','86','91','93','100','107','113'];
 
+// Numéro de version affiché en bas de l'app (petit repère visuel pour
+// vérifier qu'une mise à jour est bien arrivée sur le téléphone). À
+// incrémenter à chaque fois que ce fichier change, EN MÊME TEMPS que le
+// ?v=N sur la balise <script src="../engine.js?v=N"> des 3 index.html
+// (sinon le service worker peut continuer à servir l'ancienne version).
+var ENGINE_VERSION=2;
+
 function startApp(CONFIG){
 
 var WOPT=CONFIG.weightOptions||{db:WEIGHT_OPTIONS_DB,mc:WEIGHT_OPTIONS_MC};
@@ -108,14 +115,25 @@ function countsTowardProgress(ex){
   return true;
 }
 
-// ── STATS HEBDOMADAIRES ──────────────────────────────────────────────────────
-// À chaque changement de semaine détecté (voir plus bas), on prend une photo
-// de la semaine qui vient de se terminer : % d'assiduité (cases cochées /
-// total attendu sur TOUT le programme, tous les jours confondus) et % des
-// exercices dont le poids a augmenté depuis la photo précédente. Le score
-// affiché est la moyenne des deux (50/50). Une semaine où l'app n'a jamais
-// été ouverte n'a simplement aucune photo — le graphique la saute.
-function computeWeekCompletion(doneSnapshot){
+// ── STATS QUOTIDIENNES ───────────────────────────────────────────────────────
+// Une photo est prise une fois par jour (pas une fois par semaine) :
+// - Assiduité : cases cochées / total attendu sur TOUT le programme, en
+//   direct (la semaine en cours, telle qu'elle avance jour après jour).
+//   Plafonnée à 100 % — avec des cases à cocher oui/non, il n'existe pas de
+//   notion de "faire plus" qu'un exercice complet.
+// - Charge : % des exercices dont le poids a augmenté par rapport à il y a
+//   ~2 semaines, comparé à un objectif de base (WEIGHT_PROGRESS_TARGET_PCT).
+//   PEUT dépasser 100 % si tu progresses sur plus d'exercices que cet
+//   objectif — c'est volontaire : un gros effort sur les charges peut
+//   compenser une semaine où tu es moins venu.
+// Le score affiché est la moyenne des deux (50/50), donc lui aussi peut
+// dépasser 100 %. Rien n'est jamais recalculé pour le passé ni supprimé :
+// tout l'historique depuis le début est gardé.
+var WEIGHT_PROGRESS_LOOKBACK_DAYS=14;
+var WEIGHT_PROGRESS_TARGET_PCT=25;
+var WEIGHT_SCORE_CAP=200;
+
+function computeLiveCompletion(){
   var tot=0,dc=0;
   for(var i=0;i<CONFIG.days.length;i++){
     var day=CONFIG.days[i];
@@ -123,31 +141,40 @@ function computeWeekCompletion(doneSnapshot){
       var ex=day.exercises[j];
       if(!countsTowardProgress(ex))continue;
       tot++;
-      if(doneSnapshot[ex.id])dc++;
+      if(S.done[ex.id])dc++;
     }
   }
   return tot>0?Math.round(dc/tot*100):0;
 }
-function computeWeightScore(history,weights){
-  if(!history.length)return 50; // pas de semaine précédente à comparer -> neutre
-  var prevWeights=history[history.length-1].weights||{};
+function computeWeightScore(history){
+  var targetDate=new Date(getParisNow().getTime()-WEIGHT_PROGRESS_LOOKBACK_DAYS*86400000);
+  var ref=null;
+  for(var i=history.length-1;i>=0;i--){
+    if(new Date(history[i].date+'T12:00:00')<=targetDate){ref=history[i];break;}
+  }
+  if(!ref)return 50; // pas encore assez de recul -> neutre
+  var refWeights=ref.weights||{};
   var up=0,total=0;
-  for(var id in weights){
-    var cur=weights[id],prev=prevWeights[id];
+  for(var id in S.weights){
+    var cur=S.weights[id],prev=refWeights[id];
     if(!cur||cur==='—'||prev===undefined)continue;
     total++;
     if(parseFloat(cur)>parseFloat(prev))up++;
   }
-  return total>0?Math.round(up/total*100):50;
+  if(total===0)return 50;
+  var pct=up/total*100;
+  return Math.min(WEIGHT_SCORE_CAP,Math.round(pct/WEIGHT_PROGRESS_TARGET_PCT*100));
 }
-function recordWeeklySnapshot(doneSnapshot){
+function recordDailySnapshotIfNeeded(){
+  var today=getParisDate();
+  if(ld(K('statsDay'),null)===today)return;
   var history=ld(K('statsHistory'),[]);
-  var completion=computeWeekCompletion(doneSnapshot);
-  var weightScore=computeWeightScore(history,S.weights);
+  var completion=computeLiveCompletion();
+  var weightScore=computeWeightScore(history);
   var score=Math.round((completion+weightScore)/2);
-  history.push({date:getParisDate(),completion:completion,weightScore:weightScore,score:score,weights:S.weights});
-  if(history.length>52)history=history.slice(history.length-52);
-  sv(K('statsHistory'),history);
+  history.push({date:today,completion:completion,weightScore:weightScore,score:score,weights:S.weights});
+  sv(K('statsHistory'),history); // pas de troncature : historique complet gardé
+  sv(K('statsDay'),today);
 }
 
 // ── STATE ──────────────────────────────────────────────────────────────────
@@ -171,9 +198,9 @@ var S={
 };
 S.openDays[TI]=true;
 if(storedWK!==WK){
-  if(storedWK!==null)recordWeeklySnapshot(storedDone);
   sv(K('doneWeek'),WK);sv(K('done'),{});
 }
+recordDailySnapshotIfNeeded();
 
 // ── RENDER ─────────────────────────────────────────────────────────────────
 function render(){
@@ -181,6 +208,8 @@ function render(){
   if(!el)return;
   el.innerHTML=buildHTML();
   bindEvents();
+  var scrollEl=document.getElementById('stats-scroll');
+  if(scrollEl)scrollEl.scrollLeft=scrollEl.scrollWidth;
 }
 
 function bindEvents(){
@@ -228,8 +257,6 @@ function bindEvents(){
   if(btnMenu)btnMenu.addEventListener('click',function(){S.menuOpen=!S.menuOpen;render();});
   var btnMenuData=document.getElementById('btn-menu-data');
   if(btnMenuData)btnMenuData.addEventListener('click',function(){S.mode='data';S.menuOpen=false;render();});
-  var btnMenuHome=document.getElementById('btn-menu-home');
-  if(btnMenuHome)btnMenuHome.addEventListener('click',function(){S.mode='today';S.openDays={};S.openDays[TI]=true;S.menuOpen=false;render();});
   var hdrBand=document.getElementById('hdr-band');
   if(hdrBand)hdrBand.addEventListener('click',function(){
     if(S.mode==='data'){S.mode='today';S.openDays={};S.openDays[TI]=true;render();}
@@ -312,16 +339,19 @@ function buildHTML(){
     +'<div><div class="dll">&#128197; '+CONFIG.deadlineLabel+'</div><div class="dld">'+CONFIG.deadlineDateText+'</div></div>'
     +'<div style="text-align:right">'+jleftHTML()+'</div>'
     +'</div></div>'
-    +(isData?'<div style="text-align:center;padding:10px 14px 0;font-size:11px;color:'+CONFIG.noSideIconColor+'">&#8249; Touche le bandeau du haut pour revenir</div>':'')
-    +mainContent;
+    +(isData?'<div style="text-align:center;padding:10px 14px 0;font-size:11px;color:'+CONFIG.noSideIconColor+'">&#8249; Touche ton prénom pour revenir</div>':'')
+    +mainContent
+    +'<div style="text-align:right;padding:6px 14px 90px;font-size:9px;color:'+CONFIG.noSideIconColor+'">v'+ENGINE_VERSION+'</div>';
 }
 
 // Menu ☰ en haut à droite : fixe (ne bouge pas au scroll), toujours au-dessus
 // du reste. Le header réserve 64px à droite (voir "padding-right" ci-dessus)
 // pour que le badge programme et le J–N ne passent jamais dessous.
-// Premier niveau : une petite liste déroulante (Accueil / Importer-Exporter).
-// Cliquer sur "Importer / Exporter" ouvre une page dédiée en plein écran
+// Premier niveau : une petite liste déroulante (une seule ligne pour
+// l'instant). Cliquer dessus ouvre une page dédiée en plein écran
 // (S.mode='data') — jamais l'action directement depuis le petit menu.
+// Pas de bouton "Accueil" : sur la page data, toucher son prénom en haut
+// revient au programme (voir bindEvents sur #hdr-band).
 function menuButtonHTML(){
   return '<button id="btn-menu" style="position:fixed;top:14px;right:14px;z-index:60;background:transparent;border:none;font-size:30px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px 8px">&#9776;</button>';
 }
@@ -329,10 +359,9 @@ function menuButtonHTML(){
 function menuPanelHTML(){
   if(!S.menuOpen)return'';
   var c=CONFIG.exerciseNameColor;
-  var itemStyle='width:100%;text-align:left;background:transparent;border:none;padding:12px 10px;font-size:13px;font-weight:600;color:'+c+';cursor:pointer;display:flex;align-items:center;gap:8px';
+  var itemStyle='width:100%;text-align:left;background:transparent;border:none;padding:12px 10px;font-size:13px;font-weight:600;color:'+c+';cursor:pointer';
   return '<div class="dc" style="position:fixed;top:66px;right:14px;z-index:59;padding:6px;width:230px;max-width:calc(100vw - 28px);box-shadow:0 10px 30px rgba(0,0,0,.35)">'
-    +'<button id="btn-menu-home" style="'+itemStyle+'">&#127968; Accueil</button>'
-    +'<button id="btn-menu-data" style="'+itemStyle+'">&#128190; Importer / Exporter mes données</button>'
+    +'<button id="btn-menu-data" style="'+itemStyle+'">Importer / Exporter</button>'
     +'</div>';
 }
 
@@ -356,17 +385,20 @@ function dataPageHTML(){
     +'</div>';
 }
 
-// Page "STAT" : graphique des 8 dernières semaines ayant une photo (voir
-// recordWeeklySnapshot). Une semaine où l'app n'a pas été ouverte n'a pas de
-// photo et n'apparaît donc simplement pas — la ligne relie les points réels.
+// Page "STAT" : tout l'historique depuis le début (une photo par jour, voir
+// recordDailySnapshotIfNeeded), sous forme de graphique qui défile
+// horizontalement — ouvert par défaut sur les données les plus récentes,
+// on glisse vers la gauche pour remonter dans l'historique. Rien n'est
+// jamais coupé : le score peut dépasser 100 % (voir computeWeightScore).
 function statsPageHTML(){
-  var history=ld(K('statsHistory'),[]).slice(-8);
+  var history=ld(K('statsHistory'),[]);
   var c=CONFIG.noSideIconColor;
   return '<div class="days" style="padding-top:14px">'
     +'<div class="dc" style="padding:18px">'
-    +'<div style="font-size:11px;font-weight:800;letter-spacing:1px;color:'+c+';margin-bottom:14px">&#128200; TA PROGRESSION (8 DERNIÈRES SEMAINES)</div>'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1px;color:'+c+';margin-bottom:6px">&#128200; TA PROGRESSION</div>'
+    +'<div style="font-size:10px;color:'+c+';margin-bottom:12px">Glisse pour remonter dans l’historique &#8226; pointillé = 100&#37;</div>'
     +statsChartSVG(history)
-    +'<div style="font-size:10.5px;color:'+c+';margin-top:14px;line-height:1.5">Score = moyenne entre l’assiduité (séances cochées sur tout le programme) et la progression des charges (% d’exercices dont le poids a augmenté depuis la semaine d’avant). Une nouvelle photo est prise chaque semaine.</div>'
+    +'<div style="font-size:10.5px;color:'+c+';margin-top:14px;line-height:1.5">Score = moyenne entre l’assiduité (cases cochées sur tout le programme, en direct — plafonnée à 100&#37;) et la progression des charges (comparée à il y a 2 semaines par rapport à un objectif de base — peut dépasser 100&#37; si tu progresses plus vite que prévu). Une photo est prise chaque jour, pour toujours.</div>'
     +'</div>'
     +'</div>';
 }
@@ -379,29 +411,42 @@ function shortDateFR(iso){
 function statsChartSVG(history){
   var c=CONFIG.noSideIconColor;
   if(history.length===0){
-    return '<div style="text-align:center;padding:24px 10px;color:'+c+';font-size:12px">Pas encore de données — reviens dans une semaine ou deux, une photo est prise à chaque changement de semaine.</div>';
+    return '<div style="text-align:center;padding:24px 10px;color:'+c+';font-size:12px">Pas encore de données — reviens demain, une photo est prise chaque jour.</div>';
   }
   var ac='#a855f7';
-  var w=320,h=180,padL=26,padR=10,padT=22,padB=26;
-  var innerW=w-padL-padR,innerH=h-padT-padB;
   var n=history.length;
-  var stepX=n>1?innerW/(n-1):0;
-  function xAt(i){return padL+(n>1?i*stepX:innerW/2);}
-  function yAt(score){return padT+innerH-(score/100*innerH);}
-  var pts=[];
-  for(var i=0;i<n;i++)pts.push(xAt(i)+','+yAt(history[i].score));
+  var stepX=16,axisW=26,padR=16,padT=10,padB=26,h=170;
+  var innerH=h-padT-padB;
+  var innerW=Math.max(1,n-1)*stepX;
+  var svgW=innerW+padR+8;
+  var maxScore=100;
+  for(var i=0;i<n;i++){if(history[i].score>maxScore)maxScore=history[i].score;}
+  var yMax=Math.max(100,Math.ceil((maxScore+10)/25)*25);
+  function xAt(i){return 8+i*stepX;}
+  function yAt(score){return padT+innerH-(score/yMax*innerH);}
+  var pts=[];for(var i=0;i<n;i++)pts.push(xAt(i)+','+yAt(history[i].score));
   var pointsStr=pts.join(' ');
   var areaStr=pointsStr+' '+xAt(n-1)+','+(padT+innerH)+' '+xAt(0)+','+(padT+innerH);
-  var gridlines=[0,25,50,75,100].map(function(v){
-    return '<line x1="'+padL+'" y1="'+yAt(v)+'" x2="'+(w-padR)+'" y2="'+yAt(v)+'" stroke="'+c+'" stroke-opacity=".15" stroke-width="1"/>'
-      +'<text x="2" y="'+(yAt(v)+3)+'" font-size="8" fill="'+c+'">'+v+'</text>';
+  var gridVals=[];for(var v=0;v<=yMax;v+=25)gridVals.push(v);
+  var gridlines=gridVals.map(function(v){
+    var is100=v===100;
+    return '<line x1="0" y1="'+yAt(v)+'" x2="'+svgW+'" y2="'+yAt(v)+'" stroke="'+(is100?ac:c)+'" stroke-opacity="'+(is100?'.5':'.15')+'" stroke-width="1"'+(is100?' stroke-dasharray="4,3"':'')+'/>';
   }).join('');
+  var labelEvery=Math.max(1,Math.ceil(n/25));
   var marks=history.map(function(hpt,i){
-    return '<circle cx="'+xAt(i)+'" cy="'+yAt(hpt.score)+'" r="3.5" fill="'+ac+'"/>'
-      +'<text x="'+xAt(i)+'" y="'+(yAt(hpt.score)-9)+'" font-size="9" font-weight="700" fill="'+ac+'" text-anchor="middle">'+hpt.score+'</text>'
-      +'<text x="'+xAt(i)+'" y="'+(padT+innerH+16)+'" font-size="8" fill="'+c+'" text-anchor="middle">'+shortDateFR(hpt.date)+'</text>';
+    var showLabel=(i%labelEvery===0)||i===n-1;
+    return '<circle cx="'+xAt(i)+'" cy="'+yAt(hpt.score)+'" r="3" fill="'+ac+'"/>'
+      +(showLabel?('<text x="'+xAt(i)+'" y="'+(yAt(hpt.score)-8)+'" font-size="8" font-weight="700" fill="'+ac+'" text-anchor="middle">'+hpt.score+'</text>'
+        +'<text x="'+xAt(i)+'" y="'+(padT+innerH+16)+'" font-size="7.5" fill="'+c+'" text-anchor="middle">'+shortDateFR(hpt.date)+'</text>'):'');
   }).join('');
-  return '<svg viewBox="0 0 '+w+' '+h+'" style="width:100%;height:auto;display:block;overflow:visible">'
+  var axisLabels=gridVals.map(function(v){
+    var is100=v===100;
+    return '<div style="position:absolute;left:0;top:'+(yAt(v)-6)+'px;font-size:8px;color:'+(is100?ac:c)+';font-weight:'+(is100?'700':'400')+'">'+v+'</div>';
+  }).join('');
+  return '<div style="display:flex;align-items:stretch;gap:2px">'
+    +'<div style="width:'+axisW+'px;flex-shrink:0;position:relative;height:'+h+'px">'+axisLabels+'</div>'
+    +'<div id="stats-scroll" style="overflow-x:auto;-webkit-overflow-scrolling:touch;flex:1">'
+    +'<svg width="'+svgW+'" height="'+h+'" viewBox="0 0 '+svgW+' '+h+'" style="display:block">'
     +'<defs><linearGradient id="statsGrad" x1="0" y1="0" x2="0" y2="1">'
     +'<stop offset="0%" stop-color="'+ac+'" stop-opacity=".35"/>'
     +'<stop offset="100%" stop-color="'+ac+'" stop-opacity="0"/>'
@@ -410,7 +455,9 @@ function statsChartSVG(history){
     +(n>1?'<polygon points="'+areaStr+'" fill="url(#statsGrad)"/>':'')
     +(n>1?'<polyline points="'+pointsStr+'" fill="none" stroke="'+ac+'" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>':'')
     +marks
-    +'</svg>';
+    +'</svg>'
+    +'</div>'
+    +'</div>';
 }
 
 // Chaque poids exporté a toujours une date : la vraie si on la connaît,
@@ -593,8 +640,9 @@ function exHTML(ex,day){
 }
 
 // Revérifie périodiquement tout ce qui dépend de la date/heure (jour affiché,
-// décompte de deadline, reset hebdomadaire des cases) pour que l'app se mette
-// à jour toute seule si le téléphone reste ouvert dessus sans rechargement.
+// décompte de deadline, reset hebdomadaire des cases, photo stat du jour)
+// pour que l'app se mette à jour toute seule si le téléphone reste ouvert
+// dessus sans rechargement.
 setInterval(function(){
   var changed=false;
   var newTI=computeDayIndex(getWeekday());
@@ -602,7 +650,8 @@ setInterval(function(){
   var newJLEFT_RAW=Math.floor((DL-getParisNow())/86400000);
   if(newJLEFT_RAW!==JLEFT_RAW){JLEFT_RAW=newJLEFT_RAW;JLEFT=Math.max(0,JLEFT_RAW);changed=true;}
   var nwk=getWK();
-  if(ld(K('doneWeek'),null)!==nwk){recordWeeklySnapshot(S.done);S.done={};sv(K('doneWeek'),nwk);sv(K('done'),{});changed=true;}
+  if(ld(K('doneWeek'),null)!==nwk){S.done={};sv(K('doneWeek'),nwk);sv(K('done'),{});changed=true;}
+  recordDailySnapshotIfNeeded();
   if(changed)render();
 },300000);
 
