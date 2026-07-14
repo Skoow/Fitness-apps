@@ -1,10 +1,16 @@
 // Service worker partagé par les 3 apps (Anthony/Mikael/Myriam), enregistré
 // depuis engine.js avec le scope du dossier parent (../) pour couvrir les
-// 3 sous-dossiers. Stratégie "stale-while-revalidate" : sert la version en
-// cache immédiatement si elle existe (fonctionne hors-ligne), et la met à
-// jour en arrière-plan pour la prochaine visite. Le cache-busting existant
-// (?v=1, ?v=2...) sur engine.js continue de fonctionner normalement car
-// chaque version a une URL différente.
+// 3 sous-dossiers.
+//
+// Deux stratégies selon le type de requête :
+// - Pages HTML (navigation, ex : ouvrir l'app) : réseau en premier, cache en
+//   secours seulement si hors-ligne. Comme index.html contient le programme
+//   (exercices, thème) et n'a pas de cache-busting comme engine.js, on veut
+//   toujours la dernière version dès qu'il y a du réseau.
+// - Tout le reste (engine.js, manifest.json, icônes) : cache en premier avec
+//   mise à jour en arrière-plan ("stale-while-revalidate") — plus rapide,
+//   et engine.js a de toute façon son propre ?v=1/?v=2 pour forcer le
+//   rechargement quand il change.
 var CACHE_NAME='fitness-cache-v1';
 
 self.addEventListener('install',function(event){
@@ -21,6 +27,23 @@ self.addEventListener('activate',function(event){
 
 self.addEventListener('fetch',function(event){
   if(event.request.method!=='GET')return;
+
+  var isPage=event.request.mode==='navigate'||(event.request.headers.get('accept')||'').indexOf('text/html')!==-1;
+
+  if(isPage){
+    event.respondWith(
+      fetch(event.request).then(function(response){
+        if(response&&response.ok){
+          caches.open(CACHE_NAME).then(function(cache){cache.put(event.request,response.clone());});
+        }
+        return response;
+      }).catch(function(){
+        return caches.open(CACHE_NAME).then(function(cache){return cache.match(event.request);});
+      })
+    );
+    return;
+  }
+
   event.respondWith(
     caches.open(CACHE_NAME).then(function(cache){
       return cache.match(event.request).then(function(cached){
