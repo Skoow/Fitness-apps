@@ -3,8 +3,8 @@
 // Tout ce qui est écrit ICI est le comportement par défaut partagé par les 3.
 // Une personne dont le programme a un besoin réel (et un seul) peut le
 // redéfinir depuis SON PROPRE index.html via un des "hooks" du CONFIG
-// (resolveDayIndex, computeNextWeight, renderWeightRow, extraBadge) —
-// le moteur ne connaît alors rien du cas particulier, il délègue simplement.
+// (resolveDayIndex, renderWeightRow, extraBadge) — le moteur ne connaît
+// alors rien du cas particulier, il délègue simplement.
 //
 // Chaque index.html fournit un objet CONFIG (voir les 3 dossiers) puis appelle
 // startApp(CONFIG).
@@ -108,28 +108,20 @@ function countsTowardProgress(ex){
   return true;
 }
 
-// Suggestion de progression : par défaut on propose la valeur suivante dans
-// la liste de poids. Une personne peut fournir CONFIG.computeNextWeight pour
-// un autre calcul (ex : +2,5 kg fixe).
-function defaultComputeNextWeight(w,opts){
-  var idx=opts.indexOf(w);
-  return (idx>0&&idx<opts.length-1)?opts[idx+1]:'';
-}
-function computeNextWeight(w,opts){
-  return (CONFIG.computeNextWeight||defaultComputeNextWeight)(w,opts);
-}
-
 // ── STATE ──────────────────────────────────────────────────────────────────
 var TI=computeDayIndex(getWeekday());
 var DL=new Date(CONFIG.deadline+'T12:00:00');
-var JLEFT=Math.max(0,Math.floor((DL-getParisNow())/86400000));
+// JLEFT_RAW garde le signe (négatif une fois la deadline passée) pour pouvoir
+// afficher un décompte de retard ; JLEFT (jamais négatif) sert à l'affichage
+// normal "J–N jours restants".
+var JLEFT_RAW=Math.floor((DL-getParisNow())/86400000);
+var JLEFT=Math.max(0,JLEFT_RAW);
 var WK=getWK();
 var S={
   mode:'today',
   openDays:{},
   weights:ld(K('weights'),{}),
   weightDates:ld(K('weightDates'),{}),
-  hist:ld(K('hist'),{}),
   done:ld(K('doneWeek'),null)===WK?ld(K('done'),{}):{},
 };
 S.openDays[TI]=true;
@@ -178,12 +170,6 @@ function bindEvents(){
         S.weightDates[id]=getParisDate();
         sv(K('weightDates'),S.weightDates);
       }
-      var hist=S.hist[id]||[];
-      var last=hist.length>0?hist[hist.length-1]:null;
-      if(last&&last.weight===val){hist[hist.length-1].completedCount=(last.completedCount||1)+1;}
-      else{hist.push({weight:val,completedCount:1});if(hist.length>20)hist.shift();}
-      S.hist[id]=hist;
-      sv(K('hist'),S.hist);
       render();
     });
     sel.addEventListener('click',function(e){e.stopPropagation();});
@@ -191,9 +177,9 @@ function bindEvents(){
 }
 
 function jleftHTML(){
-  if(CONFIG.deadlineZero&&JLEFT===0){
+  if(CONFIG.deadlineZero&&JLEFT_RAW<=0){
     var z=CONFIG.deadlineZero;
-    return '<div class="dlc" style="color:'+z.color+';font-size:'+z.size+';line-height:1.1">'+z.icon+' '+z.title+'</div><div class="dls" style="color:'+z.color+';font-weight:700">'+z.sub+'</div>';
+    return '<div class="dlc" style="color:'+z.color+'">J+'+(-JLEFT_RAW)+'</div><div class="dls" style="color:'+z.color+';font-weight:700">'+z.label+'</div>';
   }
   return '<div class="dlc" style="color:'+(JLEFT<14?CONFIG.jleftUrgentColor:CONFIG.jleftNormalColor)+'">J–'+JLEFT+'</div><div class="dls">jours restants</div>';
 }
@@ -323,22 +309,19 @@ function blkHTML(block,day){
 // Rendu d'un contrôle de poids (une charge). Exposé aux hooks de config
 // (voir renderWeightRow) pour qu'une personne puisse composer plusieurs
 // contrôles (ex : un par côté) sans dupliquer cette logique.
+// La couleur (vert/orange/rouge selon l'ancienneté, cf. getWCol) est le seul
+// rappel de progression : pas de suggestion de poids chiffrée.
 function weightCtrl(key,ec,sideLabel,isDB){
   var w=S.weights[key]||'';
-  var hist=S.hist[key]||[];
-  var last=hist.length>0?hist[hist.length-1]:null;
   var opts=isDB?WOPT.db:WOPT.mc;
   var hasW=!!(w&&w!=='—');
   var wc=hasW?getWCol(key):CONFIG.weightColors.none;
-  var newW=computeNextWeight(w,opts);
-  var showSugg=hasW&&newW&&last&&last.completedCount>=3&&last.weight===w;
   var selOpts=opts.map(function(o){return '<option value="'+o+'"'+(o===(w||'—')?' selected':'')+'>'+(o==='—'?'Sélectionner kg':o+' kg')+'</option>';}).join('');
   return '<div class="wrow">'
     +(sideLabel?'<span class="wside" style="color:'+ec+'">'+sideLabel+'</span>':'<span style="font-size:11px;color:'+CONFIG.noSideIconColor+'">&#9878;</span>')
     +'<select class="wsel" data-id="'+key+'" style="color:'+(hasW?wc:CONFIG.noSideIconColor)+';border-color:'+(hasW?wc+'60':'#2a2a30')+'">'+selOpts+'</select>'
     +(hasW?'<span class="wval" style="color:'+wc+';background:'+wc+'18;border-color:'+wc+'40">'+w+' kg</span>':'')
-    +'</div>'
-    +(showSugg?'<div class="sugg">&#128200; '+(sideLabel?sideLabel+' : ':'')+'Tu tiens '+w+'kg depuis 3 fois &mdash; essaie <strong>'+newW+' kg</strong></div>':'');
+    +'</div>';
 }
 
 // Par défaut : un seul contrôle de poids par exercice. Une personne dont

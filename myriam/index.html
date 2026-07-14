@@ -296,7 +296,10 @@ var CONFIG={
   deadline:'2026-08-13',
   deadlineLabel:'DÉBUT DU PROGRAMME',
   deadlineDateText:'14 Juin 2026',
-  deadlineZero:{icon:'❌',title:'CHANGER',sub:'LE PROGRAMME',color:'#e91e8c',size:'1rem'},
+  // Une fois la date de révision dépassée, affiche un décompte de retard
+  // (J+1, J+2...) au lieu de rester bloqué à "J–0", jusqu'à ce que le
+  // programme soit mis à jour (nouvelle valeur de `deadline` plus loin).
+  deadlineZero:{color:'#e91e8c',label:'CHANGER LE PROGRAMME'},
   jleftUrgentColor:'#e91e8c',
   jleftNormalColor:'#a855f7',
   restDay:{
