@@ -24,7 +24,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // À changer à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=X.Y sur la balise <script src="../engine.js?v=X.Y"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION='1.1';
+var ENGINE_VERSION='1.2';
 
 function startApp(CONFIG){
 
@@ -274,8 +274,25 @@ function render(){
   if(!el)return;
   el.innerHTML=buildHTML();
   bindEvents();
+  positionVersionBadge();
   var scrollEl=document.getElementById('stats-scroll');
   if(scrollEl)scrollEl.scrollLeft=scrollEl.scrollWidth;
+}
+
+// Le numéro de version doit rester à un endroit fixe de l'écran (voir
+// versionBadgeHTML) — jamais suivre le décalage horizontal du tiroir (voir
+// #app-shell dans buildHTML). Sa position verticale, elle, doit correspondre
+// au bas du rectangle d'en-tête (#hdr-band), dont la hauteur varie d'une
+// personne à l'autre (badge programme présent ou non, etc.) — on la mesure
+// donc à chaque rendu plutôt que de deviner une valeur fixe. translateX
+// étant purement horizontal, cette mesure reste juste même si le tiroir est
+// ouvert au moment du calcul.
+function positionVersionBadge(){
+  var hdr=document.getElementById('hdr-band');
+  var badge=document.getElementById('version-badge');
+  if(!hdr||!badge)return;
+  var r=hdr.getBoundingClientRect();
+  badge.style.top=(r.bottom-20)+'px';
 }
 
 function bindEvents(){
@@ -411,18 +428,20 @@ function buildHTML(){
     +'</div>'
     +'<div class="dlbar">'
     +'<div><div class="dll">&#128197; '+CONFIG.deadlineLabel+'</div><div class="dld">'+CONFIG.deadlineDateText+'</div></div>'
-    +'<div style="text-align:right">'+jleftHTML()
-      +'<div style="font-size:9px;font-weight:700;color:'+CONFIG.noSideIconColor+';margin-top:2px">v'+ENGINE_VERSION+'</div>'
-    +'</div>'
+    +'<div style="text-align:right">'+jleftHTML()+'</div>'
     +'</div></div>'
-    +(isData?'<div style="text-align:center;padding:10px 14px 0;font-size:11px;color:'+CONFIG.noSideIconColor+'">&#8249; Touche ton prénom pour revenir</div>':'')
+    +(isData?'<div style="text-align:center;padding:10px 14px 0;font-size:11px;color:'+CONFIG.noSideIconColor+'">&#8249; Touche ton prénom pour revenir en arrière</div>':'')
     +mainContent;
   // Effet "tiroir" : tout le contenu (header + corps) est dans #app-shell et
   // se décale vers la gauche à l'ouverture du menu, comme sur une appli
   // mobile native — le panneau (voir drawerHTML) glisse alors depuis le bord
   // droit dans l'espace libéré. Le wrapper overflow-x:hidden évite qu'un
   // scroll horizontal apparaisse pendant le décalage.
+  // Le numéro de version (versionBadgeHTML) est rendu à côté, PAS à
+  // l'intérieur de #app-shell : il doit rester à un endroit fixe de l'écran,
+  // jamais suivre ce décalage horizontal (voir positionVersionBadge).
   return menuButtonHTML()
+    +versionBadgeHTML()
     +drawerHTML()
     +(S.menuOpen?'<div id="menu-overlay" style="position:fixed;inset:0;z-index:59;background:transparent"></div>':'')
     +'<div style="overflow-x:hidden">'
@@ -446,12 +465,23 @@ var DRAWER_WIDTH=250;
 // la barre système et devient impossible à toucher.
 // Le header réserve 64px à droite (voir "padding-right" dans buildHTML) pour
 // que le badge programme et le J–N ne passent jamais dessous.
-// Le numéro de version n'est plus ici : il est affiché en bas à droite du
-// rectangle d'en-tête (titre/programme/deadline), sous le compte à rebours
-// J–N — voir shellContent dans buildHTML. Ce bouton ne montre que le logo.
+// Ce bouton ne montre que le logo — le numéro de version est un élément
+// séparé (voir versionBadgeHTML), positionné indépendamment.
 function menuButtonHTML(){
   var icon=S.menuOpen?'&#10005;':'&#9776;';
   return '<button id="btn-menu" style="position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:61;background:transparent;border:none;font-size:30px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px 8px">'+icon+'</button>';
+}
+
+// Numéro de version : visuellement en bas à droite du rectangle d'en-tête
+// (sous le compte à rebours J–N), mais c'est un élément fixe INDÉPENDANT du
+// contenu qui se décale à l'ouverture du tiroir (#app-shell dans
+// buildHTML) — il ne doit jamais glisser vers la gauche avec le reste,
+// seulement rester à sa place, quitte à être recouvert par le tiroir une
+// fois ouvert. Le "top" exact est calculé après coup (voir
+// positionVersionBadge) car la hauteur du rectangle d'en-tête varie d'une
+// personne à l'autre ; la valeur ici n'est qu'un repli avant ce calcul.
+function versionBadgeHTML(){
+  return '<div id="version-badge" style="position:fixed;top:120px;right:16px;z-index:58;font-size:9px;font-weight:700;color:'+CONFIG.noSideIconColor+';pointer-events:none">v'+ENGINE_VERSION+'</div>';
 }
 
 // Tiroir latéral (droite) façon appli mobile : toujours dans le DOM (pour
@@ -481,7 +511,14 @@ function dataPageHTML(){
       +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:20px">&#11014;&#65039;</span><span style="font-size:12px;font-weight:800;letter-spacing:1px;color:'+c+'">IMPORTER MES DONNÉES</span></div>'
       +'<div style="font-size:11px;color:'+c+';margin-bottom:12px;line-height:1.4">Restaure une sauvegarde, ou récupère tes données depuis une ancienne version de l’app.</div>'
       +'<button class="mbtn" id="btn-import" style="'+actionBtn+'">Choisir un fichier</button>'
-      +'<input type="file" id="import-file" accept="application/json" style="display:none">'
+      // "accept" trop strict (juste "application/json") peut faire que Safari
+      // iOS affiche le fichier dans l'explorateur mais le grise (impossible à
+      // sélectionner) si le fichier exporté n'est pas reconnu exactement avec
+      // ce type MIME — on élargit avec l'extension ".json" en plus, bien plus
+      // fiable côté iOS. "display:none" est aussi remplacé par une technique
+      // "invisible mais toujours cliquable" (opacity:0 + taille 1px), plus
+      // sûre pour déclencher le sélecteur natif sur certains iOS.
+      +'<input type="file" id="import-file" accept=".json,application/json" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden">'
     +'</div>'
     +'<div class="dc" style="padding:18px">'
       +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:20px">&#11015;&#65039;</span><span style="font-size:12px;font-weight:800;letter-spacing:1px;color:'+c+'">EXPORTER MES DONNÉES</span></div>'
