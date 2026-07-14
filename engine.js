@@ -24,7 +24,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // À changer à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=X.Y sur la balise <script src="../engine.js?v=X.Y"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION='1.3';
+var ENGINE_VERSION='1.4';
 
 function startApp(CONFIG){
 
@@ -488,14 +488,17 @@ function dataPageHTML(){
       +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:20px">&#11014;&#65039;</span><span style="font-size:12px;font-weight:800;letter-spacing:1px;color:'+c+'">IMPORTER MES DONNÉES</span></div>'
       +'<div style="font-size:11px;color:'+c+';margin-bottom:12px;line-height:1.4">Restaure une sauvegarde, ou récupère tes données depuis une ancienne version de l’app.</div>'
       +'<button class="mbtn" id="btn-import" style="'+actionBtn+'">Choisir un fichier</button>'
-      // "accept" trop strict (juste "application/json") peut faire que Safari
-      // iOS affiche le fichier dans l'explorateur mais le grise (impossible à
-      // sélectionner) si le fichier exporté n'est pas reconnu exactement avec
-      // ce type MIME — on élargit avec l'extension ".json" en plus, bien plus
-      // fiable côté iOS. "display:none" est aussi remplacé par une technique
-      // "invisible mais toujours cliquable" (opacity:0 + taille 1px), plus
-      // sûre pour déclencher le sélecteur natif sur certains iOS.
-      +'<input type="file" id="import-file" accept=".json,application/json" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden">'
+      // Pas de filtre "accept" : sur iOS, le sélecteur de fichiers grise (rend
+      // impossible à sélectionner) tout fichier qui ne correspond pas
+      // exactement au type attendu — un export JSON peut ne pas être reconnu
+      // pile comme "application/json" selon comment il a été enregistré, et
+      // ça bloquait tout. On accepte donc n'importe quel fichier ici, et
+      // importData() valide déjà le contenu (JSON.parse + alerte si invalide)
+      // — plus robuste que de filtrer côté sélecteur. "display:none" est
+      // remplacé par une technique "invisible mais toujours cliquable"
+      // (opacity:0 + taille 1px), plus sûre pour déclencher le sélecteur
+      // natif sur certains iOS.
+      +'<input type="file" id="import-file" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden">'
     +'</div>'
     +'<div class="dc" style="padding:18px">'
       +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:20px">&#11015;&#65039;</span><span style="font-size:12px;font-weight:800;letter-spacing:1px;color:'+c+'">EXPORTER MES DONNÉES</span></div>'
@@ -633,15 +636,35 @@ function statsChartSVG(history){
 // Chaque poids exporté a toujours une date : la vraie si on la connaît,
 // sinon celle du jour de l'export — jamais laissée vide. L'export ne
 // change rien à l'affichage (pas de rechargement, on reste sur la page).
+// En PWA installée sur iPhone (mode "standalone", sans barre d'adresse), un
+// lien <a download> vers un blob: ne déclenche pas toujours un vrai
+// téléchargement — Safari peut tenter de naviguer directement vers l'URL
+// blob (rien ne se passe visiblement, ou l'app a l'air de planter). On
+// utilise donc en priorité le partage natif (Web Share API avec fichier,
+// supporté depuis iOS 15) qui ouvre la feuille de partage standard
+// (Fichiers, AirDrop, Messages...) — bien plus fiable pour "sortir" un
+// fichier d'une PWA. Le lien <a download> classique reste en repli pour les
+// navigateurs qui ne supportent pas le partage de fichiers (desktop...).
 function exportData(){
   var today=getParisDate();
   var dates={};
   for(var id in S.weights){dates[id]=S.weightDates[id]||today;}
   var data={app:CONFIG.personId,exportedAt:today,weights:S.weights,weightDates:dates};
-  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var filename=CONFIG.personId+'-export.json';
+  var json=JSON.stringify(data,null,2);
+  if(navigator.share&&navigator.canShare&&typeof File!=='undefined'){
+    try{
+      var file=new File([json],filename,{type:'application/json'});
+      if(navigator.canShare({files:[file]})){
+        navigator.share({files:[file],title:filename}).catch(function(){});
+        return;
+      }
+    }catch(e){}
+  }
+  var blob=new Blob([json],{type:'application/json'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
-  a.href=url;a.download=CONFIG.personId+'-export.json';
+  a.href=url;a.download=filename;
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
