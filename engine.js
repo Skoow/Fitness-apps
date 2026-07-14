@@ -177,8 +177,12 @@ function bindEvents(){
   });
   var btnMenu=document.getElementById('btn-menu');
   if(btnMenu)btnMenu.addEventListener('click',function(){S.menuOpen=!S.menuOpen;render();});
-  var btnMenuClose=document.getElementById('btn-menu-close');
-  if(btnMenuClose)btnMenuClose.addEventListener('click',function(){S.menuOpen=false;render();});
+  var btnMenuData=document.getElementById('btn-menu-data');
+  if(btnMenuData)btnMenuData.addEventListener('click',function(){S.mode='data';S.menuOpen=false;render();});
+  var hdrBand=document.getElementById('hdr-band');
+  if(hdrBand)hdrBand.addEventListener('click',function(){
+    if(S.mode==='data'){S.mode='today';S.openDays={};S.openDays[TI]=true;render();}
+  });
   var btnExport=document.getElementById('btn-export');
   if(btnExport)btnExport.addEventListener('click',exportData);
   var btnImport=document.getElementById('btn-import');
@@ -218,67 +222,84 @@ function programBadgeHTML(){
 }
 
 function buildHTML(){
-  var isRest=TI<0;
-  var td=isRest?(CONFIG.restDay.fallbackDay?CONFIG.days[0]:null):CONFIG.days[TI];
-  var daysHTML;
-  if(S.mode==='today'){
-    if(isRest){
-      daysHTML=CONFIG.restDay.html+(CONFIG.restDay.showNextDayPreview?dayHTML(CONFIG.days[0],0,false):'');
-    }else{
-      daysHTML=dayHTML(td,TI,true);
-    }
+  var isData=S.mode==='data';
+  var mainContent;
+  if(isData){
+    mainContent=dataPageHTML();
   }else{
-    daysHTML=CONFIG.days.map(function(d,i){return dayHTML(d,i,false);}).join('');
+    var isRest=TI<0;
+    var td=isRest?(CONFIG.restDay.fallbackDay?CONFIG.days[0]:null):CONFIG.days[TI];
+    var daysHTML;
+    if(S.mode==='today'){
+      if(isRest){
+        daysHTML=CONFIG.restDay.html+(CONFIG.restDay.showNextDayPreview?dayHTML(CONFIG.days[0],0,false):'');
+      }else{
+        daysHTML=dayHTML(td,TI,true);
+      }
+    }else{
+      daysHTML=CONFIG.days.map(function(d,i){return dayHTML(d,i,false);}).join('');
+    }
+    var todayBtnStyle=S.mode==='today'
+      ?(td?('background:'+td.color+'18;border-color:'+td.color+';color:'+td.color):'background:rgba(107,107,120,.2);border-color:#6b6b78;color:#6b6b78')
+      :'';
+    var weekBtnStyle=S.mode==='week'?('background:'+CONFIG.accentColor+'26;border-color:'+CONFIG.accentColor+';color:'+CONFIG.accentColor):'';
+    mainContent='<div class="mtog">'
+      +'<button class="mbtn" id="btn-today" style="'+todayBtnStyle+'">&#128205; AUJOURD’HUI</button>'
+      +'<button class="mbtn" id="btn-week" style="'+weekBtnStyle+'">&#128198; SEMAINE</button>'
+      +'</div>'
+      +'<div class="days">'+daysHTML+'</div>';
   }
-  var todayBtnStyle=S.mode==='today'
-    ?(td?('background:'+td.color+'18;border-color:'+td.color+';color:'+td.color):'background:rgba(107,107,120,.2);border-color:#6b6b78;color:#6b6b78')
-    :'';
-  var weekBtnStyle=S.mode==='week'?('background:'+CONFIG.accentColor+'26;border-color:'+CONFIG.accentColor+';color:'+CONFIG.accentColor):'';
   return menuButtonHTML()+menuPanelHTML()
-    +'<div class="hdr">'
+    +'<div class="hdr" id="hdr-band" style="'+(isData?'cursor:pointer':'')+'">'
     +'<div class="hdr-top">'
     +'<div class="ttl">'+CONFIG.title+' <span style="color:'+CONFIG.genderSymbolColor+'">'+CONFIG.genderSymbol+'</span></div>'
     +programBadgeHTML()
     +'</div>'
-    +'<div class="dlbar">'
-    +'<div><div class="dll">&#128197; '+CONFIG.deadlineLabel+'</div><div class="dld">'+CONFIG.deadlineDateText+'</div></div>'
-    +'<div style="text-align:right">'+jleftHTML()+'</div>'
-    +'</div></div>'
-    +'<div class="mtog">'
-    +'<button class="mbtn" id="btn-today" style="'+todayBtnStyle+'">&#128205; AUJOURD’HUI</button>'
-    +'<button class="mbtn" id="btn-week" style="'+weekBtnStyle+'">&#128198; SEMAINE</button>'
+    +(isData?'':'<div class="dlbar">'
+      +'<div><div class="dll">&#128197; '+CONFIG.deadlineLabel+'</div><div class="dld">'+CONFIG.deadlineDateText+'</div></div>'
+      +'<div style="text-align:right">'+jleftHTML()+'</div>'
+      +'</div>')
     +'</div>'
-    +'<div class="days">'+daysHTML+'</div>';
+    +mainContent;
 }
 
-// Menu ☰ en haut à droite (fixe, au-dessus de tout) : sauvegarde/restauration
-// des poids, en localStorage uniquement, rien n'est envoyé nulle part. Sert
-// aussi à récupérer les données d'une ancienne version de l'app (même
-// format exporté : {app, weights, weightDates}).
+// Menu ☰ en haut à droite (fixe, au-dessus de tout, sur toutes les pages).
+// Premier niveau : une petite liste déroulante (pour l'instant une seule
+// ligne). Cliquer dessus ouvre une page dédiée en plein écran (S.mode='data')
+// — le bandeau du haut reste affiché et sert de bouton retour (voir
+// bindEvents : cliquer dessus en mode 'data' revient à l'accueil).
 function menuButtonHTML(){
   return '<button id="btn-menu" style="position:fixed;top:16px;right:14px;z-index:60;background:transparent;border:none;font-size:22px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px">&#9776;</button>';
 }
 
 function menuPanelHTML(){
   if(!S.menuOpen)return'';
+  return '<div class="dc" style="position:fixed;top:56px;right:14px;z-index:59;padding:6px;width:230px;max-width:calc(100vw - 28px);box-shadow:0 10px 30px rgba(0,0,0,.35)">'
+    +'<button id="btn-menu-data" style="width:100%;text-align:left;background:transparent;border:none;padding:12px 10px;font-size:13px;font-weight:600;color:'+CONFIG.exerciseNameColor+';cursor:pointer;display:flex;align-items:center;gap:8px">&#128190; Importer / Exporter mes données</button>'
+    +'</div>';
+}
+
+// Page dédiée (remplace la liste des jours) : import en haut, export en bas.
+function dataPageHTML(){
   var c=CONFIG.noSideIconColor;
   var actionBtn='font-size:12px;font-weight:700;width:100%;justify-content:center';
-  return '<div class="dc" style="position:fixed;top:56px;right:14px;z-index:59;padding:16px;width:230px;max-width:calc(100vw - 28px);display:flex;flex-direction:column;gap:14px;box-shadow:0 10px 30px rgba(0,0,0,.35)">'
-    +'<button id="btn-menu-close" style="position:absolute;top:8px;right:10px;background:transparent;border:none;font-size:16px;color:'+c+';cursor:pointer">&#10005;</button>'
-    +'<div>'
-      +'<div style="font-size:10px;font-weight:800;letter-spacing:1px;color:'+c+';margin-bottom:8px">&#11014;&#65039; IMPORTER MES DONNÉES</div>'
+  return '<div style="text-align:center;padding:8px 14px 4px;font-size:11px;color:'+c+'">&#8249; Touche le bandeau du haut pour revenir</div>'
+    +'<div class="days" style="padding-top:6px">'
+    +'<div class="dc" style="padding:16px">'
+      +'<div style="font-size:11px;font-weight:800;letter-spacing:1px;color:'+c+';margin-bottom:10px">&#11014;&#65039; IMPORTER MES DONNÉES</div>'
       +'<button class="mbtn" id="btn-import" style="'+actionBtn+'">Choisir un fichier</button>'
       +'<input type="file" id="import-file" accept="application/json" style="display:none">'
     +'</div>'
-    +'<div style="border-top:1px solid '+c+'30;padding-top:14px">'
-      +'<div style="font-size:10px;font-weight:800;letter-spacing:1px;color:'+c+';margin-bottom:8px">&#11015;&#65039; EXPORTER MES DONNÉES</div>'
+    +'<div class="dc" style="padding:16px">'
+      +'<div style="font-size:11px;font-weight:800;letter-spacing:1px;color:'+c+';margin-bottom:10px">&#11015;&#65039; EXPORTER MES DONNÉES</div>'
       +'<button class="mbtn" id="btn-export" style="'+actionBtn+'">Télécharger</button>'
     +'</div>'
     +'</div>';
 }
 
 // Chaque poids exporté a toujours une date : la vraie si on la connaît,
-// sinon celle du jour de l'export — jamais laissée vide.
+// sinon celle du jour de l'export — jamais laissée vide. L'export ne
+// change rien à l'affichage (pas de rechargement, on reste sur la page).
 function exportData(){
   var today=getParisDate();
   var dates={};
@@ -290,8 +311,6 @@ function exportData(){
   a.href=url;a.download=CONFIG.personId+'-export.json';
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  S.menuOpen=false;
-  render();
 }
 
 // Même règle à l'import, en filet de sécurité : si le fichier a une date
@@ -311,9 +330,8 @@ function importData(jsonText){
   }
   sv(K('weights'),S.weights);
   sv(K('weightDates'),S.weightDates);
-  S.menuOpen=false;
-  render();
-  alert('Import terminé.');
+  alert('Import terminé, l\'app va se relancer.');
+  window.location.reload();
 }
 
 function dayHTML(day,idx,forceOpen){
