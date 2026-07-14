@@ -24,7 +24,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // À changer à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=X.Y sur la balise <script src="../engine.js?v=X.Y"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION='1.7';
+var ENGINE_VERSION='1.8';
 
 function startApp(CONFIG){
 
@@ -459,9 +459,15 @@ var DRAWER_WIDTH=250;
 // que le badge programme et le J–N ne passent jamais dessous.
 // Ce bouton ne montre que le logo — le numéro de version est affiché dans
 // le rectangle d'en-tête (voir shellContent dans buildHTML).
+// translateZ(0)/will-change força son propre calque de rendu : sur iOS
+// Safari, un élément "position:fixed" peut sinon légèrement se décaler
+// pendant le scroll (bug connu), surtout ici où render() recrée le bouton à
+// chaque rafraîchissement (chaque case cochée, toutes les 5 min...) — sans
+// ce calque dédié établi d'emblée, le tout premier scroll qui suit une
+// recréation peut le faire "sauter" avant de se stabiliser.
 function menuButtonHTML(){
   var icon=S.menuOpen?'&#10005;':'&#9776;';
-  return '<button id="btn-menu" style="position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:61;background:transparent;border:none;font-size:30px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px 8px">'+icon+'</button>';
+  return '<button id="btn-menu" style="position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:61;background:transparent;border:none;font-size:30px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px 8px;transform:translateZ(0);-webkit-transform:translateZ(0);will-change:transform">'+icon+'</button>';
 }
 
 // Tiroir latéral (droite) façon appli mobile : toujours dans le DOM (pour
