@@ -23,7 +23,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // ensemble à chaque changement de engine.js. Aucun risque de collision de
 // cache : les "2.x" n'ont jamais servi de jeton auparavant, et comme le
 // numéro augmente toujours, il est toujours neuf.
-var ENGINE_VERSION='2.2';
+var ENGINE_VERSION='2.3';
 
 function startApp(CONFIG){
 
@@ -956,8 +956,11 @@ function weightCtrl(key,ec,sideLabel,isDB){
   var hasW=!!(w&&w!=='—');
   var wc=hasW?getWCol(key):CONFIG.weightColors.none;
   var selOpts=opts.map(function(o){return '<option value="'+o+'"'+(o===(w||'—')?' selected':'')+'>'+(o==='—'?'Sélectionner kg':o+' kg')+'</option>';}).join('');
-  return '<div class="wrow">'
-    +(sideLabel?'<span class="wside" style="color:'+ec+'">'+sideLabel+'</span>':'<span style="font-size:11px;color:'+CONFIG.noSideIconColor+'">&#9878;</span>')
+  // Plus d'icône ⚖️ (retirée) ; le rectangle de poids est centré/symétrique
+  // (on annule le décalage de 88px à gauche du .wrow). Un éventuel libellé
+  // de côté (Bras/Jambe G/D chez Mikael) est conservé.
+  return '<div class="wrow" style="padding-left:12px;justify-content:center">'
+    +(sideLabel?'<span class="wside" style="color:'+ec+'">'+sideLabel+'</span>':'')
     +'<select class="wsel" data-id="'+key+'" style="color:'+(hasW?wc:CONFIG.noSideIconColor)+';border-color:'+(hasW?wc+'60':'#2a2a30')+'">'+selOpts+'</select>'
     +'</div>';
 }
@@ -997,7 +1000,7 @@ function exHTML(ex,day){
     +'<div class="extap" data-id="'+ex.id+'" style="background:'+(done?'rgba(46,204,113,.06)':'transparent')+'">'
     +'<div class="exicon" style="align-self:center;background:'+(done?'rgba(46,204,113,.1)':'#111113')+';border-color:'+(done?'rgba(46,204,113,.3)':'#252528')+'">'+mkIcon(ex.icon,done?CONFIG.weightColors.fresh:ec,52)+'</div>'
     +'<div class="excnt">'
-    +'<div class="exnm" style="color:'+(done?CONFIG.weightColors.fresh:CONFIG.exerciseNameColor)+'">'+ex.name+'</div>'
+    +'<div class="exnm" style="text-align:center;color:'+(done?CONFIG.weightColors.fresh:CONFIG.exerciseNameColor)+'">'+ex.name+'</div>'
     +repsChip
     +'<div class="extip">'+ex.tip+'</div>'
     +'<div class="exbadges">'+catB+isoB+extraBadgeHTML(ex)+'</div>'
