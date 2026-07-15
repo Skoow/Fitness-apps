@@ -438,17 +438,14 @@ function buildHTML(){
   return shellContent;
 }
 
-// Numéro de version en pied de page, en BAS À DROITE, sans bordure : le
-// toucher ouvre la page Import/Export (S.mode='data', voir bindEvents). Il
-// remplace l'ancien bouton ☰ + tiroir. Zone cliquable volontairement
-// modérée (padding réduit) tout en restant confortable au doigt.
+// Numéro de version en pied de page, en BAS À DROITE, sans bordure ni texte
+// "Importer/Exporter" (on sait que le toucher ouvre cette page — voir
+// bindEvents, S.mode='data'). Juste le numéro, avec un padding qui garde une
+// zone au doigt confortable sans être trop grande.
 function versionFooterHTML(){
   var c=CONFIG.noSideIconColor;
   return '<div style="display:flex;justify-content:flex-end;padding:2px 14px 12px">'
-    +'<button id="btn-version" style="background:transparent;border:none;color:'+c+';cursor:pointer;padding:8px 8px;text-align:right;line-height:1.2">'
-      +'<div style="font-size:14px;font-weight:800">v'+ENGINE_VERSION+'</div>'
-      +'<div style="font-size:10px;font-weight:600;margin-top:2px">Importer / Exporter</div>'
-    +'</button>'
+    +'<button id="btn-version" style="background:transparent;border:none;color:'+c+';cursor:pointer;padding:10px 12px;text-align:right;font-size:15px;font-weight:800;line-height:1">v'+ENGINE_VERSION+'</button>'
     +'</div>';
 }
 
