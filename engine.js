@@ -24,7 +24,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // À changer à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=X.Y sur la balise <script src="../engine.js?v=X.Y"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION='1.15';
+var ENGINE_VERSION='1.16';
 
 function startApp(CONFIG){
 
@@ -933,9 +933,28 @@ window.addEventListener('DOMContentLoaded',function(){render();});
 
 // PWA hors-ligne : un seul service worker partagé (à la racine du dépôt)
 // pour les 3 apps, mis en cache "stale-while-revalidate".
+// MISE À JOUR AUTOMATIQUE : quand une nouvelle version du service worker
+// prend le contrôle (parce que sw.js a changé), l'événement
+// "controllerchange" se déclenche et on recharge la page UNE fois pour
+// appliquer le nouveau code sans manip de l'utilisateur. Le garde-fou
+// "refreshing" évite toute boucle de rechargement. Sans ça, une PWA
+// installée déjà ouverte gardait l'ancien JS chargé en mémoire tant qu'on
+// ne la fermait pas complètement à la main — c'était la cause du « ça ne se
+// met pas à jour » sur le téléphone.
 if('serviceWorker' in navigator){
+  var swRefreshing=false;
+  navigator.serviceWorker.addEventListener('controllerchange',function(){
+    if(swRefreshing)return;
+    swRefreshing=true;
+    window.location.reload();
+  });
   window.addEventListener('load',function(){
-    navigator.serviceWorker.register('../sw.js',{scope:'../'}).catch(function(){});
+    navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(function(reg){
+      // Vérifie tout de suite s'il existe une version plus récente de sw.js
+      // sur le serveur (au lieu d'attendre le contrôle périodique du
+      // navigateur, qui peut tarder sur une PWA installée).
+      reg.update();
+    }).catch(function(){});
   });
 }
 

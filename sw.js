@@ -11,7 +11,11 @@
 //   mise à jour en arrière-plan ("stale-while-revalidate") — plus rapide,
 //   et engine.js a de toute façon son propre ?v=1/?v=2 pour forcer le
 //   rechargement quand il change.
-var CACHE_NAME='fitness-cache-v1';
+// Nom du cache : à INCRÉMENTER pour purger d'un coup tout l'ancien contenu
+// mis en cache (index.html/engine.js périmés) — l'ancien cache est supprimé
+// dans l'événement "activate" ci-dessous. Utile quand une vieille version
+// reste collée sur un téléphone malgré le cache-busting ?v=X.Y.
+var CACHE_NAME='fitness-cache-v2';
 
 self.addEventListener('install',function(event){
   self.skipWaiting();
