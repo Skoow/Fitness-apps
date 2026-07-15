@@ -24,7 +24,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // À changer à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=X.Y sur la balise <script src="../engine.js?v=X.Y"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION='1.16';
+var ENGINE_VERSION='1.17';
 
 function startApp(CONFIG){
 
@@ -428,33 +428,30 @@ function buildHTML(){
     +'</div>'
     +(isData?'<div style="text-align:center;padding:10px 14px 0;font-size:11px;color:'+CONFIG.noSideIconColor+'">&#8249; Touche ton prénom pour revenir en arrière</div>':'')
     +mainContent;
-  // ARCHITECTURE (cause racine du bouton ☰ qui « défilait » enfin isolée) :
-  // le vrai piège, c'est qu'un même élément servait à LA FOIS de conteneur
-  // de défilement (overflow:auto) ET portait un transform (translateX du
-  // tiroir). Or un transform sur un conteneur de défilement casse le
-  // position:sticky de ses enfants ET fait qu'un position:fixed à côté est
-  // recalculé par rapport à ce conteneur, pas au vrai viewport — c'est ce
-  // qui décalait le bouton pendant le scroll, quel que soit le navigateur.
-  // On sépare donc proprement les deux rôles :
-  //   #app-scroll : conteneur de défilement, position:fixed;inset:0,
-  //     overflow-y:auto, AUCUN transform. Comme html/body sont verrouillés
-  //     (overflow:hidden), c'est lui seul qui défile — pas le document —
-  //     donc la barre du navigateur ne s'anime pas et le viewport reste
-  //     stable.
+  // ARCHITECTURE (spécifique iOS — vérifié : sur iPhone, un position:fixed
+  // voisin d'un AUTRE élément qui défile bouge quand même pendant le
+  // défilement ; bug WebKit connu avec plusieurs fixed dont un scroll).
+  // Solution : UN SEUL élément fixe, #app-frame (position:fixed;inset:0,
+  // overflow:hidden), qui ne défile jamais et sert de cadre stable. TOUT le
+  // reste est en position:absolute À L'INTÉRIEUR de ce cadre :
+  //   #app-scroll : position:absolute;inset:0, overflow-y:auto — c'est LUI
+  //     seul qui défile, à l'intérieur du cadre.
   //   #app-shell : enfant de #app-scroll, porte le translateX du tiroir.
-  //     Le transform est ici, PAS sur le conteneur qui défile.
-  //   #btn-menu (menuButtonHTML) : position:fixed, SIBLING de #app-scroll,
-  //     enfant direct de #app (aucun ancêtre transformé) — donc réellement
-  //     fixé au viewport, qui ne bouge jamais. Il ne peut structurellement
-  //     plus suivre le défilement.
+  //   #btn-menu : position:ABSOLUTE (pas fixed) par rapport à #app-frame,
+  //     qui ne défile pas → le bouton est ancré au cadre, jamais au
+  //     défilement. C'est le point clé : absolute-dans-un-cadre-fixe est
+  //     fiable sur iOS là où fixed-voisin-d'un-scroll ne l'est pas.
+  //   #drawer / #menu-overlay : eux aussi en absolute dans le cadre.
   // z-index : bouton 61 > tiroir 60 > fond cliquable 59 > #app-scroll (auto).
-  return menuButtonHTML()
-    +drawerHTML()
-    +(S.menuOpen?'<div id="menu-overlay" style="position:fixed;inset:0;z-index:59;background:transparent"></div>':'')
-    +'<div id="app-scroll" style="position:fixed;inset:0;overflow-x:hidden;overflow-y:auto;padding-top:env(safe-area-inset-top,20px);padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))">'
+  return '<div id="app-frame" style="position:fixed;inset:0;overflow:hidden">'
+    +'<div id="app-scroll" style="position:absolute;inset:0;overflow-x:hidden;overflow-y:auto;padding-top:env(safe-area-inset-top,20px);padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))">'
     +'<div id="app-shell" style="transform:translateX('+(S.menuOpen?'-'+DRAWER_WIDTH+'px':'0')+');transition:transform .3s ease">'
     +shellContent
     +'</div>'
+    +'</div>'
+    +(S.menuOpen?'<div id="menu-overlay" style="position:absolute;inset:0;z-index:59;background:transparent"></div>':'')
+    +drawerHTML()
+    +menuButtonHTML()
     +'</div>';
 }
 
@@ -463,28 +460,23 @@ function buildHTML(){
 var DRAWER_WIDTH=250;
 
 // Bouton ☰ en haut à droite — il devient une croix une fois le tiroir
-// ouvert, pour refermer. C'est un simple position:fixed, enfant direct de
-// #app et SIBLING de #app-scroll (voir l'explication d'architecture complète
-// dans buildHTML) : aucun ancêtre transformé, et le document ne défile pas
-// (html/body en overflow:hidden, seul #app-scroll défile en interne), donc
-// le viewport auquel il est fixé ne bouge jamais → le bouton ne peut pas
-// suivre le défilement. Pas besoin de sticky, de translateZ ni de
-// contre-décalage : le bouton est en dehors du conteneur qui se décale.
-// top: aligné (au pixel près, à ~2px) avec le haut du rectangle orange
-// PROGRAMME dans l'en-tête = padding-top de #app-scroll (safe-area) + le
-// padding-top 28px de .hdr, moins le padding interne 6px du bouton
-// -> calc(22px + safe-area). env(safe-area-inset-top) est nécessaire ici
-// (le bouton est fixé au viewport, il doit éviter l'encoche lui-même).
-// translateZ(0) promeut le bouton sur son propre calque GPU — recommandé
-// contre le scintillement des position:fixed sur iOS ; sans effet de bord
-// puisque le bouton n'a pas de descendant positionné.
+// ouvert, pour refermer. position:ABSOLUTE (pas fixed) par rapport à
+// #app-frame, qui est un cadre position:fixed;inset:0 qui NE DÉFILE JAMAIS
+// (voir l'explication d'architecture complète dans buildHTML). Le bouton est
+// donc ancré à ce cadre stable, pas au défilement (qui se passe dans
+// #app-scroll, un autre élément) — c'est la seule façon fiable sur iOS.
+// top: aligné (à ~2px) avec le haut du rectangle orange PROGRAMME dans
+// l'en-tête = padding-top de #app-scroll (safe-area) + le padding-top 28px
+// de .hdr, moins le padding interne 6px du bouton -> calc(22px + safe-area).
+// env(safe-area-inset-top) est nécessaire ici : #app-frame couvre tout le
+// viewport (encoche comprise), le bouton doit éviter cette zone lui-même.
 // Le header réserve 64px à droite (voir "padding-right" dans buildHTML) pour
 // que le badge programme et le J–N ne passent jamais dessous.
 // Ce bouton ne montre que le logo — le numéro de version est affiché dans
 // le rectangle d'en-tête (voir shellContent dans buildHTML).
 function menuButtonHTML(){
   var icon=S.menuOpen?'&#10005;':'&#9776;';
-  return '<button id="btn-menu" style="position:fixed;top:calc(22px + env(safe-area-inset-top,0px));right:14px;z-index:61;background:transparent;border:none;font-size:30px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px 8px;transform:translateZ(0);-webkit-transform:translateZ(0)">'+icon+'</button>';
+  return '<button id="btn-menu" style="position:absolute;top:calc(22px + env(safe-area-inset-top,0px));right:14px;z-index:61;background:transparent;border:none;font-size:30px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px 8px">'+icon+'</button>';
 }
 
 // Tiroir latéral (droite) façon appli mobile : toujours dans le DOM (pour
@@ -497,7 +489,7 @@ function menuButtonHTML(){
 // plein écran (S.mode='data') — jamais l'action directement depuis le tiroir.
 function drawerHTML(){
   var open=S.menuOpen;
-  return '<div class="hdr" style="position:fixed;top:0;right:0;width:'+DRAWER_WIDTH+'px;max-width:78vw;height:100dvh;z-index:60;border:none;box-shadow:'+(open?'-14px 0 34px rgba(0,0,0,.35)':'none')+';transform:translateX('+(open?'0':'100%')+');transition:transform .3s ease;padding:calc(88px + env(safe-area-inset-top,0px)) 16px 16px;display:flex;flex-direction:column;gap:10px">'
+  return '<div class="hdr" style="position:absolute;top:0;right:0;bottom:0;width:'+DRAWER_WIDTH+'px;max-width:78vw;z-index:60;border:none;box-shadow:'+(open?'-14px 0 34px rgba(0,0,0,.35)':'none')+';transform:translateX('+(open?'0':'100%')+');transition:transform .3s ease;padding:calc(88px + env(safe-area-inset-top,0px)) 16px 16px;display:flex;flex-direction:column;gap:10px">'
     +'<button id="btn-menu-data" class="mbtn" style="flex:none;justify-content:flex-start;gap:10px;font-size:13.5px;padding:14px">'
     +'<span style="font-size:18px">&#128190;</span> Importer / Exporter'
     +'</button>'
