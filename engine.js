@@ -16,17 +16,14 @@ var WEIGHT_OPTIONS_DB=['—','2','4','6','8','10','12','14','16','18','20','22',
 var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','39','41','45','50','52','54','59','64','66','68','73','77','79','82','86','91','93','100','107','113'];
 
 // Numéro de version AFFICHÉ dans l'app (pied de page, sert aussi de bouton
-// Import/Export). C'est purement cosmétique : on le fixe librement à la
-// valeur qu'on veut montrer — ici 1.5, car depuis cette version il n'y a eu
-// que des petits ajustements, pas de gros changement.
-// ATTENTION : ce numéro affiché est INDÉPENDANT du jeton de cache "?v=..."
-// des balises <script src="../engine.js?v=..."> dans les 3 index.html. Ce
-// jeton-là, lui, doit être une valeur NEUVE et jamais réutilisée à chaque
-// modif de engine.js (sinon le navigateur ressert l'ancien fichier en
-// cache) — on utilise donc un compteur de build "b1, b2, b3..." qui n'a
-// rien à voir avec le numéro affiché (réutiliser "1.5" comme jeton
-// resservirait le vieux engine.js déjà mis en cache sous ?v=1.5).
-var ENGINE_VERSION='1.5';
+// Import/Export). Depuis la 2.0, on repart sur un numéro qui BOUGE à chaque
+// mise à jour (2.0, 2.1, 2.2...), et ce même numéro sert aussi de jeton de
+// cache "?v=..." sur les balises <script src="../engine.js?v=..."> des 3
+// index.html — les deux DOIVENT rester identiques et être incrémentés
+// ensemble à chaque changement de engine.js. Aucun risque de collision de
+// cache : les "2.x" n'ont jamais servi de jeton auparavant, et comme le
+// numéro augmente toujours, il est toujours neuf.
+var ENGINE_VERSION='2.0';
 
 function startApp(CONFIG){
 
@@ -620,7 +617,7 @@ function statsStatusLine(history){
   if(!ref)ref=history[0];
   var diff=last.score-ref.score;
   if(diff>=6)return {text:'&#128200; En progression',color:CONFIG.weightColors.fresh};
-  if(diff<=-6)return {text:'&#128201; En baisse — viens un peu plus souvent ou monte tes charges',color:CONFIG.weightColors.old};
+  if(diff<=-6)return {text:'&#128201; En baisse',color:CONFIG.weightColors.old};
   return {text:'&#8594; Stable',color:c};
 }
 
@@ -634,37 +631,32 @@ function statsPageHTML(){
   if(last){
     var status=statsStatusLine(history);
     var elapsed=daysSinceFirstEntry(history);
-    // 3 mois / 6 mois / 1 an ne s'affichent que quand il y a vraiment eu ce
-    // recul — sinon la moyenne serait identique à "depuis le début" et
-    // donnerait un faux sentiment de recul historique qui n'existe pas
-    // encore. Chaque nouvelle fenêtre s'ajoute donc progressivement au fil
-    // du temps.
-    var chips=[
-      {label:'moy. 7j',val:rollingAverage(history,7)},
-      {label:'moy. 30j',val:rollingAverage(history,30)}
-    ];
-    if(elapsed>=90)chips.push({label:'moy. 3 mois',val:rollingAverage(history,90)});
-    if(elapsed>=180)chips.push({label:'moy. 6 mois',val:rollingAverage(history,180)});
-    if(elapsed>=365)chips.push({label:'moy. 1 an',val:rollingAverage(history,365)});
-    // Le score affiché en grand est la moyenne des fenêtres actuellement
-    // visibles ci-dessous (2 au début, jusqu'à 5 une fois un an
-    // d'historique écoulé) plutôt que le score brut du jour seul — moins
-    // bruité d'un jour à l'autre, et directement cohérent avec le détail
-    // affiché juste en dessous.
-    var displayedScore=Math.round(chips.reduce(function(sum,ch){return sum+ch.val;},0)/chips.length);
-    bigScore='<div style="text-align:center;margin-bottom:2px"><span style="font-family:Impact,sans-serif;font-size:2.6rem;color:'+scoreColorFor(displayedScore)+'">'+displayedScore+'%</span></div>'
-      +'<div style="text-align:center;font-size:11.5px;font-weight:700;color:'+status.color+';margin-bottom:10px">'+status.text+'</div>'
-      +'<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:18px;margin-bottom:14px">'
-        +chips.map(function(ch){return '<div style="text-align:center"><div style="font-size:15px;font-weight:800;color:'+scoreColorFor(ch.val)+'">'+ch.val+'%</div><div style="font-size:9px;color:'+c+'">'+ch.label+'</div></div>';}).join('')
-      +'</div>';
+    var today=last.score;
+    // Le gros chiffre = la note du jour. En dessous, les moyennes glissantes
+    // — mais on n'affiche QUE celles qui DIFFÈRENT de la note du jour :
+    // quand il y a peu d'historique, 7j/30j valent la même chose que le jour,
+    // c'est répétitif et ça n'apporte rien. Chaque fenêtre longue (3/6/12
+    // mois) n'apparaît en plus qu'une fois ce recul réellement écoulé.
+    var windows=[{label:'moy. 7j',n:7,min:0},{label:'moy. 30j',n:30,min:0},
+      {label:'moy. 3 mois',n:90,min:90},{label:'moy. 6 mois',n:180,min:180},{label:'moy. 1 an',n:365,min:365}];
+    var chips=[];
+    windows.forEach(function(w){
+      if(elapsed<w.min)return;
+      var v=rollingAverage(history,w.n);
+      if(v!==today)chips.push({label:w.label,val:v}); // seulement si différent
+    });
+    bigScore='<div style="text-align:center"><span style="font-family:Impact,sans-serif;font-size:3.2rem;line-height:1;color:'+scoreColorFor(today)+'">'+today+'%</span></div>'
+      +'<div style="text-align:center;font-size:11.5px;font-weight:700;color:'+status.color+';margin-top:4px">'+status.text+'</div>'
+      +(chips.length?'<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:16px;margin-top:8px">'
+        +chips.map(function(ch){return '<div style="text-align:center"><div style="font-size:14px;font-weight:800;color:'+scoreColorFor(ch.val)+'">'+ch.val+'%</div><div style="font-size:9px;color:'+c+'">'+ch.label+'</div></div>';}).join('')
+      +'</div>':'');
   }
   return '<div class="days" style="padding-top:14px">'
-    +'<div class="dc" style="padding:18px">'
-    +'<div style="font-size:11px;font-weight:800;letter-spacing:1px;color:'+c+';margin-bottom:6px">&#128200; TA PROGRESSION</div>'
+    +'<div class="dc" style="padding:14px 14px 12px">'
     +bigScore
-    +'<div style="font-size:10px;color:'+c+';margin-bottom:12px">Glisse pour l’historique &#8226; <span style="color:'+CONFIG.weightColors.fresh+'">— vert</span> vise haut &#8226; <span style="color:'+CONFIG.weightColors.old+'">— rouge</span> plancher</div>'
+    +'<div style="height:10px"></div>'
     +statsChartSVG(history)
-    +'<div style="font-size:10px;color:'+c+';margin-top:14px;line-height:1.4">La note part de 100&#37; : chaque exo ou journée non fait la baisse un peu (proportionnellement). Monter tes charges ajoute un bonus qui peut rattraper une absence et dépasser 100&#37;. Vise entre les deux repères — au‑dessus du vert c’est très bien, sous le rouge il faut se reprendre.</div>'
+    +'<div style="font-size:9.5px;color:'+c+';text-align:center;margin-top:8px"><span style="color:'+CONFIG.weightColors.fresh+'">&#9473; vise haut</span> &#8226; <span style="color:'+CONFIG.weightColors.old+'">&#9473; plancher</span> &#8226; monter les charges = bonus</div>'
     +'</div>'
     // Carte "Mode vacances" : met le programme en pause (stats gelées +
     // compte à rebours gelé, deadline repoussée au retour, voir toggleVacation).
@@ -694,7 +686,7 @@ function statsChartSVG(history){
   }
   var ac='#a855f7';
   var n=history.length;
-  var stepX=16,axisW=26,padR=16,padT=10,padB=26,h=170;
+  var stepX=18,axisW=26,padR=16,padT=12,padB=28,h=330;
   var innerH=h-padT-padB;
   var innerW=Math.max(1,n-1)*stepX;
   var svgW=innerW+padR+8;
@@ -722,7 +714,9 @@ function statsChartSVG(history){
   var bandLines=''
     +'<line x1="0" y1="'+yAt(goodLevel)+'" x2="'+svgW+'" y2="'+yAt(goodLevel)+'" stroke="'+greenCol+'" stroke-opacity=".8" stroke-width="1.2" stroke-dasharray="5,3"/>'
     +'<line x1="0" y1="'+yAt(minLevel)+'" x2="'+svgW+'" y2="'+yAt(minLevel)+'" stroke="'+redCol+'" stroke-opacity=".8" stroke-width="1.2" stroke-dasharray="5,3"/>';
-  var labelEvery=Math.max(1,Math.ceil(n/25));
+  // Espace mini entre deux étiquettes (~34px) pour qu'elles ne se chevauchent
+  // pas : on saute des points selon la largeur d'un label rapportée à stepX.
+  var labelEvery=Math.max(1,Math.ceil(n/25),Math.ceil(34/stepX));
   var marks=history.map(function(hpt,i){
     var showLabel=(i%labelEvery===0)||i===n-1;
     return '<circle cx="'+xAt(i)+'" cy="'+yAt(hpt.score)+'" r="3" fill="'+ac+'"/>'
