@@ -24,7 +24,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // À changer à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=X.Y sur la balise <script src="../engine.js?v=X.Y"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION='1.10';
+var ENGINE_VERSION='1.11';
 
 function startApp(CONFIG){
 
@@ -547,6 +547,17 @@ function rollingAverage(history,n){
   return Math.round(sum/slice.length);
 }
 
+// Nombre de jours calendaires écoulés depuis la toute première photo — pas
+// juste le nombre d'entrées (l'app n'est pas forcément ouverte tous les
+// jours). Sert à savoir si une moyenne sur une longue fenêtre (6 mois, 1 an)
+// a vraiment du sens à afficher, ou si elle serait identique à une moyenne
+// plus courte faute de recul suffisant.
+function daysSinceFirstEntry(history){
+  if(history.length===0)return 0;
+  var first=new Date(history[0].date+'T12:00:00');
+  return Math.floor((getParisNow()-first)/86400000);
+}
+
 // Compare le score du jour à celui d'il y a ~7 jours pour une phrase courte
 // et colorée (verte/orange/grise) plutôt qu'un paragraphe.
 function statsStatusLine(history){
@@ -572,13 +583,20 @@ function statsPageHTML(){
   var bigScore='';
   if(last){
     var status=statsStatusLine(history);
-    var avg7=rollingAverage(history,7);
-    var avg30=rollingAverage(history,30);
+    var elapsed=daysSinceFirstEntry(history);
+    // 6 mois / 1 an ne s'affichent que quand il y a vraiment eu ce recul —
+    // sinon la moyenne serait identique à "depuis le début" et donnerait un
+    // faux sentiment de recul historique qui n'existe pas encore.
+    var chips=[
+      {label:'moy. 7j',val:rollingAverage(history,7)},
+      {label:'moy. 30j',val:rollingAverage(history,30)}
+    ];
+    if(elapsed>=180)chips.push({label:'moy. 6 mois',val:rollingAverage(history,180)});
+    if(elapsed>=365)chips.push({label:'moy. 1 an',val:rollingAverage(history,365)});
     bigScore='<div style="text-align:center;margin-bottom:2px"><span style="font-family:Impact,sans-serif;font-size:2.6rem;color:'+scoreColorFor(last.score)+'">'+last.score+'%</span></div>'
       +'<div style="text-align:center;font-size:11.5px;font-weight:700;color:'+status.color+';margin-bottom:10px">'+status.text+'</div>'
-      +'<div style="display:flex;justify-content:center;gap:18px;margin-bottom:14px">'
-        +'<div style="text-align:center"><div style="font-size:15px;font-weight:800;color:'+scoreColorFor(avg7)+'">'+avg7+'%</div><div style="font-size:9px;color:'+c+'">moy. 7j</div></div>'
-        +'<div style="text-align:center"><div style="font-size:15px;font-weight:800;color:'+scoreColorFor(avg30)+'">'+avg30+'%</div><div style="font-size:9px;color:'+c+'">moy. 30j</div></div>'
+      +'<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:18px;margin-bottom:14px">'
+        +chips.map(function(ch){return '<div style="text-align:center"><div style="font-size:15px;font-weight:800;color:'+scoreColorFor(ch.val)+'">'+ch.val+'%</div><div style="font-size:9px;color:'+c+'">'+ch.label+'</div></div>';}).join('')
       +'</div>';
   }
   return '<div class="days" style="padding-top:14px">'
