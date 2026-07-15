@@ -24,7 +24,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // À changer à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=X.Y sur la balise <script src="../engine.js?v=X.Y"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION='1.11';
+var ENGINE_VERSION='1.12';
 
 function startApp(CONFIG){
 
@@ -435,17 +435,22 @@ function buildHTML(){
   // scroll horizontal apparaisse pendant le décalage.
   // #app-shell est LE seul élément qui défile (position:fixed + overflow
   // interne), et html/body sont verrouillés (overflow:hidden, voir le CSS de
-  // chaque personne) : sur iOS Safari, un position:fixed cohabite mal avec
-  // un défilement natif du document entier (bug connu, le bouton ☰ pouvait
-  // se décaler pendant le scroll même avec translateZ(0)/will-change). En
-  // supprimant le défilement du document et en le confinant à ce conteneur
-  // dédié, le bouton (et le tiroir), qui restent SIBLINGS en dehors de ce
-  // conteneur, ne peuvent plus du tout être affectés par un scroll qui ne
-  // les concerne pas.
+  // chaque personne) : sur iOS, un position:fixed cohabite mal avec un
+  // défilement natif du document entier (bug connu). Note : -webkit-
+  // overflow-scrolling:touch (retiré ci-dessous) est lui-même une source
+  // connue de ce genre de bug — il forçait l'ancien mode de défilement
+  // "élastique" par calque séparé de WebKit, qui pouvait décaler les
+  // éléments position:fixed SIBLINGS pendant le défilement. Il est inutile
+  // sur iOS récent (le défilement fluide est natif par défaut dès iOS 13),
+  // donc on le retire plutôt que de risquer ce comportement.
+  // isolation:isolate sur le bouton et le tiroir leur donne leur propre
+  // contexte d'empilement, pour que le calque de compositing forcé par
+  // translateZ(0)/will-change (voir menuButtonHTML) reste stable et ne soit
+  // pas recalculé au gré du contenu qui défile en dessous.
   return menuButtonHTML()
     +drawerHTML()
     +(S.menuOpen?'<div id="menu-overlay" style="position:fixed;inset:0;z-index:59;background:transparent"></div>':'')
-    +'<div id="app-shell" style="position:fixed;inset:0;overflow:hidden auto;-webkit-overflow-scrolling:touch;padding-top:env(safe-area-inset-top,20px);padding-bottom:calc(28px + env(safe-area-inset-bottom,0px));transform:translateX('+(S.menuOpen?'-'+DRAWER_WIDTH+'px':'0')+');transition:transform .3s ease">'
+    +'<div id="app-shell" style="position:fixed;inset:0;overflow:hidden auto;padding-top:env(safe-area-inset-top,20px);padding-bottom:calc(28px + env(safe-area-inset-bottom,0px));transform:translateX('+(S.menuOpen?'-'+DRAWER_WIDTH+'px':'0')+');transition:transform .3s ease">'
     +shellContent
     +'</div>';
 }
@@ -474,7 +479,7 @@ var DRAWER_WIDTH=250;
 // recréation peut le faire "sauter" avant de se stabiliser.
 function menuButtonHTML(){
   var icon=S.menuOpen?'&#10005;':'&#9776;';
-  return '<button id="btn-menu" style="position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:61;background:transparent;border:none;font-size:30px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px 8px;transform:translateZ(0);-webkit-transform:translateZ(0);will-change:transform">'+icon+'</button>';
+  return '<button id="btn-menu" style="position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:61;background:transparent;border:none;font-size:30px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px 8px;transform:translateZ(0);-webkit-transform:translateZ(0);will-change:transform;isolation:isolate">'+icon+'</button>';
 }
 
 // Tiroir latéral (droite) façon appli mobile : toujours dans le DOM (pour
@@ -584,16 +589,25 @@ function statsPageHTML(){
   if(last){
     var status=statsStatusLine(history);
     var elapsed=daysSinceFirstEntry(history);
-    // 6 mois / 1 an ne s'affichent que quand il y a vraiment eu ce recul —
-    // sinon la moyenne serait identique à "depuis le début" et donnerait un
-    // faux sentiment de recul historique qui n'existe pas encore.
+    // 3 mois / 6 mois / 1 an ne s'affichent que quand il y a vraiment eu ce
+    // recul — sinon la moyenne serait identique à "depuis le début" et
+    // donnerait un faux sentiment de recul historique qui n'existe pas
+    // encore. Chaque nouvelle fenêtre s'ajoute donc progressivement au fil
+    // du temps.
     var chips=[
       {label:'moy. 7j',val:rollingAverage(history,7)},
       {label:'moy. 30j',val:rollingAverage(history,30)}
     ];
+    if(elapsed>=90)chips.push({label:'moy. 3 mois',val:rollingAverage(history,90)});
     if(elapsed>=180)chips.push({label:'moy. 6 mois',val:rollingAverage(history,180)});
     if(elapsed>=365)chips.push({label:'moy. 1 an',val:rollingAverage(history,365)});
-    bigScore='<div style="text-align:center;margin-bottom:2px"><span style="font-family:Impact,sans-serif;font-size:2.6rem;color:'+scoreColorFor(last.score)+'">'+last.score+'%</span></div>'
+    // Le score affiché en grand est la moyenne des fenêtres actuellement
+    // visibles ci-dessous (2 au début, jusqu'à 5 une fois un an
+    // d'historique écoulé) plutôt que le score brut du jour seul — moins
+    // bruité d'un jour à l'autre, et directement cohérent avec le détail
+    // affiché juste en dessous.
+    var displayedScore=Math.round(chips.reduce(function(sum,ch){return sum+ch.val;},0)/chips.length);
+    bigScore='<div style="text-align:center;margin-bottom:2px"><span style="font-family:Impact,sans-serif;font-size:2.6rem;color:'+scoreColorFor(displayedScore)+'">'+displayedScore+'%</span></div>'
       +'<div style="text-align:center;font-size:11.5px;font-weight:700;color:'+status.color+';margin-bottom:10px">'+status.text+'</div>'
       +'<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:18px;margin-bottom:14px">'
         +chips.map(function(ch){return '<div style="text-align:center"><div style="font-size:15px;font-weight:800;color:'+scoreColorFor(ch.val)+'">'+ch.val+'%</div><div style="font-size:9px;color:'+c+'">'+ch.label+'</div></div>';}).join('')
