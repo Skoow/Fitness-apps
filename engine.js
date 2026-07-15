@@ -24,7 +24,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // À changer à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=X.Y sur la balise <script src="../engine.js?v=X.Y"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION='1.14';
+var ENGINE_VERSION='1.15';
 
 function startApp(CONFIG){
 
@@ -428,39 +428,33 @@ function buildHTML(){
     +'</div>'
     +(isData?'<div style="text-align:center;padding:10px 14px 0;font-size:11px;color:'+CONFIG.noSideIconColor+'">&#8249; Touche ton prénom pour revenir en arrière</div>':'')
     +mainContent;
-  // Effet "tiroir" : tout le contenu (header + corps) est dans #app-shell et
-  // se décale vers la gauche à l'ouverture du menu, comme sur une appli
-  // mobile native — le panneau (voir drawerHTML) glisse alors depuis le bord
-  // droit dans l'espace libéré. Le wrapper overflow-x:hidden évite qu'un
-  // scroll horizontal apparaisse pendant le décalage.
-  // #app-shell est LE seul élément qui défile (position:fixed + overflow
-  // interne), et html/body sont verrouillés (overflow:hidden, voir le CSS de
-  // chaque personne) : sur iOS, un position:fixed cohabite mal avec un
-  // défilement natif du document entier (bug connu). Note : -webkit-
-  // overflow-scrolling:touch (retiré) est lui-même une source connue de ce
-  // genre de bug — il forçait l'ancien mode de défilement "élastique" par
-  // calque séparé de WebKit, qui pouvait décaler les éléments position:fixed
-  // SIBLINGS pendant le défilement. Il est inutile sur iOS récent (le
-  // défilement fluide est natif par défaut dès iOS 13), donc on le retire
-  // plutôt que de risquer ce comportement.
-  // Le bouton ☰ (voir menuButtonHTML) n'est PLUS en position:fixed en dehors
-  // de ce conteneur : il est maintenant le TOUT PREMIER élément À
-  // L'INTÉRIEUR de #app-shell, en position:sticky. Raison : position:fixed
-  // est positionné par rapport au "visual viewport", qui peut légèrement
-  // bouger pendant le scroll quand la barre du navigateur (adresse/onglets)
-  // s'anime — un comportement qui varie d'un navigateur iOS à l'autre
-  // (Safari/Chrome/Firefox partagent le même moteur WebKit mais pas
-  // forcément la même gestion de cette zone). position:sticky, lui, se
-  // calcule uniquement à partir du défilement de SON PROPRE conteneur
-  // (#app-shell, entièrement sous notre contrôle) — aucune ambiguïté
-  // possible, quel que soit le navigateur. z-index:1 sur #app-shell
-  // garantit que le tiroir (z-index:60) et le fond cliquable (z-index:59)
-  // s'affichent bien par-dessus le bouton sticky une fois le tiroir ouvert.
-  return drawerHTML()
+  // ARCHITECTURE (cause racine du bouton ☰ qui « défilait » enfin isolée) :
+  // le vrai piège, c'est qu'un même élément servait à LA FOIS de conteneur
+  // de défilement (overflow:auto) ET portait un transform (translateX du
+  // tiroir). Or un transform sur un conteneur de défilement casse le
+  // position:sticky de ses enfants ET fait qu'un position:fixed à côté est
+  // recalculé par rapport à ce conteneur, pas au vrai viewport — c'est ce
+  // qui décalait le bouton pendant le scroll, quel que soit le navigateur.
+  // On sépare donc proprement les deux rôles :
+  //   #app-scroll : conteneur de défilement, position:fixed;inset:0,
+  //     overflow-y:auto, AUCUN transform. Comme html/body sont verrouillés
+  //     (overflow:hidden), c'est lui seul qui défile — pas le document —
+  //     donc la barre du navigateur ne s'anime pas et le viewport reste
+  //     stable.
+  //   #app-shell : enfant de #app-scroll, porte le translateX du tiroir.
+  //     Le transform est ici, PAS sur le conteneur qui défile.
+  //   #btn-menu (menuButtonHTML) : position:fixed, SIBLING de #app-scroll,
+  //     enfant direct de #app (aucun ancêtre transformé) — donc réellement
+  //     fixé au viewport, qui ne bouge jamais. Il ne peut structurellement
+  //     plus suivre le défilement.
+  // z-index : bouton 61 > tiroir 60 > fond cliquable 59 > #app-scroll (auto).
+  return menuButtonHTML()
+    +drawerHTML()
     +(S.menuOpen?'<div id="menu-overlay" style="position:fixed;inset:0;z-index:59;background:transparent"></div>':'')
-    +'<div id="app-shell" style="position:fixed;inset:0;z-index:1;overflow:hidden auto;padding-top:env(safe-area-inset-top,20px);padding-bottom:calc(28px + env(safe-area-inset-bottom,0px));transform:translateX('+(S.menuOpen?'-'+DRAWER_WIDTH+'px':'0')+');transition:transform .3s ease">'
-    +menuButtonHTML()
+    +'<div id="app-scroll" style="position:fixed;inset:0;overflow-x:hidden;overflow-y:auto;padding-top:env(safe-area-inset-top,20px);padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))">'
+    +'<div id="app-shell" style="transform:translateX('+(S.menuOpen?'-'+DRAWER_WIDTH+'px':'0')+');transition:transform .3s ease">'
     +shellContent
+    +'</div>'
     +'</div>';
 }
 
@@ -469,39 +463,28 @@ function buildHTML(){
 var DRAWER_WIDTH=250;
 
 // Bouton ☰ en haut à droite — il devient une croix une fois le tiroir
-// ouvert, pour refermer. Il reste TOUJOURS visible en haut à droite pendant
-// le défilement grâce à position:sticky (voir l'explication complète dans
-// buildHTML, juste avant l'appel à cette fonction) : un bandeau "collé" en
-// haut de #app-shell, avec une VRAIE hauteur (BTN_ROW_H) — un wrapper à
-// hauteur 0 avec le bouton positionné en absolu dedans s'est avéré peu
-// fiable (le bouton "descendait" et continuait à défiler chez toi, signe
-// que le sticky ne s'appliquait pas correctement sur une boîte de hauteur
-// nulle). Un bandeau à hauteur réelle est la façon standard/éprouvée de
-// faire un élément "collant" — sa hauteur est ensuite annulée avec un
-// margin-bottom négatif du même montant pour ne pas repousser le header en
-// dessous.
-// Important : PAS de env(safe-area-inset-top) ici — #app-shell (son parent)
-// l'applique déjà via son propre padding-top, donc le bandeau sticky
-// (top:0) est déjà placé juste sous l'encoche par la mise en page normale.
-// En rajouter une deuxième fois ici doublait le décalage et poussait le
-// bouton bien plus bas que sa place d'origine — c'était le bug la dernière
-// fois.
-// Le décalage horizontal du tiroir (S.menuOpen) doit être annulé pour ce
-// bandeau : #app-shell (son parent scrollable) se décale de -DRAWER_WIDTH à
-// l'ouverture, et comme le bouton est DEDANS (nécessaire pour le
-// position:sticky), il suivrait ce décalage sans ce translateX inverse
-// (même technique que pour le numéro de version, voir shellContent).
+// ouvert, pour refermer. C'est un simple position:fixed, enfant direct de
+// #app et SIBLING de #app-scroll (voir l'explication d'architecture complète
+// dans buildHTML) : aucun ancêtre transformé, et le document ne défile pas
+// (html/body en overflow:hidden, seul #app-scroll défile en interne), donc
+// le viewport auquel il est fixé ne bouge jamais → le bouton ne peut pas
+// suivre le défilement. Pas besoin de sticky, de translateZ ni de
+// contre-décalage : le bouton est en dehors du conteneur qui se décale.
+// top: aligné (au pixel près, à ~2px) avec le haut du rectangle orange
+// PROGRAMME dans l'en-tête = padding-top de #app-scroll (safe-area) + le
+// padding-top 28px de .hdr, moins le padding interne 6px du bouton
+// -> calc(22px + safe-area). env(safe-area-inset-top) est nécessaire ici
+// (le bouton est fixé au viewport, il doit éviter l'encoche lui-même).
+// translateZ(0) promeut le bouton sur son propre calque GPU — recommandé
+// contre le scintillement des position:fixed sur iOS ; sans effet de bord
+// puisque le bouton n'a pas de descendant positionné.
 // Le header réserve 64px à droite (voir "padding-right" dans buildHTML) pour
 // que le badge programme et le J–N ne passent jamais dessous.
 // Ce bouton ne montre que le logo — le numéro de version est affiché dans
 // le rectangle d'en-tête (voir shellContent dans buildHTML).
-var BTN_ROW_H=48;
 function menuButtonHTML(){
   var icon=S.menuOpen?'&#10005;':'&#9776;';
-  var counterX=S.menuOpen?DRAWER_WIDTH:0;
-  return '<div style="position:sticky;top:0;z-index:61;height:'+BTN_ROW_H+'px;margin-bottom:-'+BTN_ROW_H+'px;display:flex;justify-content:flex-end;pointer-events:none;transform:translateX('+counterX+'px)">'
-    +'<button id="btn-menu" style="pointer-events:auto;background:transparent;border:none;font-size:30px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px 14px 6px 8px;align-self:flex-start">'+icon+'</button>'
-    +'</div>';
+  return '<button id="btn-menu" style="position:fixed;top:calc(22px + env(safe-area-inset-top,0px));right:14px;z-index:61;background:transparent;border:none;font-size:30px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px 8px;transform:translateZ(0);-webkit-transform:translateZ(0)">'+icon+'</button>';
 }
 
 // Tiroir latéral (droite) façon appli mobile : toujours dans le DOM (pour
