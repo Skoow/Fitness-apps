@@ -23,7 +23,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // ensemble à chaque changement de engine.js. Aucun risque de collision de
 // cache : les "2.x" n'ont jamais servi de jeton auparavant, et comme le
 // numéro augmente toujours, il est toujours neuf.
-var ENGINE_VERSION='2.0';
+var ENGINE_VERSION='2.1';
 
 function startApp(CONFIG){
 
@@ -130,14 +130,17 @@ function countsTowardProgress(ex){
 //   de missThreshold ratés, chaque exo en plus coûte missExtraPenalty EN PLUS ;
 //   une journée entière non faite coûte missedDayPenalty de plus. Réglé par
 //   personne (le sain perd plus, la personne fragile perd moins). Plafonné à
-//   100 : dépasser 100 % ne vient QUE du bonus de charges.
+//   100 : dépasser 100 % ne vient QUE des bonus ci-dessous.
 // - Bonus charges (0..weightBonusMax, ajouté) : selon la part d'exercices
 //   dont le poids a monté depuis weightLookbackDays jours, rapportée à un
 //   objectif perso (weightProgressTargetPct = part de hausses donnant le
 //   bonus max). 0 si pas de recul ou pas de hausse — jamais négatif.
-// Score du jour = assiduité + bonus. Tout est perso (config), le moteur ne
-// connaît aucun chiffre en dur. Rien n'est recalculé pour le passé ni
-// supprimé : tout l'historique est gardé.
+// - Bonus régularité (0..regularityBonusMax, ajouté, MÊME pour tous) : part
+//   des derniers jours qui étaient bien assidus. Permet à la constance SEULE
+//   de dépasser 100 (atteindre la ligne verte) sans dépendre de la charge.
+// Score du jour = assiduité + bonus charges + bonus régularité. Tout est
+// perso (config) sauf la régularité (vertu universelle). Rien n'est recalculé
+// pour le passé ni supprimé : tout l'historique est gardé.
 var WEIGHT_PROGRESS_LOOKBACK_DAYS_DEFAULT=14;
 var WEIGHT_PROGRESS_TARGET_PCT_DEFAULT=25;
 var WEIGHT_BONUS_MAX_DEFAULT=25;
@@ -156,6 +159,18 @@ var MISSED_DAY_PENALTY_DEFAULT=3;
 // de 100, à rester au-dessus). Réglables par personne.
 var GOOD_LEVEL_DEFAULT=110;
 var MIN_LEVEL_DEFAULT=85;
+// Bonus de RÉGULARITÉ : récompense la constance (l'habitude, le vrai
+// objectif), pour que l'assiduité SEULE puisse dépasser 100 et atteindre la
+// ligne verte — sans dépendre de la charge. C'est la même valeur pour tous
+// (venir régulièrement est la vertu universelle, pas un réglage santé). On
+// regarde les REGULARITY_WINDOW_DAYS derniers jours enregistrés : la part de
+// ceux qui étaient "bons" (assiduité >= REGULARITY_GOOD_DAY) donne le bonus,
+// jusqu'à regularityBonusMax. Pas de "série qui casse à zéro" au moindre
+// jour off (trop dur) : une proportion, plus douce et plus juste.
+var REGULARITY_BONUS_MAX_DEFAULT=15;
+var REGULARITY_WINDOW_DAYS=14;
+var REGULARITY_GOOD_DAY=90;
+var REGULARITY_MIN_ENTRIES=5;
 
 function statsTarget(name,dflt){
   return (CONFIG.statsTarget&&CONFIG.statsTarget[name]!=null)?CONFIG.statsTarget[name]:dflt;
@@ -233,20 +248,41 @@ function computeWeightBonus(history){
   var pctUp=up/total*100;
   return Math.min(maxBonus,Math.round(pctUp/target*maxBonus));
 }
+// Bonus de régularité (>=0) : part des derniers jours enregistrés qui étaient
+// "bons" (assiduité >= REGULARITY_GOOD_DAY) sur les REGULARITY_WINDOW_DAYS
+// derniers jours, × regularityBonusMax. 0 tant qu'il n'y a pas au moins
+// REGULARITY_MIN_ENTRIES jours de recul (sinon 1 bon jour donnerait le max).
+// Permet à l'assiduité constante de dépasser 100 même sans monter les poids.
+function computeRegularityBonus(history){
+  var maxB=statsTarget('regularityBonusMax',REGULARITY_BONUS_MAX_DEFAULT);
+  var cutoff=getParisNow().getTime()-REGULARITY_WINDOW_DAYS*86400000;
+  var total=0,good=0;
+  for(var i=history.length-1;i>=0;i--){
+    var t=new Date(history[i].date+'T12:00:00').getTime();
+    if(t<cutoff)break;
+    total++;
+    var comp=history[i].completion!=null?history[i].completion:history[i].score;
+    if(comp>=REGULARITY_GOOD_DAY)good++;
+  }
+  if(total<REGULARITY_MIN_ENTRIES)return 0;
+  return Math.round(good/total*maxB);
+}
 // Met à jour la photo du jour en cours à chaque appel (elle reste "vivante"
 // tant qu'on est le même jour — sinon cocher un exercice l'après-midi
 // n'apparaîtrait dans les stats que le lendemain). Une fois le jour passé,
 // son entrée devient définitive et n'est plus jamais retouchée.
-// Score du jour = assiduité (base 0-100) + bonus de charges (>=0). Le bonus
-// peut donc rattraper des séances manquées et faire dépasser 100 %.
+// Score du jour = assiduité (base 0-100) + bonus charges + bonus régularité
+// (les deux >=0). Ces bonus peuvent rattraper une absence et faire dépasser
+// 100 % ; la régularité permet d'y arriver par la seule constance.
 function recordDailySnapshotIfNeeded(){
   if(isVacationOn())return; // programme en pause -> aucune photo, pas de pénalité
   var today=getParisDate();
   var history=ld(K('statsHistory'),[]);
   var completion=computeAssiduityScore();
   var weightBonus=computeWeightBonus(history);
-  var score=completion+weightBonus;
-  var entry={date:today,completion:completion,weightBonus:weightBonus,score:score,weights:S.weights};
+  var regularityBonus=computeRegularityBonus(history);
+  var score=completion+weightBonus+regularityBonus;
+  var entry={date:today,completion:completion,weightBonus:weightBonus,regularityBonus:regularityBonus,score:score,weights:S.weights};
   if(history.length&&history[history.length-1].date===today){
     history[history.length-1]=entry;
   }else{
@@ -656,7 +692,7 @@ function statsPageHTML(){
     +bigScore
     +'<div style="height:10px"></div>'
     +statsChartSVG(history)
-    +'<div style="font-size:9.5px;color:'+c+';text-align:center;margin-top:8px"><span style="color:'+CONFIG.weightColors.fresh+'">&#9473; vise haut</span> &#8226; <span style="color:'+CONFIG.weightColors.old+'">&#9473; plancher</span> &#8226; monter les charges = bonus</div>'
+    +'<div style="font-size:9.5px;color:'+c+';text-align:center;margin-top:8px"><span style="color:'+CONFIG.weightColors.fresh+'">&#9473; vise haut</span> &#8226; <span style="color:'+CONFIG.weightColors.old+'">&#9473; plancher</span> &#8226; régularité + charges = bonus</div>'
     +'</div>'
     // Carte "Mode vacances" : met le programme en pause (stats gelées +
     // compte à rebours gelé, deadline repoussée au retour, voir toggleVacation).
