@@ -24,7 +24,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // À changer à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=X.Y sur la balise <script src="../engine.js?v=X.Y"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION='1.12';
+var ENGINE_VERSION='1.13';
 
 function startApp(CONFIG){
 
@@ -437,20 +437,29 @@ function buildHTML(){
   // interne), et html/body sont verrouillés (overflow:hidden, voir le CSS de
   // chaque personne) : sur iOS, un position:fixed cohabite mal avec un
   // défilement natif du document entier (bug connu). Note : -webkit-
-  // overflow-scrolling:touch (retiré ci-dessous) est lui-même une source
-  // connue de ce genre de bug — il forçait l'ancien mode de défilement
-  // "élastique" par calque séparé de WebKit, qui pouvait décaler les
-  // éléments position:fixed SIBLINGS pendant le défilement. Il est inutile
-  // sur iOS récent (le défilement fluide est natif par défaut dès iOS 13),
-  // donc on le retire plutôt que de risquer ce comportement.
-  // isolation:isolate sur le bouton et le tiroir leur donne leur propre
-  // contexte d'empilement, pour que le calque de compositing forcé par
-  // translateZ(0)/will-change (voir menuButtonHTML) reste stable et ne soit
-  // pas recalculé au gré du contenu qui défile en dessous.
-  return menuButtonHTML()
-    +drawerHTML()
+  // overflow-scrolling:touch (retiré) est lui-même une source connue de ce
+  // genre de bug — il forçait l'ancien mode de défilement "élastique" par
+  // calque séparé de WebKit, qui pouvait décaler les éléments position:fixed
+  // SIBLINGS pendant le défilement. Il est inutile sur iOS récent (le
+  // défilement fluide est natif par défaut dès iOS 13), donc on le retire
+  // plutôt que de risquer ce comportement.
+  // Le bouton ☰ (voir menuButtonHTML) n'est PLUS en position:fixed en dehors
+  // de ce conteneur : il est maintenant le TOUT PREMIER élément À
+  // L'INTÉRIEUR de #app-shell, en position:sticky. Raison : position:fixed
+  // est positionné par rapport au "visual viewport", qui peut légèrement
+  // bouger pendant le scroll quand la barre du navigateur (adresse/onglets)
+  // s'anime — un comportement qui varie d'un navigateur iOS à l'autre
+  // (Safari/Chrome/Firefox partagent le même moteur WebKit mais pas
+  // forcément la même gestion de cette zone). position:sticky, lui, se
+  // calcule uniquement à partir du défilement de SON PROPRE conteneur
+  // (#app-shell, entièrement sous notre contrôle) — aucune ambiguïté
+  // possible, quel que soit le navigateur. z-index:1 sur #app-shell
+  // garantit que le tiroir (z-index:60) et le fond cliquable (z-index:59)
+  // s'affichent bien par-dessus le bouton sticky une fois le tiroir ouvert.
+  return drawerHTML()
     +(S.menuOpen?'<div id="menu-overlay" style="position:fixed;inset:0;z-index:59;background:transparent"></div>':'')
-    +'<div id="app-shell" style="position:fixed;inset:0;overflow:hidden auto;padding-top:env(safe-area-inset-top,20px);padding-bottom:calc(28px + env(safe-area-inset-bottom,0px));transform:translateX('+(S.menuOpen?'-'+DRAWER_WIDTH+'px':'0')+');transition:transform .3s ease">'
+    +'<div id="app-shell" style="position:fixed;inset:0;z-index:1;overflow:hidden auto;padding-top:env(safe-area-inset-top,20px);padding-bottom:calc(28px + env(safe-area-inset-bottom,0px));transform:translateX('+(S.menuOpen?'-'+DRAWER_WIDTH+'px':'0')+');transition:transform .3s ease">'
+    +menuButtonHTML()
     +shellContent
     +'</div>';
 }
@@ -459,27 +468,33 @@ function buildHTML(){
 // décalage du contenu principal dans buildHTML.
 var DRAWER_WIDTH=250;
 
-// Bouton ☰ en haut à droite : fixe (ne bouge pas au scroll ni au décalage du
-// tiroir), toujours au-dessus du reste — il devient une croix une fois le
-// tiroir ouvert, pour refermer. Positionné avec env(safe-area-inset-top) en
-// plus du décalage habituel : en PWA installée sur iPhone (icône sur l'écran
-// d'accueil), la zone du haut de l'écran (encoche/horloge) n'est plus
-// compensée par le padding du <body> comme dans Safari — un élément
-// "position:fixed" doit gérer cette zone lui-même, sinon il se retrouve sous
-// la barre système et devient impossible à toucher.
+// Bouton ☰ en haut à droite — il devient une croix une fois le tiroir
+// ouvert, pour refermer. Il reste TOUJOURS visible en haut à droite pendant
+// le défilement grâce à position:sticky (voir l'explication complète dans
+// buildHTML, juste avant l'appel à cette fonction) : un wrapper invisible
+// (hauteur 0, ne prend aucune place dans la mise en page) est "collé" en
+// haut de #app-shell dès qu'on défile au-delà, et le vrai bouton est
+// positionné en absolu DANS ce wrapper (donc toujours ancré à son coin
+// haut-droit, quelle que soit la position de défilement).
+// env(safe-area-inset-top) reste nécessaire à l'intérieur du wrapper : en
+// PWA installée sur iPhone (icône sur l'écran d'accueil), la zone du haut de
+// l'écran (encoche/horloge) doit être évitée pour que le bouton reste
+// touchable.
+// Le décalage horizontal du tiroir (S.menuOpen) doit être annulé pour ce
+// wrapper : #app-shell (son parent scrollable) se décale de -DRAWER_WIDTH à
+// l'ouverture, et comme le bouton est maintenant DEDANS (nécessaire pour le
+// position:sticky), il suivrait ce décalage sans ce translateX inverse
+// (même technique que pour le numéro de version, voir shellContent).
 // Le header réserve 64px à droite (voir "padding-right" dans buildHTML) pour
 // que le badge programme et le J–N ne passent jamais dessous.
 // Ce bouton ne montre que le logo — le numéro de version est affiché dans
 // le rectangle d'en-tête (voir shellContent dans buildHTML).
-// translateZ(0)/will-change força son propre calque de rendu : sur iOS
-// Safari, un élément "position:fixed" peut sinon légèrement se décaler
-// pendant le scroll (bug connu), surtout ici où render() recrée le bouton à
-// chaque rafraîchissement (chaque case cochée, toutes les 5 min...) — sans
-// ce calque dédié établi d'emblée, le tout premier scroll qui suit une
-// recréation peut le faire "sauter" avant de se stabiliser.
 function menuButtonHTML(){
   var icon=S.menuOpen?'&#10005;':'&#9776;';
-  return '<button id="btn-menu" style="position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:61;background:transparent;border:none;font-size:30px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px 8px;transform:translateZ(0);-webkit-transform:translateZ(0);will-change:transform;isolation:isolate">'+icon+'</button>';
+  var counterX=S.menuOpen?DRAWER_WIDTH:0;
+  return '<div style="position:sticky;top:0;z-index:61;height:0;pointer-events:none;transform:translateX('+counterX+'px)">'
+    +'<button id="btn-menu" style="position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:14px;pointer-events:auto;background:transparent;border:none;font-size:30px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px 8px">'+icon+'</button>'
+    +'</div>';
 }
 
 // Tiroir latéral (droite) façon appli mobile : toujours dans le DOM (pour
