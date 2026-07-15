@@ -127,13 +127,13 @@ function countsTowardProgress(ex){
 // malus). But : suivre son programme est ce qui compte d'abord ; ne pas
 // (encore) monter ses charges ne doit PAS faire chuter la note, mais en
 // monter récompense et peut rattraper une séance manquée.
-// - Assiduité (0-100, base) : exercices cochés / attendus SUR LES JOURS DÉJÀ
-//   PASSÉS cette semaine (mercredi ne compte pas encore un lundi, sinon la
-//   note retombe à chaque début de semaine). Chacun a une MARGE de séances
-//   ratables sans pénalité (CONFIG.statsTarget.assiduityAllowedMisses) :
-//   tant qu'on reste dans sa marge -> 100 %. Au-delà, la note descend
-//   proportionnellement aux exercices ratés EN TROP. Plafonnée à 100 :
-//   dépasser 100 % ne vient QUE du bonus de charges.
+// - Assiduité (base = 100 − pénalités, 0-100) : sur les jours DÉJÀ passés
+//   cette semaine (mercredi ne compte pas encore un lundi). Tout fait -> 100.
+//   Chaque exercice non fait coûte missPenalty, proportionnellement ; au-delà
+//   de missThreshold ratés, chaque exo en plus coûte missExtraPenalty EN PLUS ;
+//   une journée entière non faite coûte missedDayPenalty de plus. Réglé par
+//   personne (le sain perd plus, la personne fragile perd moins). Plafonné à
+//   100 : dépasser 100 % ne vient QUE du bonus de charges.
 // - Bonus charges (0..weightBonusMax, ajouté) : selon la part d'exercices
 //   dont le poids a monté depuis weightLookbackDays jours, rapportée à un
 //   objectif perso (weightProgressTargetPct = part de hausses donnant le
@@ -143,30 +143,30 @@ function countsTowardProgress(ex){
 // supprimé : tout l'historique est gardé.
 var WEIGHT_PROGRESS_LOOKBACK_DAYS_DEFAULT=14;
 var WEIGHT_PROGRESS_TARGET_PCT_DEFAULT=25;
-var ASSIDUITY_ALLOWED_MISSES_DEFAULT=3;
 var WEIGHT_BONUS_MAX_DEFAULT=25;
+// Pénalités d'assiduité (base 100 - pénalités). Douces et proportionnelles :
+// chaque exo non fait coûte missPenalty ; au-delà de missThreshold ratés,
+// chaque exo supplémentaire coûte missExtraPenalty EN PLUS (ça pique un peu
+// plus quand ça s'accumule) ; une journée entière non faite coûte
+// missedDayPenalty de plus (pour encourager à au moins venir). Tout est
+// réglable par personne (statsTarget).
+var MISS_PENALTY_DEFAULT=2;
+var MISS_THRESHOLD_DEFAULT=3;
+var MISS_EXTRA_PENALTY_DEFAULT=2;
+var MISSED_DAY_PENALTY_DEFAULT=3;
+// Fourchette affichée sur le graphique STAT : ligne verte "objectif haut"
+// (au-dessus de 100, sympa à viser) et ligne rouge "plancher" (en dessous
+// de 100, à rester au-dessus). Réglables par personne.
+var GOOD_LEVEL_DEFAULT=110;
+var MIN_LEVEL_DEFAULT=85;
 
 function statsTarget(name,dflt){
   return (CONFIG.statsTarget&&CONFIG.statsTarget[name]!=null)?CONFIG.statsTarget[name]:dflt;
 }
 
-// Nombre total d'exercices comptabilisables sur TOUTE la semaine (tous les
-// jours du programme), pour convertir un nombre d'exercices "ratables" en
-// pourcentage — reste correct même si le programme change de taille.
-function computeWeekTotalCountable(){
-  var tot=0;
-  for(var i=0;i<CONFIG.days.length;i++){
-    var day=CONFIG.days[i];
-    for(var j=0;j<day.exercises.length;j++){
-      if(countsTowardProgress(day.exercises[j]))tot++;
-    }
-  }
-  return tot;
-}
-
-// Compte, sur les jours DÉJÀ passés cette semaine, combien d'exercices sont
-// attendus et combien sont faits (bannières/échauffements exclus, comme la
-// barre de progression). Renvoie {done,total}.
+// Compte, sur les jours DÉJÀ passés cette semaine : exercices attendus /
+// faits (bannières/échauffements exclus), et le nombre de JOURS de programme
+// entièrement ratés (0 exo fait ce jour-là). Renvoie {done,total,daysMissed}.
 function computeLiveCounts(){
   var weekday=getWeekday();
   var expectedIdx={};
@@ -174,33 +174,39 @@ function computeLiveCounts(){
     var idx=computeDayIndex(w);
     if(idx>=0)expectedIdx[idx]=true;
   }
-  var tot=0,dc=0;
+  var tot=0,dc=0,daysMissed=0;
   for(var idxKey in expectedIdx){
     var day=CONFIG.days[idxKey];
+    var dayTot=0,dayDone=0;
     for(var j=0;j<day.exercises.length;j++){
       var ex=day.exercises[j];
       if(!countsTowardProgress(ex))continue;
-      tot++;
-      if(S.done[ex.id])dc++;
+      dayTot++;tot++;
+      if(S.done[ex.id]){dayDone++;dc++;}
     }
+    if(dayTot>0&&dayDone===0)daysMissed++; // journée entière non faite
   }
-  return {done:dc,total:tot};
+  return {done:dc,total:tot,daysMissed:daysMissed};
 }
-// Assiduité : note de BASE, 0-100. Tant qu'on reste dans sa marge de séances
-// ratables (assiduityAllowedMisses, définie par semaine) -> 100 %. Au-delà,
-// la note baisse au prorata des exercices ratés EN TROP. La marge est
-// proratisée à la part de la semaine déjà écoulée (sinon, en début de
-// semaine, la marge complète rendrait n'importe quoi = 100 %). Plafonnée à
-// 100 : le dépassement ne vient que du bonus de charges (computeWeightBonus).
+// Assiduité : note de BASE = 100 − pénalités (jamais au-dessus de 100 ; le
+// dépassement ne vient que du bonus de charges, computeWeightBonus). Chaque
+// exercice non fait coûte missPenalty, proportionnellement (2 ratés coûtent
+// 2× plus qu'1) ; au-delà de missThreshold ratés, chaque exo en plus coûte
+// missExtraPenalty EN PLUS ; chaque journée entière ratée coûte
+// missedDayPenalty de plus. Réglé par personne (le sain perd plus, la
+// personne fragile perd moins). Plancher à 0.
 function computeAssiduityScore(){
   var c=computeLiveCounts();
   if(c.total===0)return 100; // rien attendu encore -> neutre
-  var allowedWeek=statsTarget('assiduityAllowedMisses',ASSIDUITY_ALLOWED_MISSES_DEFAULT);
-  var weekTotal=computeWeekTotalCountable();
-  var allowedNow=weekTotal>0?allowedWeek*(c.total/weekTotal):allowedWeek;
   var missed=c.total-c.done;
-  var effectiveMissed=Math.max(0,missed-allowedNow);
-  return Math.round((c.total-effectiveMissed)/c.total*100);
+  var missPen=statsTarget('missPenalty',MISS_PENALTY_DEFAULT);
+  var threshold=statsTarget('missThreshold',MISS_THRESHOLD_DEFAULT);
+  var extraPen=statsTarget('missExtraPenalty',MISS_EXTRA_PENALTY_DEFAULT);
+  var dayPen=statsTarget('missedDayPenalty',MISSED_DAY_PENALTY_DEFAULT);
+  var pen=missPen*missed
+    +extraPen*Math.max(0,missed-threshold)
+    +dayPen*c.daysMissed;
+  return Math.max(0,Math.round(100-pen));
 }
 // Bonus de charges : points AJOUTÉS à l'assiduité (jamais retirés). Renvoie
 // toujours un nombre >= 0. 0 quand il n'y a pas encore assez de recul, ou
@@ -569,9 +575,11 @@ function dataPageHTML(){
 // horizontalement — ouvert par défaut sur les données les plus récentes,
 // on glisse vers la gauche pour remonter dans l'historique. Rien n'est
 // jamais coupé : le score peut dépasser 100 % (bonus charges, computeWeightBonus).
+// Couleur du score, calée sur la fourchette : >=100 (au moins à l'objectif)
+// vert, au-dessus du plancher rouge orange, en dessous rouge.
 function scoreColorFor(score){
   if(score>=100)return CONFIG.weightColors.fresh;
-  if(score>=70)return CONFIG.weightColors.aging;
+  if(score>=statsTarget('minLevel',MIN_LEVEL_DEFAULT))return CONFIG.weightColors.aging;
   return CONFIG.weightColors.old;
 }
 
@@ -654,9 +662,9 @@ function statsPageHTML(){
     +'<div class="dc" style="padding:18px">'
     +'<div style="font-size:11px;font-weight:800;letter-spacing:1px;color:'+c+';margin-bottom:6px">&#128200; TA PROGRESSION</div>'
     +bigScore
-    +'<div style="font-size:10px;color:'+c+';margin-bottom:12px">Glisse pour l’historique &#8226; pointillé = ton objectif</div>'
+    +'<div style="font-size:10px;color:'+c+';margin-bottom:12px">Glisse pour l’historique &#8226; <span style="color:'+CONFIG.weightColors.fresh+'">— vert</span> vise haut &#8226; <span style="color:'+CONFIG.weightColors.old+'">— rouge</span> plancher</div>'
     +statsChartSVG(history)
-    +'<div style="font-size:10px;color:'+c+';margin-top:14px;line-height:1.4">La note vient de ton assiduité (100&#37; si tu respectes ta marge). Monter tes charges ajoute un bonus qui peut rattraper une séance manquée et dépasser 100&#37;. Ne pas progresser n&rsquo;enlève rien.</div>'
+    +'<div style="font-size:10px;color:'+c+';margin-top:14px;line-height:1.4">La note part de 100&#37; : chaque exo ou journée non fait la baisse un peu (proportionnellement). Monter tes charges ajoute un bonus qui peut rattraper une absence et dépasser 100&#37;. Vise entre les deux repères — au‑dessus du vert c’est très bien, sous le rouge il faut se reprendre.</div>'
     +'</div>'
     // Carte "Mode vacances" : met le programme en pause (stats gelées +
     // compte à rebours gelé, deadline repoussée au retour, voir toggleVacation).
@@ -690,7 +698,14 @@ function statsChartSVG(history){
   var innerH=h-padT-padB;
   var innerW=Math.max(1,n-1)*stepX;
   var svgW=innerW+padR+8;
-  var maxScore=100;
+  // Fourchette : ligne verte "objectif haut" (au-dessus de 100) et ligne
+  // rouge "plancher" (en dessous de 100). Osciller entre les deux est normal ;
+  // au-dessus du vert = très bien, sous le rouge = vraiment négatif.
+  var goodLevel=statsTarget('goodLevel',GOOD_LEVEL_DEFAULT);
+  var minLevel=statsTarget('minLevel',MIN_LEVEL_DEFAULT);
+  var greenCol=CONFIG.weightColors.fresh;
+  var redCol=CONFIG.weightColors.old;
+  var maxScore=goodLevel; // l'axe monte au moins jusqu'à la ligne verte
   for(var i=0;i<n;i++){if(history[i].score>maxScore)maxScore=history[i].score;}
   var yMax=Math.max(100,Math.ceil((maxScore+10)/25)*25);
   function xAt(i){return 8+i*stepX;}
@@ -703,6 +718,10 @@ function statsChartSVG(history){
     var is100=v===100;
     return '<line x1="0" y1="'+yAt(v)+'" x2="'+svgW+'" y2="'+yAt(v)+'" stroke="'+(is100?ac:c)+'" stroke-opacity="'+(is100?'.5':'.15')+'" stroke-width="1"'+(is100?' stroke-dasharray="4,3"':'')+'/>';
   }).join('');
+  // Les deux lignes repères de la fourchette (pointillés verts/rouges).
+  var bandLines=''
+    +'<line x1="0" y1="'+yAt(goodLevel)+'" x2="'+svgW+'" y2="'+yAt(goodLevel)+'" stroke="'+greenCol+'" stroke-opacity=".8" stroke-width="1.2" stroke-dasharray="5,3"/>'
+    +'<line x1="0" y1="'+yAt(minLevel)+'" x2="'+svgW+'" y2="'+yAt(minLevel)+'" stroke="'+redCol+'" stroke-opacity=".8" stroke-width="1.2" stroke-dasharray="5,3"/>';
   var labelEvery=Math.max(1,Math.ceil(n/25));
   var marks=history.map(function(hpt,i){
     var showLabel=(i%labelEvery===0)||i===n-1;
@@ -713,7 +732,10 @@ function statsChartSVG(history){
   var axisLabels=gridVals.map(function(v){
     var is100=v===100;
     return '<div style="position:absolute;left:0;top:'+(yAt(v)-6)+'px;font-size:8px;color:'+(is100?ac:c)+';font-weight:'+(is100?'700':'400')+'">'+v+'</div>';
-  }).join('');
+  }).join('')
+    // Étiquettes des lignes de la fourchette, dans leur couleur.
+    +'<div style="position:absolute;left:0;top:'+(yAt(goodLevel)-6)+'px;font-size:8px;font-weight:700;color:'+greenCol+'">'+goodLevel+'</div>'
+    +'<div style="position:absolute;left:0;top:'+(yAt(minLevel)-6)+'px;font-size:8px;font-weight:700;color:'+redCol+'">'+minLevel+'</div>';
   return '<div style="display:flex;align-items:stretch;gap:2px">'
     +'<div style="width:'+axisW+'px;flex-shrink:0;position:relative;height:'+h+'px">'+axisLabels+'</div>'
     +'<div id="stats-scroll" style="overflow-x:auto;-webkit-overflow-scrolling:touch;flex:1">'
@@ -723,6 +745,7 @@ function statsChartSVG(history){
     +'<stop offset="100%" stop-color="'+ac+'" stop-opacity="0"/>'
     +'</linearGradient></defs>'
     +gridlines
+    +bandLines
     +(n>1?'<polygon points="'+areaStr+'" fill="url(#statsGrad)"/>':'')
     +(n>1?'<polyline points="'+pointsStr+'" fill="none" stroke="'+ac+'" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>':'')
     +marks
