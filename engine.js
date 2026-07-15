@@ -24,7 +24,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // À changer à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=X.Y sur la balise <script src="../engine.js?v=X.Y"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION='1.13';
+var ENGINE_VERSION='1.14';
 
 function startApp(CONFIG){
 
@@ -471,29 +471,36 @@ var DRAWER_WIDTH=250;
 // Bouton ☰ en haut à droite — il devient une croix une fois le tiroir
 // ouvert, pour refermer. Il reste TOUJOURS visible en haut à droite pendant
 // le défilement grâce à position:sticky (voir l'explication complète dans
-// buildHTML, juste avant l'appel à cette fonction) : un wrapper invisible
-// (hauteur 0, ne prend aucune place dans la mise en page) est "collé" en
-// haut de #app-shell dès qu'on défile au-delà, et le vrai bouton est
-// positionné en absolu DANS ce wrapper (donc toujours ancré à son coin
-// haut-droit, quelle que soit la position de défilement).
-// env(safe-area-inset-top) reste nécessaire à l'intérieur du wrapper : en
-// PWA installée sur iPhone (icône sur l'écran d'accueil), la zone du haut de
-// l'écran (encoche/horloge) doit être évitée pour que le bouton reste
-// touchable.
+// buildHTML, juste avant l'appel à cette fonction) : un bandeau "collé" en
+// haut de #app-shell, avec une VRAIE hauteur (BTN_ROW_H) — un wrapper à
+// hauteur 0 avec le bouton positionné en absolu dedans s'est avéré peu
+// fiable (le bouton "descendait" et continuait à défiler chez toi, signe
+// que le sticky ne s'appliquait pas correctement sur une boîte de hauteur
+// nulle). Un bandeau à hauteur réelle est la façon standard/éprouvée de
+// faire un élément "collant" — sa hauteur est ensuite annulée avec un
+// margin-bottom négatif du même montant pour ne pas repousser le header en
+// dessous.
+// Important : PAS de env(safe-area-inset-top) ici — #app-shell (son parent)
+// l'applique déjà via son propre padding-top, donc le bandeau sticky
+// (top:0) est déjà placé juste sous l'encoche par la mise en page normale.
+// En rajouter une deuxième fois ici doublait le décalage et poussait le
+// bouton bien plus bas que sa place d'origine — c'était le bug la dernière
+// fois.
 // Le décalage horizontal du tiroir (S.menuOpen) doit être annulé pour ce
-// wrapper : #app-shell (son parent scrollable) se décale de -DRAWER_WIDTH à
-// l'ouverture, et comme le bouton est maintenant DEDANS (nécessaire pour le
+// bandeau : #app-shell (son parent scrollable) se décale de -DRAWER_WIDTH à
+// l'ouverture, et comme le bouton est DEDANS (nécessaire pour le
 // position:sticky), il suivrait ce décalage sans ce translateX inverse
 // (même technique que pour le numéro de version, voir shellContent).
 // Le header réserve 64px à droite (voir "padding-right" dans buildHTML) pour
 // que le badge programme et le J–N ne passent jamais dessous.
 // Ce bouton ne montre que le logo — le numéro de version est affiché dans
 // le rectangle d'en-tête (voir shellContent dans buildHTML).
+var BTN_ROW_H=48;
 function menuButtonHTML(){
   var icon=S.menuOpen?'&#10005;':'&#9776;';
   var counterX=S.menuOpen?DRAWER_WIDTH:0;
-  return '<div style="position:sticky;top:0;z-index:61;height:0;pointer-events:none;transform:translateX('+counterX+'px)">'
-    +'<button id="btn-menu" style="position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:14px;pointer-events:auto;background:transparent;border:none;font-size:30px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px 8px">'+icon+'</button>'
+  return '<div style="position:sticky;top:0;z-index:61;height:'+BTN_ROW_H+'px;margin-bottom:-'+BTN_ROW_H+'px;display:flex;justify-content:flex-end;pointer-events:none;transform:translateX('+counterX+'px)">'
+    +'<button id="btn-menu" style="pointer-events:auto;background:transparent;border:none;font-size:30px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px 14px 6px 8px;align-self:flex-start">'+icon+'</button>'
     +'</div>';
 }
 
