@@ -402,12 +402,41 @@ function bindEvents(){
 // Une fois la deadline dépassée (pour les 3), on affiche un décompte de
 // retard (J+1, J+2...) et un rappel fixe en rouge/gras/majuscules, jusqu'à
 // ce que la personne mette à jour `deadline` avec le nouveau programme.
+// En mode vacances, le compte à rebours est GELÉ : on l'affiche en gris/
+// atténué avec "⏸ en pause" au lieu de "jours restants", pour montrer
+// visuellement que les jours ne défilent plus.
 function jleftHTML(){
+  if(isVacationOn()){
+    var m=CONFIG.noSideIconColor;
+    return '<div class="dlc" style="color:'+m+'">J&#8211;'+JLEFT+'</div><div class="dls" style="color:'+m+';font-weight:700">&#9208;&#65039; en pause</div>';
+  }
   if(JLEFT_RAW<=0){
     var red=CONFIG.weightColors.old;
     return '<div class="dlc" style="color:'+red+'">J+'+(-JLEFT_RAW)+'</div><div class="dls" style="color:'+red+';font-weight:700">CHANGER LE PROGRAMME</div>';
   }
-  return '<div class="dlc" style="color:'+(JLEFT<14?CONFIG.jleftUrgentColor:CONFIG.jleftNormalColor)+'">J–'+JLEFT+'</div><div class="dls">jours restants</div>';
+  return '<div class="dlc" style="color:'+(JLEFT<14?CONFIG.jleftUrgentColor:CONFIG.jleftNormalColor)+'">J&#8211;'+JLEFT+'</div><div class="dls">jours restants</div>';
+}
+
+// Carte "pause" partagée : même charte pour le REPOS et les VACANCES (voir
+// restBodyHTML et le mode vacances dans buildHTML). opts = {emoji, title,
+// subtitle, color}. Structure unique (gros emoji + titre Impact + sous-titre
+// atténué) ; seuls l'emoji, le titre et la couleur changent d'un cas à
+// l'autre -> charte graphique uniforme, avec juste ce qu'il faut de
+// différence entre repos et vacances.
+function pauseCardHTML(opts){
+  var col=opts.color||CONFIG.noSideIconColor;
+  return '<div class="dc" style="padding:38px 20px;text-align:center;border-color:'+col+'55">'
+    +'<div style="font-size:3rem;line-height:1">'+opts.emoji+'</div>'
+    +'<div style="font-family:Impact,sans-serif;font-size:1.5rem;letter-spacing:2px;margin-top:14px;color:'+col+'">'+opts.title+'</div>'
+    +'<div style="font-size:12.5px;margin-top:10px;color:'+CONFIG.noSideIconColor+';line-height:1.45;max-width:280px;margin-left:auto;margin-right:auto">'+opts.subtitle+'</div>'
+    +'</div>';
+}
+// Rendu du jour de repos : via la carte partagée (pauseCardHTML) si la config
+// fournit restDay.card {emoji,title,subtitle} ; sinon repli sur l'ancien
+// restDay.html (compat).
+function restBodyHTML(){
+  var card=CONFIG.restDay&&CONFIG.restDay.card;
+  return card?pauseCardHTML({emoji:card.emoji,title:card.title,subtitle:card.subtitle,color:card.color||CONFIG.noSideIconColor}):CONFIG.restDay.html;
 }
 
 function programBadgeHTML(){
@@ -432,8 +461,18 @@ function buildHTML(){
     var bodyHTML2;
     if(isStats){
       bodyHTML2=statsPageHTML();
+    }else if(isVacationOn()){
+      // Programme en pause : à la place de la séance, une carte "Vacances"
+      // (même charte que le repos, voir pauseCardHTML) — sur Aujourd'hui ET
+      // Semaine. STAT reste accessible (c'est là qu'on désactive le mode).
+      bodyHTML2='<div class="days">'+pauseCardHTML({
+        emoji:'&#127958;&#65039;',
+        title:'VACANCES',
+        subtitle:'Programme en pause. Reprends quand tu rentres — le compte à rebours et tes stats sont gelés.',
+        color:CONFIG.accentColor
+      })+'</div>';
     }else if(S.mode==='today'){
-      bodyHTML2='<div class="days">'+(isRest?(CONFIG.restDay.html+(CONFIG.restDay.showNextDayPreview?dayHTML(CONFIG.days[0],0,false):'')):dayHTML(td,TI,true))+'</div>';
+      bodyHTML2='<div class="days">'+(isRest?(restBodyHTML()+(CONFIG.restDay.showNextDayPreview?dayHTML(CONFIG.days[0],0,false):'')):dayHTML(td,TI,true))+'</div>';
     }else{
       bodyHTML2='<div class="days">'+CONFIG.days.map(function(d,i){return dayHTML(d,i,false);}).join('')+'</div>';
     }
@@ -475,10 +514,6 @@ function buildHTML(){
     +'<div style="text-align:right">'+jleftHTML()+'</div>'
     +'</div>'
     +'</div>'
-    // Bandeau vacances : visible partout (sauf page données) quand le
-    // programme est en pause, pour qu'on sache d'un coup d'œil que rien n'est
-    // compté et que le compte à rebours est gelé.
-    +((!isData&&isVacationOn())?'<div style="margin:12px 14px 0;padding:12px 14px;border-radius:12px;background:'+CONFIG.accentColor+'1f;border:1px solid '+CONFIG.accentColor+';text-align:center;font-size:12.5px;font-weight:700;color:'+CONFIG.accentColor+'">&#127958;&#65039; Vacances — programme en pause</div>':'')
     +(isData?'<div style="text-align:center;padding:10px 14px 0;font-size:11px;color:'+CONFIG.noSideIconColor+'">&#8249; Touche ton prénom pour revenir en arrière</div>':'')
     +mainContent
     // Sur la page données elle-même, pas de pied de version (on y est déjà) ;
