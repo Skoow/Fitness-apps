@@ -23,7 +23,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // ensemble à chaque changement de engine.js. Aucun risque de collision de
 // cache : les "2.x" n'ont jamais servi de jeton auparavant, et comme le
 // numéro augmente toujours, il est toujours neuf.
-var ENGINE_VERSION='2.1';
+var ENGINE_VERSION='2.2';
 
 function startApp(CONFIG){
 
@@ -988,7 +988,6 @@ function exHTML(ex,day){
     :ex.cat==='free'?'<span class="bdg bf">🔴 Libre</span>'
     :ex.cat==='cardio'?'<span class="bdg bc">🏃 Cardio</span>':'';
   var isoB=ex.isIso?'<span class="bdg bi">🎯 Isolation</span>':'';
-  var doneB=done?'<span class="bdg bd">✓ Fait</span>':'';
   var repsChip=CONFIG.showRepsChip
     ?'<div style="margin-top:5px"><span style="display:inline-block;padding:4px 12px;border-radius:8px;border:2px solid '+(done?'rgba(46,204,113,.5)':ec+'80')+';background:'+(done?'rgba(46,204,113,.12)':ec+'18')+';color:'+(done?CONFIG.weightColors.fresh:ec)+';font-size:11.5px;font-weight:900;letter-spacing:.3px">'+reps+'</span></div>'
     :'';
@@ -996,12 +995,12 @@ function exHTML(ex,day){
   var wRow=noWeight?'':renderWeightRow(ex,ec);
   return '<div class="exrow">'
     +'<div class="extap" data-id="'+ex.id+'" style="background:'+(done?'rgba(46,204,113,.06)':'transparent')+'">'
-    +'<div class="exicon" style="background:'+(done?'rgba(46,204,113,.1)':'#111113')+';border-color:'+(done?'rgba(46,204,113,.3)':'#252528')+'">'+mkIcon(ex.icon,done?CONFIG.weightColors.fresh:ec,52)+'</div>'
+    +'<div class="exicon" style="align-self:center;background:'+(done?'rgba(46,204,113,.1)':'#111113')+';border-color:'+(done?'rgba(46,204,113,.3)':'#252528')+'">'+mkIcon(ex.icon,done?CONFIG.weightColors.fresh:ec,52)+'</div>'
     +'<div class="excnt">'
     +'<div class="exnm" style="color:'+(done?CONFIG.weightColors.fresh:CONFIG.exerciseNameColor)+'">'+ex.name+'</div>'
     +repsChip
     +'<div class="extip">'+ex.tip+'</div>'
-    +'<div class="exbadges">'+catB+isoB+extraBadgeHTML(ex)+doneB+'</div>'
+    +'<div class="exbadges">'+catB+isoB+extraBadgeHTML(ex)+'</div>'
     +'</div>'
     // align-self:center : centre la coche sur toute la hauteur de la rangée
     // (sinon collée en haut quand le nom/tip/badges prennent plusieurs
