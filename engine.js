@@ -24,7 +24,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // À changer à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=X.Y sur la balise <script src="../engine.js?v=X.Y"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION='1.19';
+var ENGINE_VERSION='1.20';
 
 function startApp(CONFIG){
 
@@ -256,7 +256,6 @@ var storedWK=ld(K('doneWeek'),null);
 var storedDone=ld(K('done'),{});
 var S={
   mode:'today',
-  menuOpen:false,
   openDays:{},
   weights:ld(K('weights'),{}),
   weightDates:ld(K('weightDates'),{}),
@@ -321,12 +320,10 @@ function bindEvents(){
     });
     sel.addEventListener('click',function(e){e.stopPropagation();});
   });
-  var btnMenu=document.getElementById('btn-menu');
-  if(btnMenu)btnMenu.addEventListener('click',function(){S.menuOpen=!S.menuOpen;render();});
-  var menuOverlay=document.getElementById('menu-overlay');
-  if(menuOverlay)menuOverlay.addEventListener('click',function(){S.menuOpen=false;render();});
-  var btnMenuData=document.getElementById('btn-menu-data');
-  if(btnMenuData)btnMenuData.addEventListener('click',function(){S.mode='data';S.menuOpen=false;render();});
+  // Le numéro de version (pied de page) remplace l'ancien bouton ☰ + tiroir :
+  // le toucher ouvre directement la page Import/Export.
+  var btnVersion=document.getElementById('btn-version');
+  if(btnVersion)btnVersion.addEventListener('click',function(){S.mode='data';window.scrollTo(0,0);render();});
   var hdrBand=document.getElementById('hdr-band');
   if(hdrBand)hdrBand.addEventListener('click',function(){
     if(S.mode==='data'){S.mode='today';S.openDays={};S.openDays[TI]=true;render();}
@@ -404,7 +401,17 @@ function buildHTML(){
       +'</div>'
       +bodyHTML2;
   }
-  var shellContent='<div class="hdr" id="hdr-band" style="padding-right:64px;position:relative;'+(isData?'cursor:pointer':'')+'">'
+  // Plus AUCUN bouton flottant (☰) ni tiroir : après de nombreuses
+  // tentatives, un élément qui doit rester immobile pendant le défilement
+  // s'est avéré impossible à fiabiliser sur iOS. L'accès Import/Export passe
+  // désormais par le NUMÉRO DE VERSION affiché tout en bas de la page (voir
+  // versionFooterHTML) : on le touche, ça ouvre la page données (S.mode=
+  // 'data'). Résultat : que du flux normal, rien de flottant, rien qui
+  // puisse déraper au scroll.
+  // L'en-tête n'a plus besoin de réserver 64px à droite (c'était pour le
+  // bouton) : le badge programme et l'encart deadline reprennent toute la
+  // largeur.
+  var shellContent='<div class="hdr" id="hdr-band" style="'+(isData?'cursor:pointer':'')+'">'
     +'<div class="hdr-top">'
     +'<div class="ttl">'+CONFIG.title+' <span style="color:'+CONFIG.genderSymbolColor+'">'+CONFIG.genderSymbol+'</span></div>'
     +programBadgeHTML()
@@ -413,93 +420,26 @@ function buildHTML(){
     +'<div><div class="dll">&#128197; '+CONFIG.deadlineLabel+'</div><div class="dld">'+CONFIG.deadlineDateText+'</div></div>'
     +'<div style="text-align:right">'+jleftHTML()+'</div>'
     +'</div>'
-    // Le numéro de version est ANCRÉ (position:absolute) au coin bas-droit
-    // du GRAND rectangle d'en-tête lui-même (#hdr-band, passé en
-    // position:relative ci-dessus) — pas ajouté comme une ligne en plus
-    // après le petit encart deadline (ça le faisait paraître "sous" ce
-    // dernier au lieu d'être au ras du bord bas du grand rectangle). Aligné
-    // à droite comme le bouton ☰ (right:16px, à comparer à son right:14px),
-    // mais collé en bas au lieu d'en haut. Comme #hdr-band fait partie de
-    // #app-shell qui se décale de -DRAWER_WIDTH à l'ouverture du tiroir, on
-    // annule ce décalage juste pour cet élément avec un translateX inverse
-    // (les transforms imbriqués s'additionnent), pour qu'il ne suive pas ce
-    // glissement horizontal.
-    +'<div style="position:absolute;right:16px;bottom:10px;font-size:9px;font-weight:700;color:'+CONFIG.noSideIconColor+';transform:translateX('+(S.menuOpen?DRAWER_WIDTH:0)+'px)">v'+ENGINE_VERSION+'</div>'
     +'</div>'
     +(isData?'<div style="text-align:center;padding:10px 14px 0;font-size:11px;color:'+CONFIG.noSideIconColor+'">&#8249; Touche ton prénom pour revenir en arrière</div>':'')
-    +mainContent;
-  // ARCHITECTURE (après 6 tentatives ratées d'internal-scroll/fixed/absolute
-  // qui échouaient toutes sur iPhone). Retour au DÉFILEMENT NORMAL DE LA
-  // PAGE — comme n'importe quel site web, comme l'app à ses débuts — au lieu
-  // de forcer un conteneur de défilement interne, ce qui se battait contre
-  // iOS (bouton entraîné, marge noire en bas car iOS calcule mal la hauteur
-  // d'un body position:fixed). Le document défile naturellement.
-  //   - Le bouton ☰ (menuButtonHTML) est en position:STICKY : la seule
-  //     technique qu'iOS gère de façon fiable pendant un défilement de page
-  //     normal. Il est un enfant direct SANS aucun ancêtre transformé (les
-  //     échecs sticky précédents venaient de #app-shell transformé au-dessus
-  //     de lui) — il colle donc au haut du viewport, quel que soit le
-  //     défilement. Un bandeau à hauteur réelle annulée par un margin-bottom
-  //     négatif : il chevauche l'en-tête (bouton aligné avec le badge) sans
-  //     pousser le contenu vers le bas.
-  //   - Le wrapper overflow-x:clip enferme le décalage du tiroir (translateX
-  //     de #app-shell) pour qu'il ne crée pas de défilement horizontal. Le
-  //     bandeau sticky est EN DEHORS de ce wrapper -> aucun ancêtre à
-  //     overflow au-dessus du sticky, indispensable pour qu'il fonctionne.
-  //   - Tiroir / fond cliquable : position:fixed (ce sont des surcouches
-  //     affichées seulement menu ouvert, quand on ne défile pas — fixed y
-  //     est sans risque).
-  // z-index : bouton 61 > tiroir 60 > fond cliquable 59.
-  return menuButtonHTML()
-    +'<div style="overflow-x:clip">'
-    +'<div id="app-shell" style="transform:translateX('+(S.menuOpen?'-'+DRAWER_WIDTH+'px':'0')+');transition:transform .3s ease">'
-    +shellContent
-    +'</div>'
-    +'</div>'
-    +(S.menuOpen?'<div id="menu-overlay" style="position:fixed;inset:0;z-index:59;background:transparent"></div>':'')
-    +drawerHTML();
+    +mainContent
+    // Sur la page données elle-même, pas de pied de version (on y est déjà) ;
+    // partout ailleurs, le numéro de version tout en bas sert d'accès
+    // Import/Export.
+    +(isData?'':versionFooterHTML());
+  return shellContent;
 }
 
-// Largeur du tiroir (voir drawerHTML) — utilisée aussi pour calculer le
-// décalage du contenu principal dans buildHTML.
-var DRAWER_WIDTH=250;
-
-// Bouton ☰ en haut à droite — il devient une croix une fois le tiroir
-// ouvert, pour refermer. Rendu dans un bandeau position:STICKY (voir
-// l'explication d'architecture dans buildHTML) : avec le défilement normal
-// de la page, sticky colle le bandeau au haut du viewport de façon fiable
-// sur iOS. Le bandeau a une hauteur réelle (nécessaire pour que sticky soit
-// fiable) annulée par un margin-bottom négatif du même montant, pour qu'il
-// chevauche l'en-tête au lieu de pousser le contenu vers le bas.
-// top: env(safe-area-inset-top) — le bandeau colle juste sous l'encoche (le
-// body a déjà un padding-top de même valeur, donc au repos le bandeau est
-// déjà là : position identique au repos et une fois collé, pas de saut).
-// pointer-events: le bandeau laisse passer les clics (none) sauf sur le
-// bouton lui-même (auto), pour ne pas bloquer le contenu qu'il chevauche.
-// Le header réserve 64px à droite (padding-right dans buildHTML) pour que le
-// badge programme et le J–N ne passent jamais sous le bouton.
-// Ce bouton ne montre que le logo — le numéro de version est affiché dans
-// le rectangle d'en-tête (voir shellContent dans buildHTML).
-function menuButtonHTML(){
-  var icon=S.menuOpen?'&#10005;':'&#9776;';
-  return '<div style="position:sticky;top:env(safe-area-inset-top,20px);z-index:61;height:56px;margin-bottom:-56px;display:flex;justify-content:flex-end;align-items:flex-start;pointer-events:none">'
-    +'<button id="btn-menu" style="pointer-events:auto;margin-top:22px;background:transparent;border:none;font-size:30px;line-height:1;color:'+CONFIG.exerciseNameColor+';cursor:pointer;padding:6px 8px">'+icon+'</button>'
-    +'</div>';
-}
-
-// Tiroir latéral (droite) façon appli mobile : toujours dans le DOM (pour
-// l'animation de fermeture), simplement poussé hors écran via translateX
-// quand fermé. Réutilise la classe "hdr" (déjà définie par personne, sombre
-// ou claire selon le thème) pour le fond, plutôt qu'une couleur codée en dur
-// dans le moteur — sinon le tiroir serait noir même chez Myriam qui a un
-// thème clair. Le bouton "Importer / Exporter" réutilise "mbtn" (déjà
-// stylé/thémé) pour la même raison. Cliquer dessus ouvre la page dédiée en
-// plein écran (S.mode='data') — jamais l'action directement depuis le tiroir.
-function drawerHTML(){
-  var open=S.menuOpen;
-  return '<div class="hdr" style="position:fixed;top:0;right:0;bottom:0;width:'+DRAWER_WIDTH+'px;max-width:78vw;z-index:60;border:none;box-shadow:'+(open?'-14px 0 34px rgba(0,0,0,.35)':'none')+';transform:translateX('+(open?'0':'100%')+');transition:transform .3s ease;padding:calc(88px + env(safe-area-inset-top,0px)) 16px 16px;display:flex;flex-direction:column;gap:10px">'
-    +'<button id="btn-menu-data" class="mbtn" style="flex:none;justify-content:flex-start;gap:10px;font-size:13.5px;padding:14px">'
-    +'<span style="font-size:18px">&#128190;</span> Importer / Exporter'
+// Numéro de version en pied de page, avec une grande zone cliquable : le
+// toucher ouvre la page Import/Export (S.mode='data', voir bindEvents). Il
+// remplace l'ancien bouton ☰ + tiroir. Écrit un peu plus gros et bien
+// centré pour qu'on le voie et qu'on le touche facilement.
+function versionFooterHTML(){
+  var c=CONFIG.noSideIconColor;
+  return '<div style="display:flex;justify-content:center;padding:6px 14px 10px">'
+    +'<button id="btn-version" style="background:transparent;border:1px solid '+c+'55;border-radius:14px;color:'+c+';cursor:pointer;padding:14px 30px;text-align:center;line-height:1.2">'
+      +'<div style="font-size:16px;font-weight:800">v'+ENGINE_VERSION+'</div>'
+      +'<div style="font-size:11px;font-weight:600;margin-top:3px">Importer / Exporter</div>'
     +'</button>'
     +'</div>';
 }
