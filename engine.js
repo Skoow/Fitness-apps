@@ -237,6 +237,7 @@ function computeWeightBonus(history){
 // Score du jour = assiduité (base 0-100) + bonus de charges (>=0). Le bonus
 // peut donc rattraper des séances manquées et faire dépasser 100 %.
 function recordDailySnapshotIfNeeded(){
+  if(isVacationOn())return; // programme en pause -> aucune photo, pas de pénalité
   var today=getParisDate();
   var history=ld(K('statsHistory'),[]);
   var completion=computeAssiduityScore();
@@ -251,14 +252,57 @@ function recordDailySnapshotIfNeeded(){
   sv(K('statsHistory'),history);
 }
 
+// ── MODE VACANCES ────────────────────────────────────────────────────────────
+// Met le programme en pause : pendant les vacances (1) aucune photo stat
+// n'est prise -> l'assiduité n'est pas pénalisée (voir recordDailySnapshot),
+// et (2) le compte à rebours J–N est gelé. Au retour, la date de révision du
+// programme est repoussée du nombre de jours d'absence.
+// Persistance : vacationOn (bool), vacationStart (date du départ), et
+// vacationOffsetDays (jours de vacances déjà accumulés, ajoutés à la
+// deadline). Tant qu'on est en vacances, les jours écoulés depuis le départ
+// s'ajoutent "en direct" -> la deadline avance au même rythme que le temps,
+// donc le J–N reste figé. À l'arrêt, ces jours sont versés définitivement
+// dans vacationOffsetDays.
+function isVacationOn(){return !!ld(K('vacationOn'),false);}
+function ongoingVacationDays(){
+  if(!isVacationOn())return 0;
+  var start=ld(K('vacationStart'),null);
+  if(!start)return 0;
+  var d=Math.floor((getParisNow()-new Date(start+'T12:00:00'))/86400000);
+  return d>0?d:0;
+}
+function totalVacationDays(){
+  return ld(K('vacationOffsetDays'),0)+ongoingVacationDays();
+}
+function effectiveDeadlineMs(){
+  return new Date(CONFIG.deadline+'T12:00:00').getTime()+totalVacationDays()*86400000;
+}
+function recomputeJLeft(){
+  JLEFT_RAW=Math.floor((effectiveDeadlineMs()-getParisNow().getTime())/86400000);
+  JLEFT=Math.max(0,JLEFT_RAW);
+}
+function toggleVacation(){
+  if(isVacationOn()){
+    // Fin des vacances : on verse les jours écoulés dans l'offset définitif.
+    sv(K('vacationOffsetDays'),ld(K('vacationOffsetDays'),0)+ongoingVacationDays());
+    sv(K('vacationOn'),false);
+    sv(K('vacationStart'),null);
+  }else{
+    sv(K('vacationOn'),true);
+    sv(K('vacationStart'),getParisDate());
+  }
+  recomputeJLeft();
+  render();
+}
+
 // ── STATE ──────────────────────────────────────────────────────────────────
 var TI=computeDayIndex(getWeekday());
-var DL=new Date(CONFIG.deadline+'T12:00:00');
 // JLEFT_RAW garde le signe (négatif une fois la deadline passée) pour pouvoir
 // afficher un décompte de retard ; JLEFT (jamais négatif) sert à l'affichage
-// normal "J–N jours restants".
-var JLEFT_RAW=Math.floor((DL-getParisNow())/86400000);
-var JLEFT=Math.max(0,JLEFT_RAW);
+// normal "J–N jours restants". La deadline effective inclut le décalage
+// vacances (voir effectiveDeadlineMs).
+var JLEFT_RAW,JLEFT;
+recomputeJLeft();
 var WK=getWK();
 var storedWK=ld(K('doneWeek'),null);
 var storedDone=ld(K('done'),{});
@@ -292,6 +336,8 @@ function bindEvents(){
   if(btnWeek)btnWeek.addEventListener('click',function(){S.mode='week';S.openDays={};render();});
   var btnStats=document.getElementById('btn-stats');
   if(btnStats)btnStats.addEventListener('click',function(){S.mode='stats';render();});
+  var btnVacation=document.getElementById('btn-vacation');
+  if(btnVacation)btnVacation.addEventListener('click',function(){toggleVacation();});
   var dhs=document.querySelectorAll('.dh');
   dhs.forEach(function(dh){
     dh.addEventListener('click',function(){
@@ -429,6 +475,10 @@ function buildHTML(){
     +'<div style="text-align:right">'+jleftHTML()+'</div>'
     +'</div>'
     +'</div>'
+    // Bandeau vacances : visible partout (sauf page données) quand le
+    // programme est en pause, pour qu'on sache d'un coup d'œil que rien n'est
+    // compté et que le compte à rebours est gelé.
+    +((!isData&&isVacationOn())?'<div style="margin:12px 14px 0;padding:12px 14px;border-radius:12px;background:'+CONFIG.accentColor+'1f;border:1px solid '+CONFIG.accentColor+';text-align:center;font-size:12.5px;font-weight:700;color:'+CONFIG.accentColor+'">&#127958;&#65039; Vacances — programme en pause</div>':'')
     +(isData?'<div style="text-align:center;padding:10px 14px 0;font-size:11px;color:'+CONFIG.noSideIconColor+'">&#8249; Touche ton prénom pour revenir en arrière</div>':'')
     +mainContent
     // Sur la page données elle-même, pas de pied de version (on y est déjà) ;
@@ -534,6 +584,8 @@ function statsStatusLine(history){
 function statsPageHTML(){
   var history=ld(K('statsHistory'),[]);
   var c=CONFIG.noSideIconColor;
+  var ac=CONFIG.accentColor;
+  var onVac=isVacationOn();
   var last=history.length?history[history.length-1]:null;
   var bigScore='';
   if(last){
@@ -570,6 +622,19 @@ function statsPageHTML(){
     +'<div style="font-size:10px;color:'+c+';margin-bottom:12px">Glisse pour l’historique &#8226; pointillé = ton objectif</div>'
     +statsChartSVG(history)
     +'<div style="font-size:10px;color:'+c+';margin-top:14px;line-height:1.4">La note vient de ton assiduité (100&#37; si tu respectes ta marge). Monter tes charges ajoute un bonus qui peut rattraper une séance manquée et dépasser 100&#37;. Ne pas progresser n&rsquo;enlève rien.</div>'
+    +'</div>'
+    // Carte "Mode vacances" : met le programme en pause (stats gelées +
+    // compte à rebours gelé, deadline repoussée au retour, voir toggleVacation).
+    +'<div class="dc" style="padding:18px">'
+      +'<div style="font-size:11px;font-weight:800;letter-spacing:1px;color:'+c+';margin-bottom:6px">&#127958;&#65039; MODE VACANCES</div>'
+      +'<div style="font-size:11px;color:'+c+';margin-bottom:12px;line-height:1.4">'
+        +(onVac
+          ?'Programme en pause : aucun jour n’est compté et le compte à rebours est gelé. Reprends quand tu rentres.'
+          :'Pars tranquille : mets le programme en pause. Aucun jour ne sera compté comme raté, le compte à rebours s’arrête, et la date de révision sera repoussée d’autant à ton retour.')
+      +'</div>'
+      +'<button class="mbtn" id="btn-vacation" style="font-size:13px;font-weight:700;width:100%;justify-content:center;padding:12px;background:'+ac+(onVac?'26':'18')+';border-color:'+ac+';color:'+ac+'">'
+        +(onVac?'Reprendre le programme':'Activer le mode vacances')
+      +'</button>'
     +'</div>'
     +'</div>';
 }
@@ -866,8 +931,9 @@ setInterval(function(){
   var changed=false;
   var newTI=computeDayIndex(getWeekday());
   if(newTI!==TI){TI=newTI;S.openDays[TI]=true;changed=true;}
-  var newJLEFT_RAW=Math.floor((DL-getParisNow())/86400000);
-  if(newJLEFT_RAW!==JLEFT_RAW){JLEFT_RAW=newJLEFT_RAW;JLEFT=Math.max(0,JLEFT_RAW);changed=true;}
+  var prevJLEFT_RAW=JLEFT_RAW;
+  recomputeJLeft(); // tient compte du décalage vacances (deadline effective)
+  if(JLEFT_RAW!==prevJLEFT_RAW)changed=true;
   var nwk=getWK();
   if(ld(K('doneWeek'),null)!==nwk){S.done={};sv(K('doneWeek'),nwk);sv(K('done'),{});changed=true;}
   recordDailySnapshotIfNeeded();
