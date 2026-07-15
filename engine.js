@@ -122,25 +122,29 @@ function countsTowardProgress(ex){
 }
 
 // ── STATS QUOTIDIENNES ───────────────────────────────────────────────────────
-// Une photo est prise une fois par jour :
-// - Assiduité : cases cochées / total attendu SUR LES JOURS DÉJÀ PASSÉS
-//   cette semaine (le jour de mercredi ne compte pas encore comme "attendu"
-//   un lundi — sinon la barre retombe artificiellement à chaque début de
-//   semaine). Comparée à un objectif personnel (CONFIG.statsTarget.
-//   assiduityTargetPct) : atteindre cet objectif = 100%, faire mieux monte
-//   au-dessus, faire moins descend en dessous.
-// - Charge : % des exercices dont le poids a augmenté par rapport à il y a
-//   quelques jours/semaines (CONFIG.statsTarget.weightLookbackDays), comparé
-//   à un objectif personnel (CONFIG.statsTarget.weightProgressTargetPct).
-// Les deux objectifs sont personnels (config), pas dans le moteur : chacun a
-// un niveau de base différent. Le score affiché est la moyenne des deux
-// (50/50) — peut dépasser 100% si tu fais mieux que ton propre objectif sur
-// l'un des deux axes, ce qui peut compenser l'autre. Rien n'est jamais
-// recalculé pour le passé ni supprimé : tout l'historique est gardé.
+// Une photo est prise une fois par jour. Modèle de note : L'ASSIDUITÉ EST LA
+// BASE, LA PROGRESSION DES CHARGES EST UN BONUS QUI S'AJOUTE (jamais un
+// malus). But : suivre son programme est ce qui compte d'abord ; ne pas
+// (encore) monter ses charges ne doit PAS faire chuter la note, mais en
+// monter récompense et peut rattraper une séance manquée.
+// - Assiduité (0-100, base) : exercices cochés / attendus SUR LES JOURS DÉJÀ
+//   PASSÉS cette semaine (mercredi ne compte pas encore un lundi, sinon la
+//   note retombe à chaque début de semaine). Chacun a une MARGE de séances
+//   ratables sans pénalité (CONFIG.statsTarget.assiduityAllowedMisses) :
+//   tant qu'on reste dans sa marge -> 100 %. Au-delà, la note descend
+//   proportionnellement aux exercices ratés EN TROP. Plafonnée à 100 :
+//   dépasser 100 % ne vient QUE du bonus de charges.
+// - Bonus charges (0..weightBonusMax, ajouté) : selon la part d'exercices
+//   dont le poids a monté depuis weightLookbackDays jours, rapportée à un
+//   objectif perso (weightProgressTargetPct = part de hausses donnant le
+//   bonus max). 0 si pas de recul ou pas de hausse — jamais négatif.
+// Score du jour = assiduité + bonus. Tout est perso (config), le moteur ne
+// connaît aucun chiffre en dur. Rien n'est recalculé pour le passé ni
+// supprimé : tout l'historique est gardé.
 var WEIGHT_PROGRESS_LOOKBACK_DAYS_DEFAULT=14;
 var WEIGHT_PROGRESS_TARGET_PCT_DEFAULT=25;
-var ASSIDUITY_TARGET_PCT_DEFAULT=100;
-var WEIGHT_SCORE_CAP=200;
+var ASSIDUITY_ALLOWED_MISSES_DEFAULT=3;
+var WEIGHT_BONUS_MAX_DEFAULT=25;
 
 function statsTarget(name,dflt){
   return (CONFIG.statsTarget&&CONFIG.statsTarget[name]!=null)?CONFIG.statsTarget[name]:dflt;
@@ -160,21 +164,10 @@ function computeWeekTotalCountable(){
   return tot;
 }
 
-// Objectif d'assiduité : une personne peut fournir soit un pourcentage
-// direct (CONFIG.statsTarget.assiduityTargetPct), soit — plus parlant —
-// un nombre d'exercices qu'elle a le droit de rater par semaine
-// (CONFIG.statsTarget.assiduityAllowedMisses), converti ici en pourcentage.
-function assiduityTargetPercent(){
-  var misses=statsTarget('assiduityAllowedMisses',null);
-  if(misses!=null){
-    var total=computeWeekTotalCountable();
-    return total>0?Math.max(1,Math.round((total-misses)/total*100)):ASSIDUITY_TARGET_PCT_DEFAULT;
-  }
-  return statsTarget('assiduityTargetPct',ASSIDUITY_TARGET_PCT_DEFAULT);
-}
-
-// % de complétion sur les jours déjà passés cette semaine (0-100, brut).
-function computeLiveCompletion(){
+// Compte, sur les jours DÉJÀ passés cette semaine, combien d'exercices sont
+// attendus et combien sont faits (bannières/échauffements exclus, comme la
+// barre de progression). Renvoie {done,total}.
+function computeLiveCounts(){
   var weekday=getWeekday();
   var expectedIdx={};
   for(var w=0;w<=weekday;w++){
@@ -191,26 +184,40 @@ function computeLiveCompletion(){
       if(S.done[ex.id])dc++;
     }
   }
-  return tot>0?Math.round(dc/tot*100):100; // rien d'attendu pour l'instant -> neutre
+  return {done:dc,total:tot};
 }
+// Assiduité : note de BASE, 0-100. Tant qu'on reste dans sa marge de séances
+// ratables (assiduityAllowedMisses, définie par semaine) -> 100 %. Au-delà,
+// la note baisse au prorata des exercices ratés EN TROP. La marge est
+// proratisée à la part de la semaine déjà écoulée (sinon, en début de
+// semaine, la marge complète rendrait n'importe quoi = 100 %). Plafonnée à
+// 100 : le dépassement ne vient que du bonus de charges (computeWeightBonus).
 function computeAssiduityScore(){
-  var raw=computeLiveCompletion();
-  var target=assiduityTargetPercent();
-  return Math.round(raw/target*100);
+  var c=computeLiveCounts();
+  if(c.total===0)return 100; // rien attendu encore -> neutre
+  var allowedWeek=statsTarget('assiduityAllowedMisses',ASSIDUITY_ALLOWED_MISSES_DEFAULT);
+  var weekTotal=computeWeekTotalCountable();
+  var allowedNow=weekTotal>0?allowedWeek*(c.total/weekTotal):allowedWeek;
+  var missed=c.total-c.done;
+  var effectiveMissed=Math.max(0,missed-allowedNow);
+  return Math.round((c.total-effectiveMissed)/c.total*100);
 }
-// Renvoie null tant qu'il n'y a pas assez de recul pour comparer (pas assez
-// de jours d'historique, ou aucun poids comparable) — jamais une valeur
-// neutre inventée, qui tirerait artificiellement le score global vers le
-// bas alors qu'on n'a simplement encore aucune donnée sur cet axe.
-function computeWeightScore(history){
+// Bonus de charges : points AJOUTÉS à l'assiduité (jamais retirés). Renvoie
+// toujours un nombre >= 0. 0 quand il n'y a pas encore assez de recul, ou
+// aucun poids comparable, ou aucune hausse — ne pas progresser ne coûte donc
+// rien. Sinon, proportionnel à la part d'exercices dont le poids a monté
+// depuis weightLookbackDays jours, rapportée à weightProgressTargetPct (part
+// de hausses qui donne le bonus MAXIMUM), plafonné à weightBonusMax.
+function computeWeightBonus(history){
   var lookback=statsTarget('weightLookbackDays',WEIGHT_PROGRESS_LOOKBACK_DAYS_DEFAULT);
   var target=statsTarget('weightProgressTargetPct',WEIGHT_PROGRESS_TARGET_PCT_DEFAULT);
+  var maxBonus=statsTarget('weightBonusMax',WEIGHT_BONUS_MAX_DEFAULT);
   var targetDate=new Date(getParisNow().getTime()-lookback*86400000);
   var ref=null;
   for(var i=history.length-1;i>=0;i--){
     if(new Date(history[i].date+'T12:00:00')<=targetDate){ref=history[i];break;}
   }
-  if(!ref)return null; // pas encore assez de recul -> pas de donnée sur cet axe
+  if(!ref)return 0; // pas encore de recul -> pas de bonus (mais aucun malus)
   var refWeights=ref.weights||{};
   var up=0,total=0;
   for(var id in S.weights){
@@ -219,24 +226,23 @@ function computeWeightScore(history){
     total++;
     if(parseFloat(cur)>parseFloat(prev))up++;
   }
-  if(total===0)return null; // rien de comparable non plus -> pas de donnée
-  var pct=up/total*100;
-  return Math.min(WEIGHT_SCORE_CAP,Math.round(pct/target*100));
+  if(total===0)return 0;
+  var pctUp=up/total*100;
+  return Math.min(maxBonus,Math.round(pctUp/target*maxBonus));
 }
 // Met à jour la photo du jour en cours à chaque appel (elle reste "vivante"
 // tant qu'on est le même jour — sinon cocher un exercice l'après-midi
 // n'apparaîtrait dans les stats que le lendemain). Une fois le jour passé,
 // son entrée devient définitive et n'est plus jamais retouchée.
-// Tant que la charge n'a pas encore de donnée (voir computeWeightScore),
-// le score du jour = l'assiduité seule, jamais une moyenne avec une valeur
-// inventée.
+// Score du jour = assiduité (base 0-100) + bonus de charges (>=0). Le bonus
+// peut donc rattraper des séances manquées et faire dépasser 100 %.
 function recordDailySnapshotIfNeeded(){
   var today=getParisDate();
   var history=ld(K('statsHistory'),[]);
   var completion=computeAssiduityScore();
-  var weightScore=computeWeightScore(history);
-  var score=weightScore===null?completion:Math.round((completion+weightScore)/2);
-  var entry={date:today,completion:completion,weightScore:weightScore,score:score,weights:S.weights};
+  var weightBonus=computeWeightBonus(history);
+  var score=completion+weightBonus;
+  var entry={date:today,completion:completion,weightBonus:weightBonus,score:score,weights:S.weights};
   if(history.length&&history[history.length-1].date===today){
     history[history.length-1]=entry;
   }else{
@@ -480,7 +486,7 @@ function dataPageHTML(){
 // recordDailySnapshotIfNeeded), sous forme de graphique qui défile
 // horizontalement — ouvert par défaut sur les données les plus récentes,
 // on glisse vers la gauche pour remonter dans l'historique. Rien n'est
-// jamais coupé : le score peut dépasser 100 % (voir computeWeightScore).
+// jamais coupé : le score peut dépasser 100 % (bonus charges, computeWeightBonus).
 function scoreColorFor(score){
   if(score>=100)return CONFIG.weightColors.fresh;
   if(score>=70)return CONFIG.weightColors.aging;
@@ -566,7 +572,7 @@ function statsPageHTML(){
     +bigScore
     +'<div style="font-size:10px;color:'+c+';margin-bottom:12px">Glisse pour l’historique &#8226; pointillé = ton objectif</div>'
     +statsChartSVG(history)
-    +'<div style="font-size:10px;color:'+c+';margin-top:14px;line-height:1.4">Assiduité + progression des charges, par rapport à tes objectifs perso. Peut dépasser 100&#37; si tu fais mieux que prévu.</div>'
+    +'<div style="font-size:10px;color:'+c+';margin-top:14px;line-height:1.4">La note vient de ton assiduité (100&#37; si tu respectes ta marge). Monter tes charges ajoute un bonus qui peut rattraper une séance manquée et dépasser 100&#37;. Ne pas progresser n&rsquo;enlève rien.</div>'
     +'</div>'
     +'</div>';
 }
