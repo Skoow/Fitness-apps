@@ -24,7 +24,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // À changer à chaque fois que ce fichier change, EN MÊME TEMPS que le
 // ?v=X.Y sur la balise <script src="../engine.js?v=X.Y"> des 3 index.html
 // (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION='1.17';
+var ENGINE_VERSION='1.18';
 
 function startApp(CONFIG){
 
@@ -428,31 +428,32 @@ function buildHTML(){
     +'</div>'
     +(isData?'<div style="text-align:center;padding:10px 14px 0;font-size:11px;color:'+CONFIG.noSideIconColor+'">&#8249; Touche ton prénom pour revenir en arrière</div>':'')
     +mainContent;
-  // ARCHITECTURE (spécifique iOS — vérifié : sur iPhone, un position:fixed
-  // voisin d'un AUTRE élément qui défile bouge quand même pendant le
-  // défilement ; bug WebKit connu avec plusieurs fixed dont un scroll).
-  // Solution : UN SEUL élément fixe, #app-frame (position:fixed;inset:0,
-  // overflow:hidden), qui ne défile jamais et sert de cadre stable. TOUT le
-  // reste est en position:absolute À L'INTÉRIEUR de ce cadre :
-  //   #app-scroll : position:absolute;inset:0, overflow-y:auto — c'est LUI
-  //     seul qui défile, à l'intérieur du cadre.
-  //   #app-shell : enfant de #app-scroll, porte le translateX du tiroir.
-  //   #btn-menu : position:ABSOLUTE (pas fixed) par rapport à #app-frame,
-  //     qui ne défile pas → le bouton est ancré au cadre, jamais au
-  //     défilement. C'est le point clé : absolute-dans-un-cadre-fixe est
-  //     fiable sur iOS là où fixed-voisin-d'un-scroll ne l'est pas.
-  //   #drawer / #menu-overlay : eux aussi en absolute dans le cadre.
+  // ARCHITECTURE (spécifique iOS — position:fixed ET absolute-dans-un-cadre-
+  // fixe ont TOUS DEUX échoué sur iPhone Safari/Firefox : le bouton bougeait
+  // encore. Cause profonde : iOS n'honore pas toujours body{overflow:hidden}
+  // et fait défiler le DOCUMENT entier, ce qui entraîne tout élément fixe.)
+  // Solution la plus robuste sur iOS :
+  //   - body est VERROUILLÉ pour de vrai : position:fixed;inset:0 (voir le
+  //     CSS de chaque personne) — sur iOS, seul position:fixed sur le body
+  //     empêche réellement le document de défiler. Plus aucun défilement de
+  //     document, donc plus rien à entraîner.
+  //   - #app (flex:1) et #app-scroll (flex:1;overflow-y:auto) : le
+  //     défilement est confiné à #app-scroll, un enfant flex normal.
+  //   - #btn-menu / #drawer / #menu-overlay : position:ABSOLUTE par rapport
+  //     à #app (position:relative, enfant flex NORMAL qui ne défile pas et
+  //     ne bouge pas). Le bouton n'est donc plus du tout en position:fixed
+  //     (ce que iOS gère mal) : il est ancré à un élément de flux normal,
+  //     stable — la façon la plus sûre d'immobiliser un élément sur iOS.
+  //   - #app-shell : enfant de #app-scroll, porte le translateX du tiroir.
   // z-index : bouton 61 > tiroir 60 > fond cliquable 59 > #app-scroll (auto).
-  return '<div id="app-frame" style="position:fixed;inset:0;overflow:hidden">'
-    +'<div id="app-scroll" style="position:absolute;inset:0;overflow-x:hidden;overflow-y:auto;padding-top:env(safe-area-inset-top,20px);padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))">'
+  return '<div id="app-scroll" style="flex:1;min-height:0;overflow-x:hidden;overflow-y:auto;padding-top:env(safe-area-inset-top,20px);padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))">'
     +'<div id="app-shell" style="transform:translateX('+(S.menuOpen?'-'+DRAWER_WIDTH+'px':'0')+');transition:transform .3s ease">'
     +shellContent
     +'</div>'
     +'</div>'
     +(S.menuOpen?'<div id="menu-overlay" style="position:absolute;inset:0;z-index:59;background:transparent"></div>':'')
     +drawerHTML()
-    +menuButtonHTML()
-    +'</div>';
+    +menuButtonHTML();
 }
 
 // Largeur du tiroir (voir drawerHTML) — utilisée aussi pour calculer le
@@ -460,16 +461,18 @@ function buildHTML(){
 var DRAWER_WIDTH=250;
 
 // Bouton ☰ en haut à droite — il devient une croix une fois le tiroir
-// ouvert, pour refermer. position:ABSOLUTE (pas fixed) par rapport à
-// #app-frame, qui est un cadre position:fixed;inset:0 qui NE DÉFILE JAMAIS
-// (voir l'explication d'architecture complète dans buildHTML). Le bouton est
-// donc ancré à ce cadre stable, pas au défilement (qui se passe dans
-// #app-scroll, un autre élément) — c'est la seule façon fiable sur iOS.
+// ouvert, pour refermer. position:ABSOLUTE (jamais fixed) par rapport à
+// #app, un enfant flex NORMAL (position:relative) qui ne défile pas et ne
+// bouge pas (voir l'explication d'architecture complète dans buildHTML). Le
+// bouton est donc ancré à un élément de flux stable, pas au défilement (qui
+// se passe dans #app-scroll) — la façon la plus fiable d'immobiliser un
+// élément sur iOS, où position:fixed est mal géré.
 // top: aligné (à ~2px) avec le haut du rectangle orange PROGRAMME dans
 // l'en-tête = padding-top de #app-scroll (safe-area) + le padding-top 28px
 // de .hdr, moins le padding interne 6px du bouton -> calc(22px + safe-area).
-// env(safe-area-inset-top) est nécessaire ici : #app-frame couvre tout le
-// viewport (encoche comprise), le bouton doit éviter cette zone lui-même.
+// env(safe-area-inset-top) est nécessaire ici : #app couvre tout le viewport
+// (encoche comprise, car body est en viewport-fit=cover), le bouton doit
+// éviter cette zone lui-même.
 // Le header réserve 64px à droite (voir "padding-right" dans buildHTML) pour
 // que le badge programme et le J–N ne passent jamais dessous.
 // Ce bouton ne montre que le logo — le numéro de version est affiché dans
