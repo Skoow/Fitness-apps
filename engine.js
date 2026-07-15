@@ -15,16 +15,18 @@
 var WEIGHT_OPTIONS_DB=['—','2','4','6','8','10','12','14','16','18','20','22','24','26','28','30','32','34','36','38','40','42','44','46','48','50'];
 var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','39','41','45','50','52','54','59','64','66','68','73','77','79','82','86','91','93','100','107','113'];
 
-// Numéro de version affiché dans l'app (petit repère visuel pour vérifier
-// qu'une mise à jour est bien arrivée sur le téléphone), au format
-// MAJEUR.MINEUR : le chiffre MINEUR s'incrémente pour chaque petit
-// changement (réajustement graphique, correctif...) — 1.1, 1.2, 1.3...
-// Le chiffre MAJEUR ne bouge que pour une évolution importante (nouvelle
-// fonctionnalité, refonte...) et repart alors avec un mineur à 0 — 2.0, 3.0...
-// À changer à chaque fois que ce fichier change, EN MÊME TEMPS que le
-// ?v=X.Y sur la balise <script src="../engine.js?v=X.Y"> des 3 index.html
-// (sinon le service worker peut continuer à servir l'ancienne version).
-var ENGINE_VERSION='1.20';
+// Numéro de version AFFICHÉ dans l'app (pied de page, sert aussi de bouton
+// Import/Export). C'est purement cosmétique : on le fixe librement à la
+// valeur qu'on veut montrer — ici 1.5, car depuis cette version il n'y a eu
+// que des petits ajustements, pas de gros changement.
+// ATTENTION : ce numéro affiché est INDÉPENDANT du jeton de cache "?v=..."
+// des balises <script src="../engine.js?v=..."> dans les 3 index.html. Ce
+// jeton-là, lui, doit être une valeur NEUVE et jamais réutilisée à chaque
+// modif de engine.js (sinon le navigateur ressert l'ancien fichier en
+// cache) — on utilise donc un compteur de build "b1, b2, b3..." qui n'a
+// rien à voir avec le numéro affiché (réutiliser "1.5" comme jeton
+// resservirait le vieux engine.js déjà mis en cache sous ?v=1.5).
+var ENGINE_VERSION='1.5';
 
 function startApp(CONFIG){
 
@@ -430,16 +432,16 @@ function buildHTML(){
   return shellContent;
 }
 
-// Numéro de version en pied de page, avec une grande zone cliquable : le
+// Numéro de version en pied de page, en BAS À DROITE, sans bordure : le
 // toucher ouvre la page Import/Export (S.mode='data', voir bindEvents). Il
-// remplace l'ancien bouton ☰ + tiroir. Écrit un peu plus gros et bien
-// centré pour qu'on le voie et qu'on le touche facilement.
+// remplace l'ancien bouton ☰ + tiroir. Zone cliquable volontairement
+// modérée (padding réduit) tout en restant confortable au doigt.
 function versionFooterHTML(){
   var c=CONFIG.noSideIconColor;
-  return '<div style="display:flex;justify-content:center;padding:6px 14px 10px">'
-    +'<button id="btn-version" style="background:transparent;border:1px solid '+c+'55;border-radius:14px;color:'+c+';cursor:pointer;padding:14px 30px;text-align:center;line-height:1.2">'
-      +'<div style="font-size:16px;font-weight:800">v'+ENGINE_VERSION+'</div>'
-      +'<div style="font-size:11px;font-weight:600;margin-top:3px">Importer / Exporter</div>'
+  return '<div style="display:flex;justify-content:flex-end;padding:2px 14px 12px">'
+    +'<button id="btn-version" style="background:transparent;border:none;color:'+c+';cursor:pointer;padding:8px 8px;text-align:right;line-height:1.2">'
+      +'<div style="font-size:14px;font-weight:800">v'+ENGINE_VERSION+'</div>'
+      +'<div style="font-size:10px;font-weight:600;margin-top:2px">Importer / Exporter</div>'
     +'</button>'
     +'</div>';
 }
