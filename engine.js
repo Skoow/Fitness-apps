@@ -23,7 +23,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 // ensemble à chaque changement de engine.js. Aucun risque de collision de
 // cache : les "2.x" n'ont jamais servi de jeton auparavant, et comme le
 // numéro augmente toujours, il est toujours neuf.
-var ENGINE_VERSION='2.3';
+var ENGINE_VERSION='2.4';
 
 function startApp(CONFIG){
 
@@ -743,8 +743,10 @@ function statsChartSVG(history){
   var areaStr=pointsStr+' '+xAt(n-1)+','+(padT+innerH)+' '+xAt(0)+','+(padT+innerH);
   var gridVals=[];for(var v=0;v<=yMax;v+=25)gridVals.push(v);
   var gridlines=gridVals.map(function(v){
-    var is100=v===100;
-    return '<line x1="0" y1="'+yAt(v)+'" x2="'+svgW+'" y2="'+yAt(v)+'" stroke="'+(is100?ac:c)+'" stroke-opacity="'+(is100?'.5':'.15')+'" stroke-width="1"'+(is100?' stroke-dasharray="4,3"':'')+'/>';
+    // La ligne 100 n'a plus de traitement spécial (pointillé violet retiré) :
+    // c'est une ligne de grille neutre comme les autres. La fourchette
+    // verte/rouge suffit à situer le niveau.
+    return '<line x1="0" y1="'+yAt(v)+'" x2="'+svgW+'" y2="'+yAt(v)+'" stroke="'+c+'" stroke-opacity=".15" stroke-width="1"/>';
   }).join('');
   // Les deux lignes repères de la fourchette (pointillés verts/rouges).
   var bandLines=''
@@ -760,8 +762,7 @@ function statsChartSVG(history){
         +'<text x="'+xAt(i)+'" y="'+(padT+innerH+16)+'" font-size="7.5" fill="'+c+'" text-anchor="middle">'+shortDateFR(hpt.date)+'</text>'):'');
   }).join('');
   var axisLabels=gridVals.map(function(v){
-    var is100=v===100;
-    return '<div style="position:absolute;left:0;top:'+(yAt(v)-6)+'px;font-size:8px;color:'+(is100?ac:c)+';font-weight:'+(is100?'700':'400')+'">'+v+'</div>';
+    return '<div style="position:absolute;left:0;top:'+(yAt(v)-6)+'px;font-size:8px;color:'+c+';font-weight:400">'+v+'</div>';
   }).join('')
     // Étiquettes des lignes de la fourchette, dans leur couleur.
     +'<div style="position:absolute;left:0;top:'+(yAt(goodLevel)-6)+'px;font-size:8px;font-weight:700;color:'+greenCol+'">'+goodLevel+'</div>'
