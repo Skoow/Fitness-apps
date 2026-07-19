@@ -27,7 +27,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 //    UNIQUEMENT quand on modifie SA config perso (ses exercices, ses journées,
 //    ses réglages…), sans toucher au moteur. Chacun garde son PATCH quand le
 //    moteur bouge : qui était en 2.4.1 passe en 2.5.1 lors d'une maj moteur.
-var ENGINE_VERSION='2.5';
+var ENGINE_VERSION='3.0';
 
 // Valeurs PARTAGÉES par défaut. Tout ce qui est identique d'une personne à
 // l'autre vit ICI, pas dupliqué dans chaque config. Une config perso ne
@@ -522,13 +522,42 @@ function restBodyHTML(){
   return card?pauseCardHTML({emoji:card.emoji,title:card.title,subtitle:card.subtitle,color:card.color||CONFIG.noSideIconColor}):CONFIG.restDay.html;
 }
 
+// Prochain exercice à faire de la séance du jour = le premier de la liste
+// encore non coché (on saute les bannières et l'échauffement). Sert au badge
+// d'en-tête dynamique. Retourne null si repos ou séance terminée.
+function nextGuidedExercise(){
+  if(TI<0)return null;
+  var day=CONFIG.days[TI];
+  for(var i=0;i<day.exercises.length;i++){
+    var ex=day.exercises[i];
+    if(ex.banner||ex.cat==='warmup')continue;
+    if(!S.done[ex.id])return ex;
+  }
+  return null;
+}
+// Badge d'en-tête DYNAMIQUE (partagé par les 3) : au lieu d'un « 4×12 » figé,
+// il annonce le PROCHAIN exercice à faire et son objectif séries×reps
+// (getReps de l'exercice), et se met à jour tout seul à chaque validation
+// (buildHTML reconstruit tout l'écran). Repos / vacances / séance finie : un
+// message court à la place. Styles en ligne -> aucune dépendance CSS par app.
 function programBadgeHTML(){
-  if(!CONFIG.programBadge)return'';
-  var b=CONFIG.programBadge;
-  return '<div class="wbadge" style="background:'+CONFIG.accentColor+'26;border:1.5px solid '+CONFIG.accentColor+'">'
-    +'<div class="wl">'+b.label+'</div>'
-    +'<div class="wv" style="color:'+CONFIG.accentColor+'">'+b.value+'</div>'
-    +'<div class="wr" style="color:'+CONFIG.accentColor+'">'+b.sub+'</div>'
+  var ac=CONFIG.accentColor,c=CONFIG.noSideIconColor;
+  var label,value,sub='';
+  if(isVacationOn()){label='AUJOURD’HUI';value='Vacances';}
+  else if(TI<0){label='AUJOURD’HUI';value='Repos';}
+  else{
+    var nx=nextGuidedExercise();
+    if(!nx){label='SÉANCE';value='✓ Finie';}
+    else{
+      label='PROCHAIN';
+      value=(getReps(nx)||'').replace(/\s*reps?\.?$/i,'')||'—';
+      sub=nx.name;
+    }
+  }
+  return '<div style="background:'+ac+'26;border:1.5px solid '+ac+';border-radius:14px;padding:8px 12px;max-width:158px;text-align:right">'
+    +'<div style="font-size:8px;font-weight:800;letter-spacing:1px;color:'+ac+';opacity:.85;text-transform:uppercase">'+label+'</div>'
+    +'<div style="font-size:19px;font-weight:900;color:'+ac+';line-height:1.05;margin-top:1px">'+value+'</div>'
+    +(sub?'<div style="font-size:9.5px;color:'+c+';margin-top:3px;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+sub+'</div>':'')
     +'</div>';
 }
 
