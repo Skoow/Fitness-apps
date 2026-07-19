@@ -27,7 +27,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 //    UNIQUEMENT quand on modifie SA config perso (ses exercices, ses journées,
 //    ses réglages…), sans toucher au moteur. Chacun garde son PATCH quand le
 //    moteur bouge : qui était en 2.4.1 passe en 2.5.1 lors d'une maj moteur.
-var ENGINE_VERSION='3.0';
+var ENGINE_VERSION='3.1';
 
 // Valeurs PARTAGÉES par défaut. Tout ce qui est identique d'une personne à
 // l'autre vit ICI, pas dupliqué dans chaque config. Une config perso ne
@@ -541,23 +541,20 @@ function nextGuidedExercise(){
 // (buildHTML reconstruit tout l'écran). Repos / vacances / séance finie : un
 // message court à la place. Styles en ligne -> aucune dépendance CSS par app.
 function programBadgeHTML(){
-  var ac=CONFIG.accentColor,c=CONFIG.noSideIconColor;
-  var label,value,sub='';
-  if(isVacationOn()){label='AUJOURD’HUI';value='Vacances';}
-  else if(TI<0){label='AUJOURD’HUI';value='Repos';}
+  var ac=CONFIG.accentColor;
+  var value;
+  if(isVacationOn())value='Vacances';
+  else if(TI<0)value='Repos';
   else{
     var nx=nextGuidedExercise();
-    if(!nx){label='SÉANCE';value='✓ Finie';}
-    else{
-      label='PROCHAIN';
-      value=(getReps(nx)||'').replace(/\s*reps?\.?$/i,'')||'—';
-      sub=nx.name;
-    }
+    value=nx?((getReps(nx)||'').replace(/\s*reps?\.?$/i,'')||'—'):'Terminé';
   }
-  return '<div style="background:'+ac+'26;border:1.5px solid '+ac+';border-radius:14px;padding:8px 12px;max-width:158px;text-align:right">'
-    +'<div style="font-size:8px;font-weight:800;letter-spacing:1px;color:'+ac+';opacity:.85;text-transform:uppercase">'+label+'</div>'
-    +'<div style="font-size:19px;font-weight:900;color:'+ac+';line-height:1.05;margin-top:1px">'+value+'</div>'
-    +(sub?'<div style="font-size:9.5px;color:'+c+';margin-top:3px;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+sub+'</div>':'')
+  // Label « PROGRAMME » figé en haut ; en dessous, CENTRÉ, l'objectif
+  // séries×reps du prochain exercice à faire (aucun nom d'exo). Dynamique : il
+  // avance au suivant à chaque validation. Repos/Vacances/Terminé -> mot court.
+  return '<div style="background:'+ac+'26;border:1.5px solid '+ac+';border-radius:14px;padding:8px 16px;min-width:96px;text-align:center">'
+    +'<div style="font-size:8px;font-weight:800;letter-spacing:1.5px;color:'+ac+';opacity:.85;text-transform:uppercase">PROGRAMME</div>'
+    +'<div style="font-size:24px;font-weight:900;color:'+ac+';line-height:1.05;margin-top:2px">'+value+'</div>'
     +'</div>';
 }
 
