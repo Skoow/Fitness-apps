@@ -15,18 +15,62 @@
 var WEIGHT_OPTIONS_DB=['—','2','4','6','8','10','12','14','16','18','20','22','24','26','28','30','32','34','36','38','40','42','44','46','48','50'];
 var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','39','41','45','50','52','54','59','64','66','68','73','77','79','82','86','91','93','100','107','113'];
 
-// Numéro de version AFFICHÉ dans l'app (pied de page, sert aussi de bouton
-// Import/Export). Depuis la 2.0, on repart sur un numéro qui BOUGE à chaque
-// mise à jour (2.0, 2.1, 2.2...), et ce même numéro sert aussi de jeton de
-// cache "?v=..." sur les balises <script src="../engine.js?v=..."> des 3
-// index.html — les deux DOIVENT rester identiques et être incrémentés
-// ensemble à chaque changement de engine.js. Aucun risque de collision de
-// cache : les "2.x" n'ont jamais servi de jeton auparavant, et comme le
-// numéro augmente toujours, il est toujours neuf.
-var ENGINE_VERSION='2.4';
+// VERSION AFFICHÉE = "MAJEUR.MINEUR.PATCH" (ex : 2.5.1).
+//  - MAJEUR.MINEUR = ENGINE_VERSION ci-dessous, PARTAGÉ par les 3 apps. On le
+//    change quand on touche au MOTEUR (engine.js) : MAJEUR (2->3) pour une
+//    grosse nouveauté / nouvelle fonctionnalité, MINEUR (2.4->2.5) pour une
+//    mise à jour moyenne ou une correction de l'existant. Ce même numéro sert
+//    aussi de jeton de cache "?v=..." sur les <script src="../engine.js?v=...">
+//    des 3 index.html — il DOIT rester identique à ENGINE_VERSION et être
+//    incrémenté avec lui à chaque changement de engine.js.
+//  - PATCH = CONFIG.configVersion, PROPRE À CHAQUE PERSONNE. On l'incrémente
+//    UNIQUEMENT quand on modifie SA config perso (ses exercices, ses journées,
+//    ses réglages…), sans toucher au moteur. Chacun garde son PATCH quand le
+//    moteur bouge : qui était en 2.4.1 passe en 2.5.1 lors d'une maj moteur.
+var ENGINE_VERSION='2.5';
+
+// Valeurs PARTAGÉES par défaut. Tout ce qui est identique d'une personne à
+// l'autre vit ICI, pas dupliqué dans chaque config. Une config perso ne
+// déclare QUE ce qui lui est propre (exercices, jours restants, réps, stats,
+// nombre de journées) ou ce qui diffère du défaut (ex : le thème clair de
+// Myriam). Un défaut n'est appliqué que si la clé est absente de la config.
+// Le défaut correspond au thème "sombre" d'Anthony/Mikael ; Myriam surcharge
+// les clés visuelles pour son thème clair.
+var ENGINE_DEFAULTS={
+  genderSymbol:'♂',
+  genderSymbolColor:'#3d8bff',
+  jleftUrgentColor:'#ff4d1c',
+  jleftNormalColor:'#f5a623',
+  restDay:{card:{emoji:'😴',title:'REPOS',subtitle:'Profites-en pour bien récupérer.'}},
+  cardioRepsText:'',
+  // Échauffement et cardio ne comptent jamais dans la progression du jour
+  // (X/N) : ce ne sont pas des exercices à cocher au même titre que le reste.
+  excludedFromProgress:['warmup','cardio'],
+  noWeightCategories:['cardio'],
+  categoryColors:{cardio:'#2ecc71'},
+  weightColors:{none:'#666',fresh:'#2ecc71',aging:'#f5a623',old:'#e53e3e'},
+  noSideIconColor:'#555',
+  exerciseNameColor:'#efefef',
+  exckBorderColor:'#333',
+  exckDoneColor:'#000',
+  showRepsChip:false,
+  supersetHeaderText:'🔗 SUPERSET · 2 exercices',
+  supersetFooterText:'Repos 60s après les 2 exos · puis recommencer',
+  supersetColor:function(block){return '#ffffff';},
+  bonusBanner:{icon:null,defaultLabel:'AVANT LA SÉANCE',repsText:'4×12 reps'},
+  absBanner:null,
+  configVersion:0
+};
+// Remplit UNIQUEMENT les clés absentes (surface, pas de fusion profonde) :
+// une config qui fournit sa propre valeur (même partielle, ex : restDay)
+// garde la sienne entièrement.
+function applyEngineDefaults(cfg){
+  for(var k in ENGINE_DEFAULTS){ if(cfg[k]===undefined) cfg[k]=ENGINE_DEFAULTS[k]; }
+}
 
 function startApp(CONFIG){
 
+applyEngineDefaults(CONFIG);
 var WOPT=CONFIG.weightOptions||{db:WEIGHT_OPTIONS_DB,mc:WEIGHT_OPTIONS_MC};
 
 // ── ICONS (thème personnel) ──────────────────────────────────────────────────
@@ -496,7 +540,7 @@ function buildHTML(){
     mainContent=dataPageHTML();
   }else{
     var isRest=TI<0;
-    var td=isRest?(CONFIG.restDay.fallbackDay?CONFIG.days[0]:null):CONFIG.days[TI];
+    var td=isRest?null:CONFIG.days[TI];
     var bodyHTML2;
     if(isStats){
       bodyHTML2=statsPageHTML();
@@ -511,7 +555,9 @@ function buildHTML(){
         color:CONFIG.accentColor
       })+'</div>';
     }else if(S.mode==='today'){
-      bodyHTML2='<div class="days">'+(isRest?(restBodyHTML()+(CONFIG.restDay.showNextDayPreview?dayHTML(CONFIG.days[0],0,false):'')):dayHTML(td,TI,true))+'</div>';
+      // Jour de repos : on n'affiche QUE la carte repos, jamais la séance du
+      // lendemain (comportement uniforme pour les 3 — plus de prévisualisation).
+      bodyHTML2='<div class="days">'+(isRest?restBodyHTML():dayHTML(td,TI,true))+'</div>';
     }else{
       bodyHTML2='<div class="days">'+CONFIG.days.map(function(d,i){return dayHTML(d,i,false);}).join('')+'</div>';
     }
@@ -569,7 +615,7 @@ function buildHTML(){
 function versionFooterHTML(){
   var c=CONFIG.noSideIconColor;
   return '<div style="display:flex;justify-content:flex-end;padding:2px 14px 12px">'
-    +'<button id="btn-version" style="background:transparent;border:none;color:'+c+';cursor:pointer;padding:10px 12px;text-align:right;font-size:15px;font-weight:800;line-height:1">v'+ENGINE_VERSION+'</button>'
+    +'<button id="btn-version" style="background:transparent;border:none;color:'+c+';cursor:pointer;padding:10px 12px;text-align:right;font-size:15px;font-weight:800;line-height:1">v'+ENGINE_VERSION+'.'+(CONFIG.configVersion==null?0:CONFIG.configVersion)+'</button>'
     +'</div>';
 }
 

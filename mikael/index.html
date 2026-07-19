@@ -78,7 +78,7 @@ select{-webkit-appearance:none;appearance:none}
 </head>
 <body>
 <div id="app"></div>
-<script src="../engine.js?v=2.4"></script>
+<script src="../engine.js?v=2.5"></script>
 <script>
 var ICONS={
     bench:'<rect x="4" y="36" width="56" height="8" rx="2" fill="C" opacity=".25"/><rect x="4" y="28" width="10" height="16" rx="2" fill="C" opacity=".3"/><rect x="6" y="10" width="52" height="4" rx="1" fill="C"/><rect x="4" y="6" width="4" height="8" rx="1" fill="C"/><rect x="56" y="6" width="4" height="8" rx="1" fill="C"/><circle cx="32" cy="26" r="4" fill="C"/><path d="M28 30L20 44" stroke="C" stroke-width="4" stroke-linecap="round"/><path d="M36 30L44 44" stroke="C" stroke-width="4" stroke-linecap="round"/><path d="M28 32L36 32" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M20 44L18 54" stroke="C" stroke-width="3.5" stroke-linecap="round"/><path d="M44 44L46 54" stroke="C" stroke-width="3.5" stroke-linecap="round"/>',
@@ -154,53 +154,23 @@ var CONFIG={
   personId:'mikael',
   storagePrefix:'mikael_',
   title:'MIKAEL',
-  genderSymbol:'♂',
-  genderSymbolColor:'#3d8bff',
   accentColor:'#ff4d1c',
+  configVersion:0,
   programBadge:{label:'PROGRAMME',value:'4×12',sub:'4 séries · 12 répétitions'},
   deadline:'2026-08-13',
   deadlineLabel:'RÉVISION DU PROGRAMME',
   deadlineDateText:'13 Août 2026',
-  jleftUrgentColor:'#ff4d1c',
-  jleftNormalColor:'#f5a623',
-  restDay:{
-    // card = carte partagée avec les vacances (voir pauseCardHTML dans le moteur).
-    card:{emoji:'😴',title:'REPOS',subtitle:'Profites-en pour bien récupérer.'},
-    fallbackDay:false,
-    showNextDayPreview:false
-  },
   defaultReps:'4×12 reps',
-  cardioRepsText:'',
-  // Charge Gauche/Droite séparée : Mikael a un bras et une jambe diminués et
-  // ne peut pas forcer pareil des deux côtés. Seul son programme a besoin de
-  // deux contrôles de poids (un par côté) — logique propre à sa config,
-  // réutilisant le weightCtrl partagé du moteur pour chaque côté.
+  // Charge Gauche/Droite séparée : Mikael a un bras et une jambe diminués et ne
+  // peut pas forcer pareil des deux côtés. Deux contrôles de poids (un par
+  // côté), en réutilisant le weightCtrl partagé du moteur.
   renderWeightRow:function(ex,ec,weightCtrl){
     if(!ex.side)return weightCtrl(ex.id,ec,'',ex.isDB);
     var sl=ex.side==='leg'?['Jambe G','Jambe D']:['Bras G','Bras D'];
     return weightCtrl(ex.id+'_g',ec,sl[0],ex.isDB)+weightCtrl(ex.id+'_d',ec,sl[1],ex.isDB);
   },
   extraBadge:function(ex){return ex.side?'<span class="bdg bf">🩹 '+(ex.side==='leg'?'Jambe G/D':'Bras G/D')+'</span>':'';},
-  weightColors:{none:'#666',fresh:'#2ecc71',aging:'#f5a623',old:'#e53e3e'},
-  noSideIconColor:'#555',
-  exerciseNameColor:'#efefef',
-  exckBorderColor:'#333',
-  exckDoneColor:'#000',
-  showRepsChip:false,
-  supersetHeaderText:'🔗 SUPERSET · 2 exercices',
-  supersetFooterText:'Repos 60s après les 2 exos · puis recommencer',
-  supersetColor:function(block){return '#ffffff';},
-  bonusBanner:{
-    icon:null,
-    defaultLabel:'AVANT LA SÉANCE',
-    repsText:'4×12 reps'
-  },
-  absBanner:null,
-  // Objectifs STAT intermédiaires (séquelles bras/jambe, douleurs
-  // articulaires). Note = 100 − pénalités + bonus charges. Chaque exo raté
-  // -2 (moins que le sain) ; au-delà de 5 ratés, -1 de plus ; journée entière
-  // -3. Bonus charges généreux (+25) : monter les poids est un vrai effort
-  // pour lui, donc mieux récompensé.
+  // Objectifs STAT intermédiaires (séquelles bras/jambe, douleurs articulaires).
   statsTarget:{missPenalty:2,missThreshold:5,missExtraPenalty:1,missedDayPenalty:3,weightProgressTargetPct:15,weightBonusMax:25,weightLookbackDays:21},
   icons:ICONS,
   days:P

@@ -78,7 +78,7 @@ select{-webkit-appearance:none;appearance:none}
 </head>
 <body>
 <div id="app"></div>
-<script src="../engine.js?v=2.4"></script>
+<script src="../engine.js?v=2.5"></script>
 <script>
 var ICONS={
     bench:'<rect x="4" y="36" width="56" height="8" rx="2" fill="C" opacity=".25"/><rect x="4" y="28" width="10" height="16" rx="2" fill="C" opacity=".3"/><rect x="6" y="10" width="52" height="4" rx="1" fill="C"/><rect x="4" y="6" width="4" height="8" rx="1" fill="C"/><rect x="56" y="6" width="4" height="8" rx="1" fill="C"/><circle cx="32" cy="26" r="4" fill="C"/><path d="M28 30L20 44" stroke="C" stroke-width="4" stroke-linecap="round"/><path d="M36 30L44 44" stroke="C" stroke-width="4" stroke-linecap="round"/><path d="M28 32L36 32" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M20 44L18 54" stroke="C" stroke-width="3.5" stroke-linecap="round"/><path d="M44 44L46 54" stroke="C" stroke-width="3.5" stroke-linecap="round"/>',
@@ -171,46 +171,22 @@ var CONFIG={
   personId:'anthony',
   storagePrefix:'anthony_',
   title:'ANTHONY',
-  genderSymbol:'♂',
-  genderSymbolColor:'#3d8bff',
   accentColor:'#ff4d1c',
+  configVersion:0,
   programBadge:{label:'PROGRAMME',value:'4×12',sub:'4 séries · 12 répétitions'},
   deadline:'2026-09-29',
   deadlineLabel:'RÉVISION DU PROGRAMME',
   deadlineDateText:'30 Juillet 2026',
-  jleftUrgentColor:'#ff4d1c',
-  jleftNormalColor:'#f5a623',
-  restDay:{
-    // card = carte partagée avec les vacances (voir pauseCardHTML dans le moteur).
-    card:{emoji:'😴',title:'REPOS',subtitle:'Profites-en pour bien récupérer.'},
-    fallbackDay:false,
-    showNextDayPreview:false
-  },
   defaultReps:'4×15 reps',
-  cardioRepsText:'',
   // Seul Anthony a des exercices unilatéraux affichant ce badge.
   extraBadge:function(ex){return ex.isUni?'<span class="bdg bun">💪 Unilatéral</span>':'';},
-  noWeightCategories:['cardio'],
-  weightColors:{none:'#666',fresh:'#2ecc71',aging:'#f5a623',old:'#e53e3e'},
-  noSideIconColor:'#555',
-  exerciseNameColor:'#efefef',
-  exckBorderColor:'#333',
-  exckDoneColor:'#000',
-  showRepsChip:false,
-  supersetHeaderText:'🔗 SUPERSET · 2 exercices',
-  supersetFooterText:'Repos 60s après les 2 exos · puis recommencer',
-  supersetColor:function(block){return '#ffffff';},
+  // Bannière bonus AVEC icône SVG (les 2 autres n'ont pas d'icône -> défaut moteur).
   bonusBanner:{
     icon:'<svg width="24" height="24" viewBox="0 0 28 28" fill="none"><rect x="4" y="8" width="20" height="14" rx="3" fill="rgba(168,85,247,.2)" stroke="#a855f7" stroke-width="1.5"/><line x1="4" y1="13" x2="24" y2="13" stroke="#a855f7" stroke-width="1"/><line x1="14" y1="8" x2="14" y2="22" stroke="#a855f7" stroke-width="1"/><rect x="7" y="10" width="4" height="2.5" rx="1" fill="#a855f7"/><rect x="17" y="10" width="4" height="2.5" rx="1" fill="#a855f7"/></svg>',
     defaultLabel:'AVANT LA SÉANCE',
     repsText:'4×12 reps'
   },
-  absBanner:null,
-  categoryColors:{cardio:'#2ecc71'},
   // Objectifs STAT (pas de souci de santé -> le plus exigeant des 3).
-  // Note = 100 − pénalités + bonus charges. Chaque exo raté -3 ; au-delà de 3
-  // ratés, -2 de plus par exo ; journée entière ratée -4 de plus. Bonus
-  // charges le plus FAIBLE (+15) : monter les poids est "normal" pour lui.
   statsTarget:{missPenalty:3,missThreshold:3,missExtraPenalty:2,missedDayPenalty:4,weightProgressTargetPct:30,weightBonusMax:15,weightLookbackDays:18},
   icons:ICONS,
   days:P

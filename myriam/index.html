@@ -180,7 +180,7 @@ select{-webkit-appearance:none;appearance:none}
 </head>
 <body>
 <div id="app"></div>
-<script src="../engine.js?v=2.4"></script>
+<script src="../engine.js?v=2.5"></script>
 <script>
 var ICONS={
     bench:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><rect x="6" y="14" width="3" height="32" fill="C" opacity=".5"/><rect x="55" y="14" width="3" height="32" fill="C" opacity=".5"/><rect x="3" y="22" width="58" height="2" rx="1" fill="C"/><rect x="2" y="18" width="4" height="10" rx="1" fill="C"/><rect x="58" y="18" width="4" height="10" rx="1" fill="C"/><circle cx="48" cy="34" r="3.5" fill="C"/><path d="M46 37L26 34L26 40L46 43Z" fill="C" opacity=".85"/><path d="M30 36Q28 28 30 22" stroke="C" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M34 38Q32 30 34 22" stroke="C" stroke-width="3" fill="none" stroke-linecap="round"/>',
@@ -267,22 +267,18 @@ var CONFIG={
   personId:'myriam',
   storagePrefix:'myriam_',
   title:'MYRIAM',
+  accentColor:'#e91e8c',
+  configVersion:0,
   genderSymbol:'♀',
   genderSymbolColor:'#e91e8c',
-  accentColor:'#e91e8c',
   programBadge:null,
   deadline:'2026-08-13',
   deadlineLabel:'DÉBUT DU PROGRAMME',
   deadlineDateText:'14 Juin 2026',
   jleftUrgentColor:'#e91e8c',
   jleftNormalColor:'#a855f7',
-  restDay:{
-    // card = carte partagée avec les vacances (voir pauseCardHTML dans le moteur).
-    card:{emoji:'🌿',title:'REPOS',subtitle:'Repose-toi bien — profite pour récupérer.'},
-    fallbackDay:false,
-    showNextDayPreview:false
-  },
-  excludedFromProgress:['warmup','cardio'],
+  // ── Surcharges du THÈME CLAIR (le moteur est sombre par défaut) ──
+  restDay:{card:{emoji:'🌿',title:'REPOS',subtitle:'Repose-toi bien — profite pour récupérer.'}},
   defaultReps:'3 × 12 reps',
   cardioRepsText:'5 min',
   warmupRepsText:'5 min',
@@ -296,29 +292,14 @@ var CONFIG={
   supersetHeaderText:'⚡ SUPER 7 · 7 reps · Même équipement',
   supersetFooterText:'Repos 60-90s après les 2 exercices · puis recommencer · 3 séries',
   supersetColor:function(block){return block.cat==='free'?'#ff6b35':'#3d8bff';},
-  bonusBanner:{icon:null,defaultLabel:'',repsText:''},
-  absBanner:{
-    icon:'💪',
-    title:'ABDOMINAUX · OBLIGATOIRE',
-    titleColor:'#0284c7',
-    subColor:'#0369a1',
-    style:'background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-bottom:2px solid #0ea5e9'
-  },
   categoryColors:{cardio:'#2ecc71',warmup:'#f59e0b'},
-  // Mapping jour de semaine -> séance. Elle s'entraine Lun/Mar/Jeu/Ven ;
-  // Mer, Sam et Dim sont des jours de repos qui n'affichent AUCUNE seance
-  // a venir (identique a Anthony : un jour de repos ne montre pas le
-  // lendemain). Les jours n'ayant pas de champ .dow, ce mapping explicite
-  // vit dans SA config, pas dans le moteur.
+  // Mapping jour -> séance (elle s'entraine Lun/Mar/Jeu/Ven ; Mer, Sam, Dim =
+  // repos). Days sans champ .dow, d'où ce mapping explicite.
   resolveDayIndex:function(weekday){
-    var map={0:0,1:1,3:2,4:3}; // Lun->J1, Mar->J2, Jeu->J3, Ven->J4
-    return map[weekday]!==undefined?map[weekday]:-1; // Mer, Sam, Dim = repos
+    var map={0:0,1:1,3:2,4:3};
+    return map[weekday]!==undefined?map[weekday]:-1;
   },
-  // Objectifs STAT les plus souples des 3 (coccyx + fibromyalgie, douleurs
-  // diffuses variables). Note = 100 − pénalités + bonus charges. Chaque exo
-  // raté -2 ; au-delà de 6 ratés seulement, -1 de plus (le seuil le plus
-  // large) ; journée entière -3. Bonus charges le plus FORT (+30) : le but
-  // est de venir et bouger, alors chaque hausse de charge est très valorisée.
+  // Objectifs STAT les plus souples des 3 (coccyx + fibromyalgie).
   statsTarget:{missPenalty:2,missThreshold:6,missExtraPenalty:1,missedDayPenalty:3,weightProgressTargetPct:15,weightBonusMax:30,weightLookbackDays:21},
   icons:ICONS,
   days:P
