@@ -27,7 +27,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 //    UNIQUEMENT quand on modifie SA config perso (ses exercices, ses journées,
 //    ses réglages…), sans toucher au moteur. Chacun garde son PATCH quand le
 //    moteur bouge : qui était en 2.4.1 passe en 2.5.1 lors d'une maj moteur.
-var ENGINE_VERSION='3.2';
+var ENGINE_VERSION='3.3';
 
 // Valeurs PARTAGÉES par défaut. Tout ce qui est identique d'une personne à
 // l'autre vit ICI, pas dupliqué dans chaque config. Une config perso ne
@@ -42,6 +42,10 @@ var ENGINE_DEFAULTS={
   jleftUrgentColor:'#ff4d1c',
   jleftNormalColor:'#f5a623',
   restDay:{card:{emoji:'😴',title:'REPOS',subtitle:'Profites-en pour bien récupérer.'}},
+  // La date de fin affichée est calculée depuis la deadline (et recule avec les
+  // vacances). Une personne dont la date affichée est autre chose (ex : Myriam
+  // affiche sa DATE DE DÉBUT) met dynamicDeadlineDate:false et garde son texte.
+  dynamicDeadlineDate:true,
   cardioRepsText:'',
   // Échauffement et cardio ne comptent jamais dans la progression du jour
   // (X/N) : ce ne sont pas des exercices à cocher au même titre que le reste.
@@ -360,6 +364,14 @@ function totalVacationDays(){
 function effectiveDeadlineMs(){
   return new Date(CONFIG.deadline+'T12:00:00').getTime()+totalVacationDays()*86400000;
 }
+// Date de fin AFFICHÉE, calculée depuis la deadline EFFECTIVE (base + jours de
+// vacances). Elle reste donc toujours cohérente avec le J–N ET recule
+// visiblement quand on met le programme en pause. Format français.
+var FR_MONTHS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+function effectiveDeadlineDateText(){
+  var d=new Date(effectiveDeadlineMs());
+  return d.getDate()+' '+FR_MONTHS[d.getMonth()]+' '+d.getFullYear();
+}
 function recomputeJLeft(){
   JLEFT_RAW=Math.floor((effectiveDeadlineMs()-getParisNow().getTime())/86400000);
   JLEFT=Math.max(0,JLEFT_RAW);
@@ -491,7 +503,7 @@ function bindEvents(){
 function jleftHTML(){
   if(isVacationOn()){
     var m=CONFIG.noSideIconColor;
-    return '<div class="dlc" style="color:'+m+'">J&#8211;'+JLEFT+'</div><div class="dls" style="color:'+m+';font-weight:700">&#9208;&#65039; en pause</div>';
+    return '<div class="dlc" style="color:'+m+'">J&#8211;'+JLEFT+'</div><div class="dls" style="color:'+m+';font-weight:700">en pause</div>';
   }
   if(JLEFT_RAW<=0){
     var red=CONFIG.weightColors.old;
@@ -624,7 +636,7 @@ function buildHTML(){
     +programBadgeHTML()
     +'</div>'
     +'<div class="dlbar">'
-    +'<div><div class="dll">&#128197; '+CONFIG.deadlineLabel+'</div><div class="dld">'+CONFIG.deadlineDateText+'</div></div>'
+    +'<div><div class="dll">&#128197; '+CONFIG.deadlineLabel+'</div><div class="dld">'+(CONFIG.dynamicDeadlineDate?effectiveDeadlineDateText():CONFIG.deadlineDateText)+'</div></div>'
     +'<div style="text-align:right">'+jleftHTML()+'</div>'
     +'</div>'
     +'</div>'
