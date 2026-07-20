@@ -27,7 +27,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 //    UNIQUEMENT quand on modifie SA config perso (ses exercices, ses journées,
 //    ses réglages…), sans toucher au moteur. Chacun garde son PATCH quand le
 //    moteur bouge : qui était en 2.4.1 passe en 2.5.1 lors d'une maj moteur.
-var ENGINE_VERSION='3.1';
+var ENGINE_VERSION='3.2';
 
 // Valeurs PARTAGÉES par défaut. Tout ce qui est identique d'une personne à
 // l'autre vit ICI, pas dupliqué dans chaque config. Une config perso ne
@@ -570,22 +570,25 @@ function buildHTML(){
     var bodyHTML2;
     if(isStats){
       bodyHTML2=statsPageHTML();
+    }else if(S.mode==='week'){
+      // SEMAINE : TOUJOURS toutes les journées d'entraînement, pour tout le
+      // monde. Jamais de carte "repos" ni "vacances" ici — on doit pouvoir
+      // consulter tout le programme (jours d'avant/d'après) à tout moment.
+      // Le repos et les vacances ne s'affichent QUE sur AUJOURD'HUI.
+      bodyHTML2='<div class="days">'+CONFIG.days.map(function(d,i){return dayHTML(d,i,false);}).join('')+'</div>';
     }else if(isVacationOn()){
-      // Programme en pause : à la place de la séance, une carte "Vacances"
-      // (même charte que le repos, voir pauseCardHTML) — sur Aujourd'hui ET
-      // Semaine. STAT reste accessible (c'est là qu'on désactive le mode).
+      // AUJOURD'HUI en mode vacances : carte "en pause" à la place de la séance
+      // (le compte à rebours et les stats sont gelés). STAT reste accessible.
       bodyHTML2='<div class="days">'+pauseCardHTML({
         emoji:'&#127958;&#65039;',
         title:'VACANCES',
         subtitle:'Programme en pause. Reprends quand tu rentres — le compte à rebours et tes stats sont gelés.',
         color:CONFIG.accentColor
       })+'</div>';
-    }else if(S.mode==='today'){
-      // Jour de repos : on n'affiche QUE la carte repos, jamais la séance du
-      // lendemain (comportement uniforme pour les 3 — plus de prévisualisation).
-      bodyHTML2='<div class="days">'+(isRest?restBodyHTML():dayHTML(td,TI,true))+'</div>';
     }else{
-      bodyHTML2='<div class="days">'+CONFIG.days.map(function(d,i){return dayHTML(d,i,false);}).join('')+'</div>';
+      // AUJOURD'HUI : jour de repos -> carte repos ; sinon la séance du jour.
+      // (Jamais de prévisualisation du lendemain.)
+      bodyHTML2='<div class="days">'+(isRest?restBodyHTML():dayHTML(td,TI,true))+'</div>';
     }
     // Les 3 boutons gardent toujours leur couleur d'identité (bleu/orange/
     // violet), même non sélectionnés (bordure/texte à faible opacité) — et
