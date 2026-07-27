@@ -27,7 +27,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 //    UNIQUEMENT quand on modifie SA config perso (ses exercices, ses journées,
 //    ses réglages…), sans toucher au moteur. Chacun garde son PATCH quand le
 //    moteur bouge : qui était en 2.4.1 passe en 2.5.1 lors d'une maj moteur.
-var ENGINE_VERSION='3.4';
+var ENGINE_VERSION='3.5';
 
 // Valeurs PARTAGÉES par défaut. Tout ce qui est identique d'une personne à
 // l'autre vit ICI, pas dupliqué dans chaque config. Une config perso ne
@@ -1098,8 +1098,8 @@ function exHTML(ex,day){
     +'<div class="excnt">'
     +'<div class="exnm" style="text-align:center;color:'+(done?CONFIG.weightColors.fresh:CONFIG.exerciseNameColor)+'">'+ex.name+'</div>'
     +repsChip
-    +'<div class="extip">'+ex.tip+'</div>'
-    +'<div class="exbadges">'+catB+isoB+extraBadgeHTML(ex)+'</div>'
+    +'<div class="extip" style="text-align:center">'+ex.tip+'</div>'
+    +'<div class="exbadges" style="justify-content:center">'+catB+isoB+extraBadgeHTML(ex)+'</div>'
     +'</div>'
     // align-self:center : centre la coche sur toute la hauteur de la rangée
     // (sinon collée en haut quand le nom/tip/badges prennent plusieurs
