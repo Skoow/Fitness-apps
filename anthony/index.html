@@ -110,7 +110,7 @@ var ICONS={
     treadmill:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><path d="M6 50L54 32" stroke="C" stroke-width="5" stroke-linecap="round" opacity=".35"/><line x1="8" y1="50" x2="8" y2="56" stroke="C" stroke-width="3" stroke-linecap="round"/><line x1="52" y1="34" x2="52" y2="56" stroke="C" stroke-width="3" stroke-linecap="round"/><line x1="50" y1="34" x2="46" y2="14" stroke="C" stroke-width="2.5" stroke-linecap="round"/><line x1="40" y1="16" x2="52" y2="12" stroke="C" stroke-width="2.5" stroke-linecap="round"/><circle cx="28" cy="12" r="4" fill="C"/><path d="M26 16L24 28" stroke="C" stroke-width="3.5" stroke-linecap="round"/><path d="M26 20L40 16" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M26 20L20 26" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M24 28L30 40" stroke="C" stroke-width="3.5" stroke-linecap="round"/><path d="M24 28L16 38" stroke="C" stroke-width="3.5" stroke-linecap="round"/>',
 };
 var P=[
-  {id:'lun',dow:0,label:'LUN',name:'Pectoraux — Triceps',sub:'3 Pecs · 3 Triceps · Cardio',color:'#ff4d1c',exercises:[
+  {id:'lun',dow:0,label:'LUN',name:'Pectoraux — Triceps',sub:'3 Pecs · 3 Triceps · 1 Cardio',color:'#ff4d1c',exercises:[
     {id:'ab_lun',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',banner:'before',bannerStyle:'bonus',bannerName:'Ab Machine',tip:'Gainage abdominal - Contraction en bas - Expiration en haut'},
     {id:'benchpress',reps:'4×8',name:'Barbell Bench Press',icon:'bench',cat:'semi',isDB:true,tip:'Allonge sur le banc - Barre descendue jusqu a la poitrine - Prise large - Pecs milieu - Mouvement principal - Progressive overload chaque semaine'},
     {id:'inclinedb',reps:'4×10',name:'Incline Dumbbell Press',icon:'incline',cat:'free',isDB:true,tip:'Banc incline 30-45 degres - Deux halteres - Haut des pecs - Coudes legerement vers exterieur - Grande amplitude - Descente complete'},
@@ -148,7 +148,7 @@ var P=[
     {id:'ezBarCurlJeu',reps:'3×12',name:'EZ Bar Curl',icon:'preacher',cat:'semi',isDB:true,tip:'Barre EZ - Coudes colles au corps - Contraction maximale en haut - Finisher biceps - Augmente la charge chaque semaine - 2eme seance biceps de la semaine'},
     {id:'triPushJeu',reps:'3×12',name:'Cable Triceps Pushdown',icon:'tricepsPush',cat:'assist',tip:'Corde ou barre droite - Coude colle au corps - Pousse vers le bas - Triceps - Finisher triceps - 2eme seance triceps de la semaine'},
   ]},
-  {id:'ven',dow:4,label:'VEN',name:'Abdos · Core',sub:'1 Abdos · 2 Obliques · 1 Gainage · Cardio',color:'#2ecc71',exercises:[
+  {id:'ven',dow:4,label:'VEN',name:'Abdos · Core',sub:'1 Abdos · 2 Obliques · 1 Gainage · 1 Cardio',color:'#2ecc71',exercises:[
     {id:'ab_ven',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',banner:'before',bannerStyle:'bonus',bannerName:'Ab Machine',tip:'Gainage abdominal - Contraction en bas'},
     {id:'legRaiseMer',reps:'3×15',name:'Roman Chair Straight-Leg Raise',icon:'pullup',cat:'free',isBW:true,tip:'Chaise romaine - Jambes tendues - Monte a 90 degres horizontale - Abdos bas - Descente lente et controlee'},
     {id:'rotaryTorsoMer',reps:'3×15',name:'Rotary Torso Machine',icon:'hipAbduct',cat:'assist',tip:'Machine rotation - Obliques - Tourne lentement - Amplitude maximale des deux cotes - Gainage pendant la rotation - Cible les bourrelets lateraux'},
@@ -171,11 +171,15 @@ var CONFIG={
   storagePrefix:'anthony_',
   title:'ANTHONY',
   accentColor:'#ff4d1c',
-  configVersion:7,
+  configVersion:8,
   deadline:'2026-09-29',
   deadlineLabel:'RÉVISION DU PROGRAMME',
   deadlineDateText:'30 Juillet 2026',
   defaultReps:'4×15 reps',
+  // Chez Anthony, le cardio COMPTE dans la progression du jour (X/N) et dans
+  // la note — seul l'échauffement en est exclu (le défaut moteur exclut aussi
+  // le cardio ; on le remplace donc ici pour lui seul).
+  excludedFromProgress:['warmup'],
   // Seul Anthony a des exercices unilatéraux affichant ce badge.
   extraBadge:function(ex){return ex.isUni?'<span class="bdg bun">💪 Unilatéral</span>':'';},
   // Bannière bonus AVEC icône SVG (les 2 autres n'ont pas d'icône -> défaut moteur).
