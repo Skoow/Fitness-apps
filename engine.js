@@ -27,7 +27,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 //    UNIQUEMENT quand on modifie SA config perso (ses exercices, ses journées,
 //    ses réglages…), sans toucher au moteur. Chacun garde son PATCH quand le
 //    moteur bouge : qui était en 2.4.1 passe en 2.5.1 lors d'une maj moteur.
-var ENGINE_VERSION='3.6';
+var ENGINE_VERSION='3.7';
 
 // Valeurs PARTAGÉES par défaut. Tout ce qui est identique d'une personne à
 // l'autre vit ICI, pas dupliqué dans chaque config. Une config perso ne
@@ -1052,17 +1052,19 @@ function weightCtrl(key,ec,sideLabel,isDB){
   var hasW=!!(w&&w!=='—');
   var wc=hasW?getWCol(key):CONFIG.weightColors.none;
   var selOpts=opts.map(function(o){return '<option value="'+o+'"'+(o===(w||'—')?' selected':'')+'>'+(o==='—'?'Sélectionner kg':o+' kg')+'</option>';}).join('');
-  // Plus d'icône ⚖️ (retirée) ; le rectangle de poids est centré/symétrique
-  // (on annule le décalage de 88px à gauche du .wrow). Un éventuel libellé
-  // de côté (Bras/Jambe G/D chez Mikael) est conservé.
-  // padding-left/right asymétriques : le contenu (le rectangle de poids) est
-  // ainsi recentré sur le MÊME axe que le titre/texte/badges — qui sont
-  // centrés dans la colonne de texte, donc décalés de ~18px à droite du centre
-  // de la rangée (à cause de l'icône à gauche). Le rectangle reste dans la
-  // largeur du texte, jamais au-delà.
-  return '<div class="wrow" style="padding-left:48px;padding-right:12px;justify-content:center">'
+  // Rectangle de poids :
+  //  - padding gauche 86 / droite 50 = largeurs icône+marges / coche+marges :
+  //    il est donc aligné sur la COLONNE DE TEXTE, centré sur le même axe que
+  //    le titre / le texte / les badges.
+  //  - padding vertical 16/16 : il est CENTRÉ dans la bande grise sous
+  //    l'exercice (plus collé à la ligne du dessus).
+  //  - largeur ~85 % (≈ deux badges) sans dépasser la description ; réduite à
+  //    58 % sur les lignes à libellé (Bras/Jambe G/D de Mikael) pour que le
+  //    libellé + le sélecteur tiennent sur la même ligne.
+  var selW=sideLabel?'58%':'85%';
+  return '<div class="wrow" style="padding:16px 50px 16px 86px;justify-content:center">'
     +(sideLabel?'<span class="wside" style="color:'+ec+'">'+sideLabel+'</span>':'')
-    +'<select class="wsel" data-id="'+key+'" style="color:'+(hasW?wc:CONFIG.noSideIconColor)+';border-color:'+(hasW?wc+'60':'#2a2a30')+'">'+selOpts+'</select>'
+    +'<select class="wsel" data-id="'+key+'" style="width:'+selW+';color:'+(hasW?wc:CONFIG.noSideIconColor)+';border-color:'+(hasW?wc+'60':'#2a2a30')+'">'+selOpts+'</select>'
     +'</div>';
 }
 
