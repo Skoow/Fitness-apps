@@ -27,7 +27,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 //    UNIQUEMENT quand on modifie SA config perso (ses exercices, ses journées,
 //    ses réglages…), sans toucher au moteur. Chacun garde son PATCH quand le
 //    moteur bouge : qui était en 2.4.1 passe en 2.5.1 lors d'une maj moteur.
-var ENGINE_VERSION='3.7';
+var ENGINE_VERSION='3.8';
 
 // Valeurs PARTAGÉES par défaut. Tout ce qui est identique d'une personne à
 // l'autre vit ICI, pas dupliqué dans chaque config. Une config perso ne
@@ -1062,7 +1062,7 @@ function weightCtrl(key,ec,sideLabel,isDB){
   //    58 % sur les lignes à libellé (Bras/Jambe G/D de Mikael) pour que le
   //    libellé + le sélecteur tiennent sur la même ligne.
   var selW=sideLabel?'58%':'85%';
-  return '<div class="wrow" style="padding:16px 50px 16px 86px;justify-content:center">'
+  return '<div class="wrow" style="padding:6px 50px 8px 86px;justify-content:center">'
     +(sideLabel?'<span class="wside" style="color:'+ec+'">'+sideLabel+'</span>':'')
     +'<select class="wsel" data-id="'+key+'" style="width:'+selW+';color:'+(hasW?wc:CONFIG.noSideIconColor)+';border-color:'+(hasW?wc+'60':'#2a2a30')+'">'+selOpts+'</select>'
     +'</div>';
@@ -1099,8 +1099,12 @@ function exHTML(ex,day){
     :'';
   var noWeight=ex.isBW||(CONFIG.noWeightCategories&&CONFIG.noWeightCategories.indexOf(ex.cat)>=0);
   var wRow=noWeight?'':renderWeightRow(ex,ec);
-  return '<div class="exrow">'
-    +'<div class="extap" data-id="'+ex.id+'" style="background:'+(done?'rgba(46,204,113,.06)':'transparent')+'">'
+  // Exercice fait : TOUT le bloc passe en vert (contenu + zone du poids), pour
+  // que le rectangle de poids ne soit plus isolé sur le fond. Une ligne de
+  // séparation verte, un peu plus épaisse, délimite deux exercices faits
+  // d'affilée (sinon tout serait vert d'un bloc).
+  return '<div class="exrow" style="'+(done?'background:rgba(46,204,113,.08);border-bottom:2px solid rgba(46,204,113,.38)':'')+'">'
+    +'<div class="extap" data-id="'+ex.id+'" style="background:transparent">'
     +'<div class="exicon" style="align-self:center;background:'+(done?'rgba(46,204,113,.1)':'#111113')+';border-color:'+(done?'rgba(46,204,113,.3)':'#252528')+'">'+mkIcon(ex.icon,done?CONFIG.weightColors.fresh:ec,52)+'</div>'
     +'<div class="excnt">'
     +'<div class="exnm" style="text-align:center;color:'+(done?CONFIG.weightColors.fresh:CONFIG.exerciseNameColor)+'">'+ex.name+'</div>'
