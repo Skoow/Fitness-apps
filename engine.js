@@ -27,7 +27,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 //    UNIQUEMENT quand on modifie SA config perso (ses exercices, ses journées,
 //    ses réglages…), sans toucher au moteur. Chacun garde son PATCH quand le
 //    moteur bouge : qui était en 2.4.1 passe en 2.5.1 lors d'une maj moteur.
-var ENGINE_VERSION='3.5';
+var ENGINE_VERSION='3.6';
 
 // Valeurs PARTAGÉES par défaut. Tout ce qui est identique d'une personne à
 // l'autre vit ICI, pas dupliqué dans chaque config. Une config perso ne
@@ -1055,7 +1055,12 @@ function weightCtrl(key,ec,sideLabel,isDB){
   // Plus d'icône ⚖️ (retirée) ; le rectangle de poids est centré/symétrique
   // (on annule le décalage de 88px à gauche du .wrow). Un éventuel libellé
   // de côté (Bras/Jambe G/D chez Mikael) est conservé.
-  return '<div class="wrow" style="padding-left:12px;justify-content:center">'
+  // padding-left/right asymétriques : le contenu (le rectangle de poids) est
+  // ainsi recentré sur le MÊME axe que le titre/texte/badges — qui sont
+  // centrés dans la colonne de texte, donc décalés de ~18px à droite du centre
+  // de la rangée (à cause de l'icône à gauche). Le rectangle reste dans la
+  // largeur du texte, jamais au-delà.
+  return '<div class="wrow" style="padding-left:48px;padding-right:12px;justify-content:center">'
     +(sideLabel?'<span class="wside" style="color:'+ec+'">'+sideLabel+'</span>':'')
     +'<select class="wsel" data-id="'+key+'" style="color:'+(hasW?wc:CONFIG.noSideIconColor)+';border-color:'+(hasW?wc+'60':'#2a2a30')+'">'+selOpts+'</select>'
     +'</div>';
