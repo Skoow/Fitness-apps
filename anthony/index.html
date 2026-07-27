@@ -110,11 +110,10 @@ var ICONS={
     treadmill:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><path d="M6 50L54 32" stroke="C" stroke-width="5" stroke-linecap="round" opacity=".35"/><line x1="8" y1="50" x2="8" y2="56" stroke="C" stroke-width="3" stroke-linecap="round"/><line x1="52" y1="34" x2="52" y2="56" stroke="C" stroke-width="3" stroke-linecap="round"/><line x1="50" y1="34" x2="46" y2="14" stroke="C" stroke-width="2.5" stroke-linecap="round"/><line x1="40" y1="16" x2="52" y2="12" stroke="C" stroke-width="2.5" stroke-linecap="round"/><circle cx="28" cy="12" r="4" fill="C"/><path d="M26 16L24 28" stroke="C" stroke-width="3.5" stroke-linecap="round"/><path d="M26 20L40 16" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M26 20L20 26" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M24 28L30 40" stroke="C" stroke-width="3.5" stroke-linecap="round"/><path d="M24 28L16 38" stroke="C" stroke-width="3.5" stroke-linecap="round"/>',
 };
 var P=[
-  {id:'lun',dow:0,label:'LUN',name:'Pectoraux — Triceps',sub:'4 Pecs · 3 Triceps · Cardio',color:'#ff4d1c',exercises:[
+  {id:'lun',dow:0,label:'LUN',name:'Pectoraux — Triceps',sub:'3 Pecs · 3 Triceps · Cardio',color:'#ff4d1c',exercises:[
     {id:'ab_lun',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',banner:'before',bannerStyle:'bonus',bannerName:'Ab Machine',tip:'Gainage abdominal - Contraction en bas - Expiration en haut'},
     {id:'benchpress',reps:'4×8',name:'Barbell Bench Press',icon:'bench',cat:'semi',isDB:true,tip:'Allonge sur le banc - Barre descendue jusqu a la poitrine - Prise large - Pecs milieu - Mouvement principal - Progressive overload chaque semaine'},
     {id:'inclinedb',reps:'4×10',name:'Incline Dumbbell Press',icon:'incline',cat:'free',isDB:true,tip:'Banc incline 30-45 degres - Deux halteres - Haut des pecs - Coudes legerement vers exterieur - Grande amplitude - Descente complete'},
-    {id:'svendPressLun',reps:'3×15',name:'Svend Press (Inner Chest)',icon:'bench',cat:'free',isDB:true,tip:'Allonge sur le banc - Un haltere ou disque tenu entre les deux paumes - Mains serrees l une contre l autre - Pousse vers le haut en pressant fort vers l interieur - Contraction constante au centre des pecs tout le mouvement - Creuse la separation sternale - Descente lente et controlee'},
     {id:'convergingPressLun',reps:'3×12',name:'Converging Chest Press',icon:'bench',cat:'assist',tip:'Poignees qui convergent en poussant - Pecs centre et bas - Contraction maximale quand les mains se rejoignent - Dos plat contre le dossier'},
     {id:'cableOverheadTriLun',reps:'3×12',name:'Cable Overhead Triceps Extension',icon:'overhead',cat:'assist',pair:'tri',isUni:true,tip:'Poulie haute dos a la machine - Corde derriere la tete - Coudes fixes pres des oreilles - Etend les avant-bras vers l avant - Chef long du triceps - Cable = aucun risque de chute - SUPERSET avec Cable Pushdown'},
     {id:'tricepsPush',reps:'3×12',name:'Cable Triceps Pushdown',icon:'tricepsPush',cat:'assist',pair:'tri',isUni:true,tip:'Corde ou poignee simple - Un bras a la fois - Coude colle au corps - Pousse vers le bas - Triceps - SUPERSET avec Overhead Triceps'},
@@ -140,10 +139,9 @@ var P=[
     {id:'hipAdductSam',reps:'3×15',name:'Hip Adduction Machine',icon:'hipAbduct',cat:'assist',tip:'Assis - Ecarte puis rapproche les jambes contre la resistance - Interieur de la cuisse (adducteurs) - Contraction forte au centre 1 seconde - Amplitude complete - Descente controlee'},
     {id:'kickbackMer',reps:'3×15',name:'Cable Glute Kickback',icon:'glueKick',cat:'assist',isUni:true,tip:'Poulie basse - Sangle a la cheville - Buste legerement penche en avant - Pousse la jambe vers l arriere en contractant le fessier en fin de course - Grand fessier isole - Une jambe a la fois - Finisher fermete et galbe'},
   ]},
-  {id:'jeu',dow:3,label:'JEU',name:'Épaules — Trapèzes — Bras',sub:'4 Épaules · 1 Trapèze · 2 Bras',color:'#a855f7',exercises:[
+  {id:'jeu',dow:3,label:'JEU',name:'Épaules — Trapèzes — Bras',sub:'3 Épaules · 1 Trapèze · 2 Bras',color:'#a855f7',exercises:[
     {id:'ab_jeu',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',banner:'before',bannerStyle:'bonus',bannerName:'Ab Machine',tip:'Gainage abdominal - Contraction en bas'},
     {id:'shoulderPress',reps:'4×10',name:'Dumbbell Shoulder Press',icon:'shoulderPress',cat:'free',isDB:true,tip:'Assis ou debout - Halteres a hauteur des oreilles - Pousse vers le haut - Deltoide complet - Grande amplitude'},
-    {id:'rearDeltFlyJeu',reps:'3×15',name:'Machine Rear Delt Fly',icon:'rearDelt',cat:'assist',tip:'Pec Deck en sens inverse - Assis face au dossier - Poignees a hauteur epaules - Ecarte les bras vers l arriere - Deltoide posterieur - Contraction maximale en fin de mouvement'},
     {id:'cableLateralJeu',reps:'3×15',name:'Cable Lateral Raise',icon:'lateralRaise',cat:'assist',isUni:true,tip:'Cable bas - Un bras a la fois - Ecarte le bras jusqu a hauteur epaule - Tension constante tout le mouvement - Deltoide lateral - Alterne les deux cotes'},
     {id:'shrug',reps:'4×12',name:'Machine Shrug',icon:'shoulderPress',cat:'assist',tip:'Hausse les epaules vers les oreilles - Trapezes - Contraction maximale en haut - Descente lente'},
     {id:'facePullJeu',reps:'3×15',name:'Cable Face Pull',icon:'facePull',cat:'assist',tip:'Corde a la poulie haute - Coudes hauts - Tire vers le visage - Epaules posterieures + Trapezes moyens - Excellent pour la posture et la sante des epaules'},
@@ -158,10 +156,9 @@ var P=[
     {id:'plancheMer',reps:'3×45 sec',name:'Front Plank',icon:'abMachine',cat:'free',isBW:true,tip:'Sur les coudes et les orteils - Corps droit comme une planche - Abdos et fessiers contractes - Respiration reguliere - Tiens 30 a 60 secondes - Core isometrique complet'},
     {id:'cardioVen',reps:'20 min',name:'Incline Treadmill Walk',icon:'treadmill',cat:'cardio',tip:'20 minutes apres la seance core - Tapis incline 8-12 pct - Marche rapide allure moderee - Zone 65-75 pct FC max - Glycogene epuise apres la seance = corps puise dans les graisses - Faible impact qui menage les articulations'},
   ]},
-  {id:'sam',dow:5,label:'SAM',name:'Quadriceps — Fessiers — Mollets',sub:'3 Quadriceps · 1 Fessier · 1 Mollet',color:'#06b6d4',exercises:[
+  {id:'sam',dow:5,label:'SAM',name:'Quadriceps — Fessiers — Mollets',sub:'2 Quadriceps · 1 Fessier · 1 Mollet',color:'#06b6d4',exercises:[
     {id:'ab_sam',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',banner:'before',bannerStyle:'bonus',bannerName:'Ab Machine',tip:'Gainage abdominal - Contraction en bas'},
     {id:'hackSquat',reps:'4×10',name:'Hack Squat Machine',icon:'squat',cat:'semi',tip:'Machine guidee - Pieds ecarte largeur epaules - Descend cuisses paralleles ou plus bas - Quadriceps complet - Dos plat contre le coussin - Mouvement principal quadriceps'},
-    {id:'legPressSam',reps:'4×10',name:'Leg Press',icon:'legPress',cat:'semi',tip:'Assis dans la machine - Pieds largeur epaules au milieu de la plateforme - Descend les genoux vers la poitrine en amplitude complete - Pousse sans verrouiller les genoux - Quadriceps + fessiers - Augmente la charge progressivement'},
     {id:'legExtSam',reps:'3×15',name:'Leg Extension',icon:'legExt',cat:'assist',isIso:true,tip:'Assis - Chevilles sous le pad - Tends les jambes vers le haut - Contraction maximale en haut 1 seconde - Quadriceps isolation - Descente lente 3 secondes'},
     {id:'hipThrustSamLight',reps:'3×12',name:'Hip Thrust Machine (Light)',icon:'glueKick',cat:'assist',tip:'Dos contre le pad - Pousse les hanches vers le haut - Contracte les fessiers en haut - 2eme dose fessiers de la semaine (plus leger que le mercredi) - Entretient la frequence qui fait progresser un muscle a la traine'},
     {id:'seatedCalfSam',reps:'4×15',name:'Seated Calf Raise',icon:'calf',cat:'assist',tip:'Assis - Genoux flechis sous le pad - Monte sur la pointe des pieds - Contraction maximale en haut - Descente complete amplitude totale'},
@@ -173,7 +170,7 @@ var CONFIG={
   storagePrefix:'anthony_',
   title:'ANTHONY',
   accentColor:'#ff4d1c',
-  configVersion:5,
+  configVersion:6,
   deadline:'2026-09-29',
   deadlineLabel:'RÉVISION DU PROGRAMME',
   deadlineDateText:'30 Juillet 2026',
