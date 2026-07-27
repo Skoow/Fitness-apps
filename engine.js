@@ -27,7 +27,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 //    UNIQUEMENT quand on modifie SA config perso (ses exercices, ses journées,
 //    ses réglages…), sans toucher au moteur. Chacun garde son PATCH quand le
 //    moteur bouge : qui était en 2.4.1 passe en 2.5.1 lors d'une maj moteur.
-var ENGINE_VERSION='3.3';
+var ENGINE_VERSION='3.4';
 
 // Valeurs PARTAGÉES par défaut. Tout ce qui est identique d'une personne à
 // l'autre vit ICI, pas dupliqué dans chaque config. Une config perso ne
@@ -433,6 +433,16 @@ function bindEvents(){
   if(btnStats)btnStats.addEventListener('click',function(){S.mode='stats';render();});
   var btnVacation=document.getElementById('btn-vacation');
   if(btnVacation)btnVacation.addEventListener('click',function(){toggleVacation();});
+  // Reset des stats : efface TOUT l'historique du graphique (repart de zéro).
+  // Confirmation oui/non explicite avant, car c'est irréversible. Les poids
+  // enregistrés et les cases cochées ne sont PAS touchés.
+  var btnReset=document.getElementById('btn-reset');
+  if(btnReset)btnReset.addEventListener('click',function(){
+    if(confirm('Réinitialiser les statistiques ?\n\nTout l\'historique du graphique (la courbe et les moyennes) sera définitivement effacé et repartira de zéro.\n\nTes poids enregistrés et tes cases cochées ne sont PAS touchés.\n\nEffacer ?')){
+      sv(K('statsHistory'),[]);
+      render();
+    }
+  });
   var dhs=document.querySelectorAll('.dh');
   dhs.forEach(function(dh){
     dh.addEventListener('click',function(){
@@ -750,7 +760,7 @@ function statsPageHTML(){
   var ac=CONFIG.accentColor;
   var onVac=isVacationOn();
   var last=history.length?history[history.length-1]:null;
-  var bigScore='';
+  var centerHTML;
   if(last){
     var status=statsStatusLine(history);
     var elapsed=daysSinceFirstEntry(history);
@@ -768,31 +778,29 @@ function statsPageHTML(){
       var v=rollingAverage(history,w.n);
       if(v!==today)chips.push({label:w.label,val:v}); // seulement si différent
     });
-    bigScore='<div style="text-align:center"><span style="font-family:Impact,sans-serif;font-size:3.2rem;line-height:1;color:'+scoreColorFor(today)+'">'+today+'%</span></div>'
+    centerHTML='<div style="text-align:center"><span style="font-family:Impact,sans-serif;font-size:3.2rem;line-height:1;color:'+scoreColorFor(today)+'">'+today+'%</span></div>'
       +'<div style="text-align:center;font-size:11.5px;font-weight:700;color:'+status.color+';margin-top:4px">'+status.text+'</div>'
       +(chips.length?'<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:16px;margin-top:8px">'
         +chips.map(function(ch){return '<div style="text-align:center"><div style="font-size:14px;font-weight:800;color:'+scoreColorFor(ch.val)+'">'+ch.val+'%</div><div style="font-size:9px;color:'+c+'">'+ch.label+'</div></div>';}).join('')
       +'</div>':'');
+  }else{
+    centerHTML='<div style="text-align:center;font-size:12px;color:'+c+';padding:14px 0;line-height:1.4">Pas encore d’historique.<br>Reviens après quelques séances.</div>';
   }
+  // Les deux petits boutons encadrent la note, dans les zones vides à gauche
+  // et à droite : Vacances (met le programme en pause) à gauche, Reset (efface
+  // l'historique du graphique) à droite. Toujours visibles en haut de STAT,
+  // sans avoir à descendre.
+  var vacBtn='<button id="btn-vacation" style="flex:0 0 auto;font-size:10px;font-weight:800;letter-spacing:.2px;padding:7px 9px;border-radius:10px;cursor:pointer;line-height:1.15;text-align:center;background:'+ac+(onVac?'33':'14')+';border:1.5px solid '+ac+(onVac?'':'55')+';color:'+ac+'">'+(onVac?'&#9208;&#65039;<br>En pause':'&#127958;&#65039;<br>Vacances')+'</button>';
+  var resetBtn='<button id="btn-reset" style="flex:0 0 auto;font-size:10px;font-weight:800;letter-spacing:.2px;padding:7px 9px;border-radius:10px;cursor:pointer;line-height:1.15;text-align:center;background:transparent;border:1.5px solid '+c+'55;color:'+c+'">&#8635;<br>Reset</button>';
+  var topRow='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'
+    +vacBtn+'<div style="flex:1;min-width:0">'+centerHTML+'</div>'+resetBtn
+    +'</div>';
   return '<div class="days" style="padding-top:14px">'
     +'<div class="dc" style="padding:14px 14px 12px">'
-    +bigScore
+    +topRow
     +'<div style="height:10px"></div>'
     +statsChartSVG(history)
     +'<div style="font-size:9.5px;color:'+c+';text-align:center;margin-top:8px"><span style="color:'+CONFIG.weightColors.fresh+'">&#9473; vise haut</span> &#8226; <span style="color:'+CONFIG.weightColors.old+'">&#9473; plancher</span> &#8226; régularité + charges = bonus</div>'
-    +'</div>'
-    // Carte "Mode vacances" : met le programme en pause (stats gelées +
-    // compte à rebours gelé, deadline repoussée au retour, voir toggleVacation).
-    +'<div class="dc" style="padding:18px">'
-      +'<div style="font-size:11px;font-weight:800;letter-spacing:1px;color:'+c+';margin-bottom:6px">&#127958;&#65039; MODE VACANCES</div>'
-      +'<div style="font-size:11px;color:'+c+';margin-bottom:12px;line-height:1.4">'
-        +(onVac
-          ?'Programme en pause : aucun jour n’est compté et le compte à rebours est gelé. Reprends quand tu rentres.'
-          :'Pars tranquille : mets le programme en pause. Aucun jour ne sera compté comme raté, le compte à rebours s’arrête, et la date de révision sera repoussée d’autant à ton retour.')
-      +'</div>'
-      +'<button class="mbtn" id="btn-vacation" style="font-size:13px;font-weight:700;width:100%;justify-content:center;padding:12px;background:'+ac+(onVac?'26':'18')+';border-color:'+ac+';color:'+ac+'">'
-        +(onVac?'Reprendre le programme':'Activer le mode vacances')
-      +'</button>'
     +'</div>'
     +'</div>';
 }
