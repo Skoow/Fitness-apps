@@ -15,7 +15,7 @@
 // mis en cache (index.html/engine.js périmés) — l'ancien cache est supprimé
 // dans l'événement "activate" ci-dessous. Utile quand une vieille version
 // reste collée sur un téléphone malgré le cache-busting ?v=X.Y.
-var CACHE_NAME='fitness-cache-v28';
+var CACHE_NAME='fitness-cache-v29';
 
 self.addEventListener('install',function(event){
   self.skipWaiting();
