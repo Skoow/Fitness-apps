@@ -219,17 +219,17 @@ var ICONS={
     inclineTreadmill:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><rect x="4" y="46" width="56" height="8" rx="2" fill="C" opacity=".2" stroke="C" stroke-width="1"/><path d="M10 46L22 20L56 20L56 46Z" fill="C" opacity=".3"/><path d="M10 46L22 20" stroke="C" stroke-width="2.5"/><path d="M22 20L56 20" stroke="C" stroke-width="2.5"/><line x1="20" y1="14" x2="14" y2="46" stroke="C" stroke-width="2.5"/><rect x="14" y="10" width="42" height="6" rx="1" fill="C" opacity=".4"/><circle cx="36" cy="16" r="3" fill="C"/><path d="M33 19L33 30L39 30L39 19Z" fill="C" opacity=".9"/><path d="M33 30L28 40" stroke="C" stroke-width="3" stroke-linecap="round"/>'
 };
 var P=[
-  {id:"j1",label:"LUN",name:"Fessiers — Ischios — Quadriceps",sub:"2 Fessiers · 2 Ischios · 1 Quadriceps",color:"#e91e8c",exercises:[
+  {id:"j1",label:"LUN",name:"Fessiers — Ischios",sub:"3 Fessiers · 2 Ischios",color:"#e91e8c",exercises:[
     {id:"j1_rdl",isDB:true,name:"Deadlift roumain",icon:"barbellRow",cat:"free",reps:"3 × 8-10",tip:"Debout haltères devant les cuisses · Pousse les hanches vers l arrière dos plat · Descends le long des jambes · Etirement des ischios en bas · Remonte en serrant les fessiers · Projection des fessiers"},
     {id:"j1_pullthrough",name:"Cable pull-through",icon:"pullThrough",cat:"assist",reps:"3 × 10-12",tip:"Poulie basse corde entre les jambes · Penche le buste dos plat · Reviens debout en contractant fort les fessiers · Maintiens en haut · Redescends lentement · Aucun stress coccyx"},
     {id:"j1_legcurl",name:"Leg curl allongé",icon:"legCurl",cat:"assist",reps:"3 × 10-12",tip:"Allongée face ventre · Ramène les talons vers les fesses · Ischios · Contraction en haut · Descente lente · Ne soulève pas les hanches"},
     {id:"j1_kickback",name:"Kickback câble",icon:"glueKick",cat:"assist",reps:"3 × 12-15 / jambe",tip:"Debout sangle à la cheville face à la poulie · Pousse la jambe vers l arrière en contractant le fessier · Maintiens en haut · Une jambe à la fois · Galbe du fessier"},
-    {id:"j1_fente",isDB:true,name:"Fente arrière (si indolore)",icon:"squat",cat:"free",reps:"3 × 10 / jambe",tip:"Debout · Grand pas vers l arrière · Descends le genou arrière vers le sol · Repousse sur le talon avant pour revenir · Fessiers et quadriceps · A garder seulement si indolore"},
-    {id:"j1_cardio",name:"Elliptique",icon:"inclineTreadmill",cat:"cardio",reps:"25-30 min",tip:"Après la séance · Allure modérée · Zone 60-70 pct FC max · Récupération active à faible impact"},
+    {id:"j1_fente",isDB:true,name:"Fente arrière",icon:"squat",cat:"free",reps:"3 × 10 / jambe",tip:"Debout · Grand pas vers l arrière · Descends le genou arrière vers le sol · Repousse sur le talon avant pour revenir · Fessiers et quadriceps · ⚠️ A supprimer si douleur à la hanche"},
+    {id:"j1_cardio",name:"Elliptique",icon:"inclineTreadmill",cat:"cardio",reps:"25-30 min · 120-140 BPM",tip:"Après la séance · Allure modérée · Zone 60-70 pct FC max · Récupération active à faible impact"},
   ]},
   {id:"j2",label:"MAR",name:"Dos — Épaules — Bras — Abdos",sub:"2 Dos · 2 Épaules · 2 Bras · 3 Abdos",color:"#3d8bff",exercises:[
     {id:"j2_tirage_v",name:"Tirage vertical prise neutre",icon:"latPull",cat:"assist",reps:"3 × 8-10",tip:"Poulie haute prise neutre · Tire vers le haut de la poitrine · Coudes vers le bas · Contracte le dos · Remonte lentement · Largeur du dos"},
-    {id:"j2_rowing",name:"Rowing poulie",icon:"seatedRow",cat:"assist",reps:"3 × 10-12",tip:"Tire les poignées vers le ventre · Serre les omoplates · Coudes près du corps · Epaisseur du dos"},
+    {id:"j2_rowing",name:"Rowing poulie",icon:"seatedRow",cat:"assist",reps:"3 × 10-12",tip:"Tire les poignées vers le ventre · Serre les omoplates · Coudes près du corps · Dessine le milieu du dos et améliore la posture"},
     {id:"j2_facepull",name:"Face pull",icon:"facePull",cat:"assist",reps:"3 × 12-15",tip:"Corde poulie haute · Tire vers le visage coudes hauts · Epaules arrière et posture · Contraction en fin de mouvement"},
     {id:"j2_lat",name:"Élévations latérales",icon:"lateralRaise",cat:"assist",reps:"3 × 12-15",tip:"Debout · Ecarte les bras jusqu à hauteur des épaules · Coude légèrement fléchi · Deltoïde latéral · Mouvement contrôlé"},
     {id:"j2_curl",name:"Curl biceps",icon:"preacher",cat:"assist",reps:"3 × 10-12",tip:"Coudes fixes contre le corps · Monte en contractant · Maintiens en haut · Redescends lentement jusqu à extension complète"},
@@ -237,27 +237,27 @@ var P=[
     {id:"j2_crunch",name:"Crunch câble",icon:"abMachine",cat:"gainage",reps:"3 × 12-15",tip:"À genoux corde poulie haute · Enroule le buste vers le bas en contractant les abdos · Remonte lentement · Abdominaux du haut"},
     {id:"j2_rotation",name:"Rotation debout à la poulie",icon:"stairs",cat:"gainage",reps:"3 × 12-15 / côté",tip:"Debout de côté face à la poulie · Tourne le buste en gardant les hanches fixes · Contrôle le retour · Obliques · Taille affinée"},
     {id:"j2_deadbug",name:"Dead bug",icon:"abMachine",cat:"gainage",reps:"3 × 10-12 / côté",tip:"Allongée sur le dos bras et genoux levés · Etends le bras et la jambe opposés sans toucher le sol · Dos collé au sol · Transverse"},
-    {id:"j2_cardio",name:"Elliptique",icon:"inclineTreadmill",cat:"cardio",reps:"25 min",tip:"Après la séance · Allure modérée · Zone 60-70 pct FC max · Récupération active à faible impact"},
+    {id:"j2_cardio",name:"Elliptique",icon:"inclineTreadmill",cat:"cardio",reps:"25 min · 120-140 BPM",tip:"Après la séance · Allure modérée · Zone 60-70 pct FC max · Récupération active à faible impact"},
   ]},
-  {id:"j3",label:"JEU",name:"Fessiers — Quadriceps — Moyen Fessier",sub:"2 Fessiers · 1 Quadriceps · 1 Ischios · 1 Moyen Fessier",color:"#a855f7",exercises:[
+  {id:"j3",label:"JEU",name:"Fessiers — Quadriceps — Ischios",sub:"3 Fessiers · 1 Quadriceps · 1 Ischios",color:"#a855f7",exercises:[
     {id:"j3_goblet",isDB:true,name:"Goblet squat (amplitude adaptée)",icon:"squat",cat:"free",reps:"3 × 8-10",tip:"Debout haltère tenu contre la poitrine · Descends en gardant le dos droit · Amplitude adaptée sans douleur · Remonte en serrant · Quadriceps et fessiers"},
     {id:"j3_rdl",isDB:true,name:"Deadlift roumain haltères",icon:"barbellRow",cat:"free",reps:"3 × 10-12",tip:"Haltères devant les cuisses · Pousse les hanches vers l arrière dos plat · Etirement des ischios · Remonte en serrant les fessiers"},
     {id:"j3_legcurl",name:"Leg curl allongé",icon:"legCurl",cat:"assist",reps:"3 × 10-12",tip:"Allongée face ventre · Ramène les talons vers les fesses · Ischios · Contraction en haut · Descente lente"},
     {id:"j3_kickback",name:"Kickback câble",icon:"glueKick",cat:"assist",reps:"3 × 12-15 / jambe",tip:"Debout sangle à la cheville · Pousse la jambe vers l arrière en contractant le fessier · Une jambe à la fois · Galbe"},
     {id:"j3_abduction",name:"Abduction debout à la poulie (si indolore)",icon:"hipAbduct",cat:"assist",reps:"2-3 × 12-15 / jambe",tip:"Debout sangle à la cheville face à la poulie · Ecarte la jambe sur le côté · Moyen fessier · Contraction en haut · A garder seulement si indolore"},
-    {id:"j3_cardio",name:"Elliptique",icon:"inclineTreadmill",cat:"cardio",reps:"25-30 min",tip:"Après la séance · Allure modérée · Zone 60-70 pct FC max · Récupération active à faible impact"},
+    {id:"j3_cardio",name:"Elliptique",icon:"inclineTreadmill",cat:"cardio",reps:"25-30 min · 120-140 BPM",tip:"Après la séance · Allure modérée · Zone 60-70 pct FC max · Récupération active à faible impact"},
   ]},
   {id:"j4",label:"VEN",name:"Dos — Épaules — Bras — Abdos",sub:"2 Dos · 2 Épaules · 2 Bras · 3 Abdos",color:"#ff6b35",exercises:[
     {id:"j4_tirage_h",name:"Tirage horizontal prise neutre",icon:"seatedRow",cat:"assist",reps:"3 × 10-12",tip:"Prise neutre · Tire vers le ventre · Serre les omoplates · Coudes près du corps · Milieu du dos"},
     {id:"j4_tirage_uni",name:"Tirage vertical unilatéral",icon:"latPull",cat:"assist",reps:"3 × 10-12",tip:"Poulie haute un bras à la fois · Tire vers le bas · Contracte le dorsal · Remonte lentement · Travaille chaque côté"},
-    {id:"j4_dev_epaules",isDB:true,name:"Développé épaules haltères",icon:"shoulderPress",cat:"free",reps:"3 × 10",tip:"Assise ou debout haltères à hauteur des oreilles · Pousse vers le haut · Redescends contrôlé · Deltoïdes"},
+    {id:"j4_dev_epaules",isDB:true,name:"Développé épaules haltères",icon:"shoulderPress",cat:"free",reps:"3 × 10",tip:"Debout de préférence si le dos et l equilibre le permettent · Haltères à hauteur des oreilles · Pousse vers le haut · Redescends contrôlé · Deltoïdes"},
     {id:"j4_oiseau",name:"Oiseau à la poulie",icon:"rearDelt",cat:"assist",reps:"3 × 12-15",tip:"Poulies croisées ou buste penché · Ecarte les bras vers l arrière · Deltoïde postérieur · Contraction en fin de mouvement"},
     {id:"j4_marteau",isDB:true,name:"Curl marteau",icon:"preacher",cat:"free",reps:"3 × 10-12",tip:"Haltères prise neutre pouces vers le haut · Monte en gardant les coudes fixes · Biceps et avant-bras"},
     {id:"j4_triceps",isDB:true,name:"Extension triceps au-dessus de la tête",icon:"tricepsPush",cat:"free",reps:"3 × 10-12",tip:"Haltère à deux mains derrière la nuque · Pousse vers le haut coudes près des oreilles · Tête longue du triceps"},
     {id:"j4_planche",name:"Planche",icon:"abMachine",cat:"gainage",reps:"3 × 30-45 sec",tip:"Appui avant-bras et orteils · Corps droit · Abdos et fessiers contractés · Respiration régulière · Gainage complet"},
     {id:"j4_pallof",name:"Pallof press",icon:"stairs",cat:"gainage",reps:"3 × 12-15 / côté",tip:"Debout de côté face à la poulie · Pousse la poignée devant toi et résiste à la rotation · Anti-rotation · Gainage profond"},
     {id:"j4_releves",name:"Relevés de genoux suspendu",icon:"pullup",cat:"gainage",reps:"3 × 10-15",tip:"Suspendue ou chaise romaine · Monte les genoux vers la poitrine · Descente contrôlée · Bas du ventre"},
-    {id:"j4_cardio",name:"Elliptique",icon:"inclineTreadmill",cat:"cardio",reps:"25 min",tip:"Après la séance · Allure modérée · Zone 60-70 pct FC max · Récupération active à faible impact"},
+    {id:"j4_cardio",name:"Elliptique",icon:"inclineTreadmill",cat:"cardio",reps:"25 min · 120-140 BPM",tip:"Après la séance · Allure modérée · Zone 60-70 pct FC max · Récupération active à faible impact"},
   ]},
 ];
 
@@ -266,7 +266,7 @@ var CONFIG={
   storagePrefix:'myriam_',
   title:'MYRIAM',
   accentColor:'#e91e8c',
-  configVersion:1,
+  configVersion:2,
   genderSymbol:'♀',
   genderSymbolColor:'#e91e8c',
   deadline:'2026-08-13',
@@ -286,7 +286,7 @@ var CONFIG={
   exerciseNameColor:'#1a0a2e',
   exckBorderColor:'#e0d0f0',
   exckDoneColor:'#fff',
-  showRepsChip:false,
+  showRepsChip:true,
   supersetHeaderText:'⚡ SUPER 7 · 7 reps · Même équipement',
   supersetFooterText:'Repos 60-90s après les 2 exercices · puis recommencer · 3 séries',
   supersetColor:function(block){return block.cat==='free'?'#ff6b35':'#3d8bff';},
