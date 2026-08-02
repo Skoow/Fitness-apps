@@ -27,7 +27,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 //    UNIQUEMENT quand on modifie SA config perso (ses exercices, ses journées,
 //    ses réglages…), sans toucher au moteur. Chacun garde son PATCH quand le
 //    moteur bouge : qui était en 2.4.1 passe en 2.5.1 lors d'une maj moteur.
-var ENGINE_VERSION='3.8';
+var ENGINE_VERSION='4.0';
 
 // Valeurs PARTAGÉES par défaut. Tout ce qui est identique d'une personne à
 // l'autre vit ICI, pas dupliqué dans chaque config. Une config perso ne
@@ -92,8 +92,18 @@ function getParisNow(){
   return new Date(ds+'T12:00:00');
 }
 function getParisDate(){return new Date().toLocaleDateString('en-CA',{timeZone:'Europe/Paris'});}
-function getISO(){var d=getParisNow(),f=new Date(d.getFullYear(),0,1),x=Math.floor((d-f)/86400000);return Math.ceil((x+f.getDay()+1)/7);}
-function getWK(){var d=getParisNow();return d.getFullYear()+'-W'+getISO();}
+// Clé de semaine ancrée sur le LUNDI (Europe/Paris) : c'est la date du lundi de
+// la semaine en cours. Elle ne change donc qu'au passage minuit dimanche->lundi.
+// La remise à zéro des cases cochées (voir doneWeek) est calée dessus : la
+// semaine en cours reste visible dans "Semaine" jusqu'au dimanche 23h59, et ne
+// repart à zéro que le lundi. (Avant, un "numéro de semaine" à l'américaine
+// basculait le dimanche -> remise à zéro un jour trop tôt.)
+function getWK(){
+  var d=getParisNow();
+  var wd=getWeekday(); // 0=Lun .. 6=Dim
+  var monday=new Date(d.getTime()-wd*86400000);
+  return monday.getFullYear()+'-'+(monday.getMonth()+1)+'-'+monday.getDate();
+}
 function getWeekday(){var d=getParisNow().getDay();return d===0?6:d-1;} // 0=Lun..6=Dim
 
 // ── RÉSOLUTION DU JOUR ACTIF ─────────────────────────────────────────────────
