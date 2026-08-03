@@ -78,7 +78,7 @@ select{-webkit-appearance:none;appearance:none}
 </head>
 <body>
 <div id="app"></div>
-<script src="../engine.js?v=4.0"></script>
+<script src="../engine.js?v=4.1"></script>
 <script>
 var ICONS={
     bench:'<rect x="4" y="36" width="56" height="8" rx="2" fill="C" opacity=".25"/><rect x="4" y="28" width="10" height="16" rx="2" fill="C" opacity=".3"/><rect x="6" y="10" width="52" height="4" rx="1" fill="C"/><rect x="4" y="6" width="4" height="8" rx="1" fill="C"/><rect x="56" y="6" width="4" height="8" rx="1" fill="C"/><circle cx="32" cy="26" r="4" fill="C"/><path d="M28 30L20 44" stroke="C" stroke-width="4" stroke-linecap="round"/><path d="M36 30L44 44" stroke="C" stroke-width="4" stroke-linecap="round"/><path d="M28 32L36 32" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M20 44L18 54" stroke="C" stroke-width="3.5" stroke-linecap="round"/><path d="M44 44L46 54" stroke="C" stroke-width="3.5" stroke-linecap="round"/>',
@@ -115,7 +115,7 @@ var P=[
     {id:'dipsLun',reps:'3×10',name:'Parallel Bar Dips',icon:'seatedDip',cat:'free',isBW:true,tip:'Barres paralleles - Poids du corps - Penche legerement le buste vers l avant - Pecs bas + Triceps - Descente complete coudes a 90 degres - Remonte sans verrouiller les coudes - Place en 1er exercice pour avoir toute la force de forcer'},
     {id:'benchpress',reps:'4×8',name:'Barbell Bench Press',icon:'bench',cat:'semi',isDB:true,tip:'Allonge sur le banc - Barre descendue jusqu a la poitrine - Prise large - Pecs milieu - Mouvement principal - Progressive overload chaque semaine'},
     {id:'inclinedb',reps:'4×10',name:'Incline Dumbbell Press',icon:'incline',cat:'free',isDB:true,tip:'Banc incline 30-45 degres - Deux halteres - Haut des pecs - Coudes legerement vers exterieur - Grande amplitude - Descente complete'},
-    {id:'convergingPressLun',reps:'3×12',name:'Converging Chest Press',icon:'bench',cat:'assist',tip:'Poignees qui convergent en poussant - Pecs centre et bas - Contraction maximale quand les mains se rejoignent - Dos plat contre le dossier'},
+    {id:'pecDeckLun',reps:'3×12',name:'Pec Deck Fly',icon:'pecFly',cat:'assist',isIso:true,tip:'Coudes legerement flechis, bras a hauteur des epaules - Rapproche les poignees devant toi en contractant les pecs - Serre a fond puis reviens lentement sans relacher - Dos plat contre le dossier'},
     {id:'cableOverheadTriLun',reps:'3×12',name:'Cable Overhead Triceps Extension',icon:'overhead',cat:'assist',pair:'tri',isUni:true,tip:'Poulie haute dos a la machine - Corde derriere la tete - Coudes fixes pres des oreilles - Etend les avant-bras vers l avant - Chef long du triceps - Cable = aucun risque de chute - SUPERSET avec Cable Pushdown'},
     {id:'tricepsPush',reps:'3×12',name:'Cable Triceps Pushdown',icon:'tricepsPush',cat:'assist',pair:'tri',isUni:true,tip:'Corde ou poignee simple - Un bras a la fois - Coude colle au corps - Pousse vers le bas - Triceps - SUPERSET avec Overhead Triceps'},
     {id:'cardioLun',reps:'20 min',name:'Incline Treadmill Walk',icon:'treadmill',cat:'cardio',tip:'20 minutes en fin de seance - Tapis incline 8-12 pct - Marche rapide allure moderee - Zone 65-75 pct FC max - Ne pas courir - Bruleur de graisse a faible impact qui menage les articulations'},
@@ -171,7 +171,7 @@ var CONFIG={
   storagePrefix:'anthony_',
   title:'ANTHONY',
   accentColor:'#ff4d1c',
-  configVersion:1,
+  configVersion:0,
   deadline:'2026-09-29',
   deadlineLabel:'RÉVISION DU PROGRAMME',
   deadlineDateText:'30 Juillet 2026',

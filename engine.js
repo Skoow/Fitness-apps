@@ -27,7 +27,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 //    UNIQUEMENT quand on modifie SA config perso (ses exercices, ses journées,
 //    ses réglages…), sans toucher au moteur. Chacun garde son PATCH quand le
 //    moteur bouge : qui était en 2.4.1 passe en 2.5.1 lors d'une maj moteur.
-var ENGINE_VERSION='4.0';
+var ENGINE_VERSION='4.1';
 
 // Valeurs PARTAGÉES par défaut. Tout ce qui est identique d'une personne à
 // l'autre vit ICI, pas dupliqué dans chaque config. Une config perso ne
@@ -52,7 +52,7 @@ var ENGINE_DEFAULTS={
   excludedFromProgress:['warmup','cardio'],
   noWeightCategories:['cardio'],
   categoryColors:{cardio:'#2ecc71'},
-  weightColors:{none:'#666',fresh:'#2ecc71',aging:'#f5a623',old:'#e53e3e'},
+  weightColors:{none:'#666',fresh:'#2ecc71',aging:'#f2d024',old:'#e53e3e'},
   noSideIconColor:'#555',
   exerciseNameColor:'#efefef',
   exckBorderColor:'#333',
@@ -162,8 +162,11 @@ function getWCol(id){
   var d=S.weightDates[id];
   if(!d)return CONFIG.weightColors.fresh;
   var days=Math.floor((getParisNow()-new Date(d+'T12:00:00'))/86400000);
-  if(days<=7)return CONFIG.weightColors.fresh;
-  if(days<=14)return CONFIG.weightColors.aging;
+  // Évolution lente : vert les 2 premières semaines (trop court pour monter la
+  // charge utilement avant), jaune la 3e semaine (approche de la limite), puis
+  // rouge au-delà (il est temps d'augmenter).
+  if(days<=14)return CONFIG.weightColors.fresh;
+  if(days<=21)return CONFIG.weightColors.aging;
   return CONFIG.weightColors.old;
 }
 
@@ -1051,10 +1054,10 @@ function blkHTML(block,day){
 // Rendu d'un contrôle de poids (une charge). Exposé aux hooks de config
 // (voir renderWeightRow) pour qu'une personne puisse composer plusieurs
 // contrôles (ex : un par côté) sans dupliquer cette logique.
-// La couleur (vert/orange/rouge selon l'ancienneté, cf. getWCol) est le seul
+// La couleur (vert/jaune/rouge selon l'ancienneté, cf. getWCol) est le seul
 // rappel de progression : pas de suggestion de poids chiffrée.
 // Le poids n'est affiché qu'une seule fois, dans le menu déroulant lui-même
-// (couleur du texte/bordure = fraîcheur, vert/orange/rouge) — pas de badge
+// (couleur du texte/bordure = fraîcheur, vert/jaune/rouge) — pas de badge
 // répétant "X kg" à côté, qui n'ajoutait rien de plus que de la répétition.
 function weightCtrl(key,ec,sideLabel,isDB){
   var w=S.weights[key]||'';
