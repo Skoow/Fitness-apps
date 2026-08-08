@@ -14,6 +14,11 @@
 // pourrait fournir CONFIG.weightOptions pour remplacer ces valeurs.
 var WEIGHT_OPTIONS_DB=['—','2','4','6','8','10','12','14','16','18','20','22','24','26','28','30','32','34','36','38','40','42','44','46','48','50'];
 var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','39','41','45','50','52','54','59','64','66','68','73','77','79','82','86','91','93','100','107','113'];
+// Liste "poids ronds" : disques que l'on charge soi-même sur une machine à
+// disques (hack squat, hip thrust, presse mollets...) ou une barre lourde.
+// Pas de 2 kg avec un plafond haut (160). Distincte de WEIGHT_OPTIONS_DB
+// (plafond 50) pour ne pas allonger les menus des petits mouvements haltères.
+var WEIGHT_OPTIONS_PLATE=(function(){var a=['—'];for(var i=2;i<=160;i+=2){a.push(String(i));}return a;})();
 
 // VERSION AFFICHÉE = "MAJEUR.MINEUR.PATCH" (ex : 2.5.1).
 //  - MAJEUR.MINEUR = ENGINE_VERSION ci-dessous, PARTAGÉ par les 3 apps. On le
@@ -27,7 +32,7 @@ var WEIGHT_OPTIONS_MC=['—','4.5','9','11','14','18','23','25','27','32','36','
 //    UNIQUEMENT quand on modifie SA config perso (ses exercices, ses journées,
 //    ses réglages…), sans toucher au moteur. Chacun garde son PATCH quand le
 //    moteur bouge : qui était en 2.4.1 passe en 2.5.1 lors d'une maj moteur.
-var ENGINE_VERSION='4.1';
+var ENGINE_VERSION='5.0';
 
 // Valeurs PARTAGÉES par défaut. Tout ce qui est identique d'une personne à
 // l'autre vit ICI, pas dupliqué dans chaque config. Une config perso ne
@@ -75,7 +80,8 @@ function applyEngineDefaults(cfg){
 function startApp(CONFIG){
 
 applyEngineDefaults(CONFIG);
-var WOPT=CONFIG.weightOptions||{db:WEIGHT_OPTIONS_DB,mc:WEIGHT_OPTIONS_MC};
+var WOPT=CONFIG.weightOptions||{db:WEIGHT_OPTIONS_DB,mc:WEIGHT_OPTIONS_MC,pl:WEIGHT_OPTIONS_PLATE};
+if(!WOPT.pl)WOPT.pl=WEIGHT_OPTIONS_PLATE;
 
 // ── ICONS (thème personnel) ──────────────────────────────────────────────────
 function mkIcon(n,c,sz){
@@ -1059,9 +1065,9 @@ function blkHTML(block,day){
 // Le poids n'est affiché qu'une seule fois, dans le menu déroulant lui-même
 // (couleur du texte/bordure = fraîcheur, vert/jaune/rouge) — pas de badge
 // répétant "X kg" à côté, qui n'ajoutait rien de plus que de la répétition.
-function weightCtrl(key,ec,sideLabel,isDB){
+function weightCtrl(key,ec,sideLabel,isDB,optsOverride){
   var w=S.weights[key]||'';
-  var opts=isDB?WOPT.db:WOPT.mc;
+  var opts=optsOverride||(isDB?WOPT.db:WOPT.mc);
   var hasW=!!(w&&w!=='—');
   var wc=hasW?getWCol(key):CONFIG.weightColors.none;
   var selOpts=opts.map(function(o){return '<option value="'+o+'"'+(o===(w||'—')?' selected':'')+'>'+(o==='—'?'Sélectionner kg':o+' kg')+'</option>';}).join('');
@@ -1085,8 +1091,16 @@ function weightCtrl(key,ec,sideLabel,isDB){
 // certains exercices se chargent différemment à gauche/droite fournit
 // CONFIG.renderWeightRow(ex, ec, weightCtrl) pour composer plusieurs
 // contrôles — cette logique n'existe alors que dans SON fichier.
+// Choix de la liste de poids selon le chargement réel de l'exercice :
+//  - isPlate : disques ronds charges a la main (machines a disques type hack
+//    squat / hip thrust / presse mollets) -> pas de 2 kg, plafond haut.
+//  - isDB : halteres ou barre -> pas de 2 kg, plafond 50.
+//  - sinon : colonne a tige de la machine guidee (ou du cable) -> liste machine.
+function weightListFor(ex){
+  return ex.isPlate?WOPT.pl:(ex.isDB?WOPT.db:WOPT.mc);
+}
 function defaultRenderWeightRow(ex,ec){
-  return weightCtrl(ex.id,ec,'',ex.isDB);
+  return weightCtrl(ex.id,ec,'',ex.isDB,weightListFor(ex));
 }
 function renderWeightRow(ex,ec){
   return (CONFIG.renderWeightRow||defaultRenderWeightRow)(ex,ec,weightCtrl);

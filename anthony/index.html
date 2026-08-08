@@ -78,7 +78,7 @@ select{-webkit-appearance:none;appearance:none}
 </head>
 <body>
 <div id="app"></div>
-<script src="../engine.js?v=4.1"></script>
+<script src="../engine.js?v=5.0"></script>
 <script>
 var ICONS={
     bench:'<rect x="4" y="36" width="56" height="8" rx="2" fill="C" opacity=".25"/><rect x="4" y="28" width="10" height="16" rx="2" fill="C" opacity=".3"/><rect x="6" y="10" width="52" height="4" rx="1" fill="C"/><rect x="4" y="6" width="4" height="8" rx="1" fill="C"/><rect x="56" y="6" width="4" height="8" rx="1" fill="C"/><circle cx="32" cy="26" r="4" fill="C"/><path d="M28 30L20 44" stroke="C" stroke-width="4" stroke-linecap="round"/><path d="M36 30L44 44" stroke="C" stroke-width="4" stroke-linecap="round"/><path d="M28 32L36 32" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M20 44L18 54" stroke="C" stroke-width="3.5" stroke-linecap="round"/><path d="M44 44L46 54" stroke="C" stroke-width="3.5" stroke-linecap="round"/>',
@@ -132,9 +132,9 @@ var P=[
   ]},
   {id:'mer',dow:2,label:'MER',name:'Ischios — Fessiers — Intérieur Cuisses',sub:'3 Fessiers · 2 Ischios · 1 Adducteurs',color:'#f5a623',exercises:[
     {id:'ab_mer',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',banner:'before',bannerStyle:'bonus',bannerName:'Ab Machine',tip:'Gainage abdominal - Contraction en bas'},
-    {id:'hipThrustSam',reps:'4×8',name:'Hip Thrust Machine',icon:'glueKick',cat:'assist',tip:'Dos contre le pad, pousse les hanches vers le haut - Contracte fort les fessiers en haut 1 sec - Le meilleur pour la fermete, va lourd'},
+    {id:'hipThrustSam',reps:'4×8',name:'Hip Thrust Machine',icon:'glueKick',cat:'semi',isPlate:true,tip:'Dos contre le pad, pousse les hanches vers le haut - Contracte fort les fessiers en haut 1 sec - Le meilleur pour la fermete, va lourd'},
     {id:'legPressMer',reps:'4×10',name:'Leg Press (High Feet)',icon:'legPress',cat:'assist',tip:'Pieds hauts et larges - Descend en grande amplitude, pousse par les talons - Cible fessiers et ischios - Ne verrouille pas les genoux'},
-    {id:'backExtMer',reps:'3×12',name:'45° Back Extension',icon:'backExt',cat:'assist',tip:'Charniere de hanche, buste qui descend puis remonte - Ischios et fessiers etires en bas - Serre les fessiers en haut, dos neutre - Lest contre la poitrine'},
+    {id:'backExtMer',reps:'3×12',name:'45° Back Extension',icon:'backExt',cat:'semi',isPlate:true,tip:'Charniere de hanche, buste qui descend puis remonte - Ischios et fessiers etires en bas - Serre les fessiers en haut, dos neutre - Lest contre la poitrine'},
     {id:'seatedCurlMer',reps:'3×12',name:'Seated Leg Curl',icon:'legCurl',cat:'assist',tip:'Ramene les talons sous le siege - Ischios en position etiree (plus de croissance) - Descente lente 3 sec'},
     {id:'hipAdductSam',reps:'3×15',name:'Hip Adduction (Inner)',icon:'hipAbduct',cat:'assist',tip:'Rapproche les jambes contre la resistance - Interieur de la cuisse (adducteurs) - Contraction forte au centre 1 sec'},
     {id:'kickbackMer',reps:'3×15',name:'Cable Glute Kickback',icon:'glueKick',cat:'semi',isUni:true,tip:'Poulie basse, sangle a la cheville - Pousse la jambe en arriere, contracte le fessier en fin de course - Une jambe a la fois, finisher'},
@@ -158,11 +158,11 @@ var P=[
   ]},
   {id:'sam',dow:5,label:'SAM',name:'Quadriceps — Fessiers — Mollets',sub:'2 Quadriceps · 2 Fessiers · 1 Mollet',color:'#06b6d4',exercises:[
     {id:'ab_sam',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',banner:'before',bannerStyle:'bonus',bannerName:'Ab Machine',tip:'Gainage abdominal - Contraction en bas'},
-    {id:'hackSquat',reps:'4×10',name:'Hack Squat Machine',icon:'squat',cat:'semi',tip:'Pieds largeur epaules - Descend cuisses paralleles ou plus bas - Quadriceps, dos plat contre le coussin - Mouvement principal'},
+    {id:'hackSquat',reps:'4×10',name:'Hack Squat Machine',icon:'squat',cat:'semi',isPlate:true,tip:'Pieds largeur epaules - Descend cuisses paralleles ou plus bas - Quadriceps, dos plat contre le coussin - Mouvement principal'},
     {id:'legExtSam',reps:'3×15',name:'Leg Extension',icon:'legExt',cat:'assist',isIso:true,tip:'Chevilles sous le pad, tends les jambes - Contraction max en haut 1 sec - Quadriceps isolation, descente lente'},
-    {id:'hipThrustSamLight',reps:'3×12',name:'Hip Thrust Machine (Light)',icon:'glueKick',cat:'assist',tip:'Pousse les hanches vers le haut, contracte en haut - 2eme dose fessiers (plus leger que mercredi) - Entretient la frequence'},
+    {id:'hipThrustSamLight',reps:'3×12',name:'Hip Thrust Machine (Light)',icon:'glueKick',cat:'semi',isPlate:true,tip:'Pousse les hanches vers le haut, contracte en haut - 2eme dose fessiers (plus leger que mercredi) - Entretient la frequence'},
     {id:'hipAbductSam',reps:'3×15',name:'Hip Abduction (Outer)',icon:'hipAbduct',cat:'assist',tip:'Ecarte les jambes contre la resistance - Moyen fessier (haut et cote de la fesse) - Contraction forte en fin d ecartement - Donne le galbe arrondi'},
-    {id:'seatedCalfSam',reps:'4×15',name:'Seated Calf Raise',icon:'calf',cat:'assist',tip:'Genoux flechis sous le pad - Monte sur la pointe des pieds - Contraction max en haut, amplitude complete'},
+    {id:'seatedCalfSam',reps:'4×15',name:'Seated Calf Raise',icon:'calf',cat:'semi',isPlate:true,tip:'Genoux flechis sous le pad - Monte sur la pointe des pieds - Contraction max en haut, amplitude complete'},
   ]},
 ];
 
@@ -171,7 +171,7 @@ var CONFIG={
   storagePrefix:'anthony_',
   title:'ANTHONY',
   accentColor:'#ff4d1c',
-  configVersion:5,
+  configVersion:0,
   deadline:'2026-09-29',
   deadlineLabel:'RÉVISION DU PROGRAMME',
   deadlineDateText:'30 Juillet 2026',
