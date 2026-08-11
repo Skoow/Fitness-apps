@@ -146,17 +146,19 @@ var P=[
     {id:'cableCurlJeu',reps:'3×12',name:'Cable Biceps Curl',icon:'preacher',cat:'semi',tip:'Poulie basse, coudes fixes contre le corps - Monte en contractant fort, tension constante - 2eme dose biceps, mouvement different du mardi'},
     {id:'machineTriExtJeu',reps:'3×12',name:'Machine Triceps Extension',icon:'tricepsPush',cat:'assist',tip:'Assis dos cale, coudes sur le pad - Etend les avant-bras contre la resistance - Triceps, contraction complete en bas'},
   ]},
-  {id:'ven',dow:4,label:'VEN',name:'Abdos · Core',sub:'1 Abdos · 1 Oblique · 1 Gainage · 1 Cardio',color:'#2ecc71',exercises:[
+  {id:'ven',dow:4,label:'VEN',name:'Abdos · Core',sub:'2 Abdos · 1 Oblique · 1 Gainage · 1 Cardio',color:'#2ecc71',exercises:[
     {id:'ab_ven',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',banner:'before',bannerStyle:'bonus',bannerName:'Ab Machine',tip:'Gainage abdominal - Contraction en bas'},
     {id:'legRaiseMer',reps:'3×15',name:'Roman Chair Straight-Leg Raise',icon:'pullup',cat:'free',isBW:true,tip:'Chaise romaine, jambes tendues - Monte a l horizontale - Abdos bas, descente controlee'},
-    {id:'sideBendMer',reps:'3×15',name:'Dumbbell Side Bend',icon:'lateralRaise',cat:'free',isDB:true,tip:'Haltere d un cote, penche lateralement - Obliques externes - Alterne gauche et droite'},
+    {id:'cableCrunchVen',reps:'3×15',name:'Cable Crunch',icon:'abMachine',cat:'semi',tip:'A genoux sous la poulie haute, corde derriere la tete - Enroule le buste vers le sol en contractant les abdos - Abdos haut, ne tire pas avec les bras - Retour controle'},
+    {id:'woodchopperVen',reps:'3×15',name:'Cable Woodchopper',icon:'facePull',cat:'semi',isUni:true,tip:'Poulie haute, debout de cote - Tire en diagonale de l epaule vers la hanche opposee - Obliques en rotation - Gaine le tronc, alterne les deux cotes'},
     {id:'plancheMer',reps:'3×45 sec',name:'Front Plank',icon:'abMachine',cat:'free',isBW:true,tip:'Sur les coudes et les orteils, corps droit - Abdos et fessiers contractes - Tiens 30 a 60 sec'},
     {id:'cardioVen',reps:'20 min',name:'Incline Treadmill Walk',icon:'treadmill',cat:'cardio',tip:'20 min tapis incline 8-12 pct - Marche rapide, ne pas courir - Zone 65-75 pct FC max'},
   ]},
-  {id:'sam',dow:5,label:'SAM',name:'Quadriceps — Fessiers — Mollets',sub:'2 Quadriceps · 1 Fessier · 1 Mollet',color:'#06b6d4',exercises:[
+  {id:'sam',dow:5,label:'SAM',name:'Quadriceps — Ischios — Fessiers — Mollets',sub:'2 Quadriceps · 1 Ischios · 1 Fessier · 1 Mollet',color:'#06b6d4',exercises:[
     {id:'ab_sam',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',banner:'before',bannerStyle:'bonus',bannerName:'Ab Machine',tip:'Gainage abdominal - Contraction en bas'},
     {id:'hackSquat',reps:'4×10',name:'Hack Squat Machine',icon:'squat',cat:'semi',isPlate:true,tip:'Pieds largeur epaules - Descend cuisses paralleles ou plus bas - Quadriceps, dos plat contre le coussin - Mouvement principal'},
     {id:'legExtSam',reps:'3×15',name:'Leg Extension',icon:'legExt',cat:'assist',isIso:true,tip:'Chevilles sous le pad, tends les jambes - Contraction max en haut 1 sec - Quadriceps isolation, descente lente'},
+    {id:'lyingCurlSam',reps:'3×12',name:'Lying Leg Curl',icon:'legCurl',cat:'assist',tip:'Allonge sur le ventre, talons sous le pad - Ramene les talons vers les fesses - Ischios - Contraction en haut, descente lente 3 sec'},
     {id:'hipAbductSam',reps:'3×15',name:'Hip Abduction (Outer)',icon:'hipAbduct',cat:'assist',tip:'Ecarte les jambes contre la resistance - Moyen fessier (haut et cote de la fesse) - Contraction forte en fin d ecartement - Donne le galbe arrondi'},
     {id:'seatedCalfSam',reps:'4×15',name:'Seated Calf Raise',icon:'calf',cat:'semi',isPlate:true,tip:'Genoux flechis sous le pad - Monte sur la pointe des pieds - Contraction max en haut, amplitude complete'},
   ]},
@@ -167,7 +169,7 @@ var CONFIG={
   storagePrefix:'anthony_',
   title:'ANTHONY',
   accentColor:'#ff4d1c',
-  configVersion:3,
+  configVersion:4,
   deadline:'2026-09-29',
   deadlineLabel:'RÉVISION DU PROGRAMME',
   deadlineDateText:'30 Juillet 2026',
