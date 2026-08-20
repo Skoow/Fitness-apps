@@ -120,13 +120,13 @@ var P=[
     {id:'tricepsPush',reps:'3×12',name:'Cable Triceps Pushdown',icon:'tricepsPush',cat:'semi',pair:'tri',isUni:true,tip:'Un bras a la fois, coude colle au corps - Pousse vers le bas - Triceps - Superset avec l Overhead'},
     {id:'cardioLun',reps:'20 min',name:'Incline Treadmill Walk',icon:'treadmill',cat:'cardio',tip:'20 min tapis incline 8-12 pct - Marche rapide, ne pas courir - Zone 65-75 pct FC max'},
   ]},
-  {id:'mar',dow:1,label:'MAR',name:'Dos — Biceps',sub:'3 Dos · 2 Biceps',color:'#3d8bff',exercises:[
+  {id:'mar',dow:1,label:'MAR',name:'Dos — Biceps',sub:'4 Dos · 1 Biceps',color:'#3d8bff',exercises:[
     {id:'ab_mar',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',banner:'before',bannerStyle:'bonus',bannerName:'Ab Machine',tip:'Gainage abdominal - Contraction en bas'},
     {id:'pullupMar',reps:'4×8',name:'Assisted Pull-Up Machine',icon:'pullup',cat:'assist',tip:'Traction assistee, prise large - Tire le corps vers le haut - Grand dorsal (largeur)'},
     {id:'seatedCableRowMar',reps:'4×10',name:'Seated Row Machine',icon:'seatedRow',cat:'assist',tip:'Poitrine contre le pad, tire les poignees vers le ventre - Coudes pres du corps - Milieu du dos et rhomboides (epaisseur)'},
     {id:'straightArmMar',reps:'3×15',name:'Straight-Arm Pulldown',icon:'latPull',cat:'semi',tip:'Poulie haute, bras tendus - Tire vers les cuisses sans plier les coudes - Isole le grand dorsal (largeur)'},
     {id:'ezBarCurlMar',reps:'3×10',name:'EZ Bar Curl',icon:'preacher',cat:'semi',isDB:true,tip:'Barre EZ, prise supination - Coudes colles au corps - Descente lente 3 sec - Fait quand encore frais'},
-    {id:'hammercurlMar',reps:'3×12',name:'Hammer Curl',icon:'lateralRaise',cat:'free',isDB:true,tip:'Prise neutre pouce vers le haut - Coudes fixes, alterne les bras - Brachial, epaissit le bras'},
+    {id:'deadliftMachineMar',reps:'4×8',name:'Deadlift Machine',icon:'backExt',cat:'semi',isPlate:true,tip:'Machine guidee, poids sur le cote - Charniere de hanche, tire la barre en te redressant - Lombaires, fessiers, ischios, trapezes - Dos neutre, va lourd'},
   ]},
   {id:'mer',dow:2,label:'MER',name:'Ischios — Fessiers — Intérieur Cuisses',sub:'3 Fessiers · 2 Ischios · 1 Adducteurs',color:'#f5a623',exercises:[
     {id:'ab_mer',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',banner:'before',bannerStyle:'bonus',bannerName:'Ab Machine',tip:'Gainage abdominal - Contraction en bas'},
@@ -146,12 +146,13 @@ var P=[
     {id:'cableCurlJeu',reps:'3×12',name:'Cable Biceps Curl',icon:'preacher',cat:'semi',tip:'Poulie basse, coudes fixes contre le corps - Monte en contractant fort, tension constante - 2eme dose biceps, mouvement different du mardi'},
     {id:'tricepsPushJeu',reps:'3×12',name:'Cable Triceps Pushdown',icon:'tricepsPush',cat:'semi',tip:'Poulie haute, corde ou barre - Coudes colles au corps - Pousse vers le bas, loin du corps - Triceps, mouvement oppose au curl'},
   ]},
-  {id:'ven',dow:4,label:'VEN',name:'Abdos · Core',sub:'2 Abdos · 1 Oblique · 1 Gainage · 1 Cardio',color:'#2ecc71',exercises:[
+  {id:'ven',dow:4,label:'VEN',name:'Abdos · Core',sub:'2 Abdos · 1 Oblique · 1 Gainage · 1 Lombaires · 1 Cardio',color:'#2ecc71',exercises:[
     {id:'ab_ven',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',banner:'before',bannerStyle:'bonus',bannerName:'Ab Machine',tip:'Gainage abdominal - Contraction en bas'},
     {id:'declineSitUpVen',reps:'3×12',name:'Weighted Decline Sit-Up',icon:'abMachine',cat:'free',isPlate:true,tip:'Banc decline, disque tenu sur la poitrine - Sit-up complet buste vers les genoux - Abdos haut, amplitude complete'},
     {id:'captainsChairVen',reps:'3×15',name:"Captain's Chair Knee Raise",icon:'pullup',cat:'free',isBW:true,tip:'Appuye sur les avant-bras, dos cale - Remonte les genoux vers la poitrine - Abdos bas, sans elan, pas de cable'},
     {id:'woodchopperVen',reps:'3×15',name:'Cable Woodchopper',icon:'facePull',cat:'semi',isUni:true,tip:'Poulie haute, debout de cote - Tire en diagonale de l epaule vers la hanche opposee - Obliques en rotation - Gaine le tronc, alterne les deux cotes'},
     {id:'plancheMer',reps:'3×45 sec',name:'Front Plank',icon:'abMachine',cat:'free',isBW:true,tip:'Sur les coudes et les orteils, corps droit - Abdos et fessiers contractes - Tiens 30 a 60 sec'},
+    {id:'lumbarMachineVen',reps:'3×12',name:'Lower Back Extension Machine',icon:'backExt',cat:'assist',tip:'Assis, dos cale contre le dossier articule - Pousse le dos en arriere pour etendre la colonne - Lombaires en isolation, contraction en fin de mouvement'},
     {id:'cardioVen',reps:'20 min',name:'Incline Treadmill Walk',icon:'treadmill',cat:'cardio',tip:'20 min tapis incline 8-12 pct - Marche rapide, ne pas courir - Zone 65-75 pct FC max'},
   ]},
   {id:'sam',dow:5,label:'SAM',name:'Quadriceps — Ischios — Fessiers — Mollets',sub:'2 Quadriceps · 1 Ischios · 1 Fessier · 1 Mollet',color:'#06b6d4',exercises:[
