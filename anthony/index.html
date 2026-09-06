@@ -110,12 +110,13 @@ var ICONS={
     treadmill:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><path d="M6 50L54 32" stroke="C" stroke-width="5" stroke-linecap="round" opacity=".35"/><line x1="8" y1="50" x2="8" y2="56" stroke="C" stroke-width="3" stroke-linecap="round"/><line x1="52" y1="34" x2="52" y2="56" stroke="C" stroke-width="3" stroke-linecap="round"/><line x1="50" y1="34" x2="46" y2="14" stroke="C" stroke-width="2.5" stroke-linecap="round"/><line x1="40" y1="16" x2="52" y2="12" stroke="C" stroke-width="2.5" stroke-linecap="round"/><circle cx="28" cy="12" r="4" fill="C"/><path d="M26 16L24 28" stroke="C" stroke-width="3.5" stroke-linecap="round"/><path d="M26 20L40 16" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M26 20L20 26" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M24 28L30 40" stroke="C" stroke-width="3.5" stroke-linecap="round"/><path d="M24 28L16 38" stroke="C" stroke-width="3.5" stroke-linecap="round"/>',
 };
 var P=[
-  {id:'lun',dow:0,label:'LUN',name:'Pectoraux — Triceps',sub:'3 Pecs · 3 Triceps',color:'#ff4d1c',exercises:[
+  {id:'lun',dow:0,label:'LUN',name:'Pectoraux — Triceps',sub:'4 Pecs · 3 Triceps',color:'#ff4d1c',exercises:[
     {id:'ab_lun',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',banner:'before',bannerStyle:'bonus',bannerName:'Ab Machine',tip:'Gainage abdominal - Contraction en bas'},
     {id:'dipsLun',reps:'3×10',name:'Parallel Bar Dips',icon:'seatedDip',cat:'free',isBW:true,tip:'Poids du corps, buste penche en avant - Descente coudes a 90 degres, remonte sans verrouiller - Pecs bas + triceps - A faire en 1er'},
     {id:'inclineBarbell',reps:'4×8',name:'Incline Barbell Press',icon:'incline',cat:'semi',isDB:true,tip:'Banc incline 30-45 degres - Haut des pecs - Descente controlee jusqu au haut de la poitrine - Un peu plus lourd chaque semaine'},
     {id:'convergingPressLun',reps:'4×10',name:'Converging Chest Press',icon:'bench',cat:'assist',tip:'Poignees qui convergent en poussant - Pecs centre et bas - Contraction max quand les mains se rejoignent'},
     {id:'pecDeckLun',reps:'3×12',name:'Pec Deck Fly',icon:'pecFly',cat:'assist',isIso:true,tip:'Bras a hauteur des epaules, coudes legerement flechis - Rapproche les poignees en contractant les pecs - Serre a fond, reviens lentement'},
+    {id:'cableCrossoverLun',reps:'3×15',name:'Cable Crossover',icon:'pecFly',cat:'semi',tip:'Poulies hautes de chaque cote, cables croises devant toi - Rapproche les mains vers le bas et le centre - Bas et interieur des pecs, contraction en fin de mouvement'},
     {id:'cableOverheadTriLun',reps:'3×12',name:'Cable Overhead Triceps Extension',icon:'overhead',cat:'semi',pair:'tri',isUni:true,tip:'Poulie haute, corde derriere la tete - Coudes fixes pres des oreilles - Chef long du triceps - Superset avec le Pushdown'},
     {id:'tricepsPush',reps:'3×12',name:'Cable Triceps Pushdown',icon:'tricepsPush',cat:'semi',pair:'tri',isUni:true,tip:'Un bras a la fois, coude colle au corps - Pousse vers le bas - Triceps - Superset avec l Overhead'},
   ]},
@@ -154,7 +155,7 @@ var P=[
     {id:'hipAbductSam',reps:'3×15',name:'Hip Abduction (Outer)',icon:'hipAbduct',cat:'assist',tip:'Ecarte les jambes contre la resistance - Moyen fessier (haut et cote de la fesse) - Contraction forte en fin d ecartement - Donne le galbe arrondi'},
     {id:'seatedCalfSam',reps:'4×15',name:'Seated Calf Raise',icon:'calf',cat:'semi',isPlate:true,tip:'Genoux flechis sous le pad - Monte sur la pointe des pieds - Contraction max en haut, amplitude complete'},
   ]},
-  {id:'ven',dow:5,label:'SAM',name:'Abdos · Core',sub:'2 Abdos · 1 Oblique · 1 Gainage · 2 Lombaires',color:'#2ecc71',exercises:[
+  {id:'ven',dow:5,label:'SAM',name:'Abdos · Core',sub:'2 Abdos · 1 Oblique · 1 Gainage · 2 Lombaires · 1 Mollet',color:'#2ecc71',exercises:[
     {id:'ab_ven',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',banner:'before',bannerStyle:'bonus',bannerName:'Ab Machine',tip:'Gainage abdominal - Contraction en bas'},
     {id:'declineSitUpVen',reps:'3×12',name:'Weighted Decline Sit-Up',icon:'abMachine',cat:'free',isPlate:true,tip:'Banc decline, disque tenu sur la poitrine - Sit-up complet buste vers les genoux - Abdos haut, amplitude complete'},
     {id:'captainsChairVen',reps:'3×15',name:"Captain's Chair Knee Raise",icon:'pullup',cat:'free',isBW:true,tip:'Appuye sur les avant-bras, dos cale - Remonte les genoux vers la poitrine - Abdos bas, sans elan, pas de cable'},
@@ -162,6 +163,7 @@ var P=[
     {id:'plancheMer',reps:'3×45 sec',name:'Front Plank',icon:'abMachine',cat:'free',isBW:true,tip:'Sur les coudes et les orteils, corps droit - Abdos et fessiers contractes - Tiens 30 a 60 sec'},
     {id:'lumbarMachineVen',reps:'3×12',name:'Lower Back Extension Machine',icon:'backExt',cat:'assist',tip:'Assis, dos cale contre le dossier articule - Pousse le dos en arriere pour etendre la colonne - Lombaires en isolation, contraction en fin de mouvement'},
     {id:'backExtVen',reps:'3×12',name:'45° Back Extension',icon:'backExt',cat:'semi',isPlate:true,tip:'Banc a 45 degres, mains croisees sur la poitrine - Descend controle puis remonte a l horizontale sans hyperextension - Lombaires, mouvement lent et progressif, charge optionnelle'},
+    {id:'standingCalfVen',reps:'4×15',name:'Standing Calf Raise',icon:'calf',cat:'semi',isPlate:true,tip:'Debout, plateforme sous l avant-pied - Monte sur la pointe des pieds, extension complete - Mollets, amplitude maximale - 2eme dose mollets de la semaine'},
   ]},
 ];
 
