@@ -15,7 +15,7 @@
 // mis en cache (index.html/engine.js périmés) — l'ancien cache est supprimé
 // dans l'événement "activate" ci-dessous. Utile quand une vieille version
 // reste collée sur un téléphone malgré le cache-busting ?v=X.Y.
-var CACHE_NAME='fitness-cache-v45';
+var CACHE_NAME='fitness-cache-v46';
 
 self.addEventListener('install',function(event){
   self.skipWaiting();
@@ -63,7 +63,11 @@ self.addEventListener('fetch',function(event){
         var networkFetch=fetch(event.request).then(function(response){
           if(response&&response.ok){cache.put(event.request,response.clone());}
           return response;
-        }).catch(function(){return cached;});
+        }).catch(function(){
+          // Meme piege que pour les pages : si ni le cache ni le reseau
+          // n'ont rien, il faut quand meme une vraie Response pour respondWith.
+          return cached||new Response('',{status:504,statusText:'Offline'});
+        });
         return cached||networkFetch;
       });
     })
