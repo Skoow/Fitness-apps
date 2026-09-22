@@ -15,7 +15,7 @@
 // mis en cache (index.html/engine.js périmés) — l'ancien cache est supprimé
 // dans l'événement "activate" ci-dessous. Utile quand une vieille version
 // reste collée sur un téléphone malgré le cache-busting ?v=X.Y.
-var CACHE_NAME='fitness-cache-v44';
+var CACHE_NAME='fitness-cache-v45';
 
 self.addEventListener('install',function(event){
   self.skipWaiting();
@@ -46,7 +46,12 @@ self.addEventListener('fetch',function(event){
         }
         return response;
       }).catch(function(){
-        return caches.open(CACHE_NAME).then(function(cache){return cache.match(event.request);});
+        return caches.open(CACHE_NAME).then(function(cache){return cache.match(event.request);}).then(function(cached){
+          // Ni reseau ni cache : il faut quand meme renvoyer une vraie Response,
+          // sinon respondWith recoit undefined -> "Returned response is null"
+          // et Safari plante l'ouverture de la page (au lieu d'un simple message).
+          return cached||new Response('Hors ligne. Reessaie avec du reseau.',{status:503,statusText:'Offline',headers:{'Content-Type':'text/plain; charset=utf-8'}});
+        });
       })
     );
     return;
