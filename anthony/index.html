@@ -110,50 +110,50 @@ var ICONS={
     treadmill:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><path d="M6 50L54 32" stroke="C" stroke-width="5" stroke-linecap="round" opacity=".35"/><line x1="8" y1="50" x2="8" y2="56" stroke="C" stroke-width="3" stroke-linecap="round"/><line x1="52" y1="34" x2="52" y2="56" stroke="C" stroke-width="3" stroke-linecap="round"/><line x1="50" y1="34" x2="46" y2="14" stroke="C" stroke-width="2.5" stroke-linecap="round"/><line x1="40" y1="16" x2="52" y2="12" stroke="C" stroke-width="2.5" stroke-linecap="round"/><circle cx="28" cy="12" r="4" fill="C"/><path d="M26 16L24 28" stroke="C" stroke-width="3.5" stroke-linecap="round"/><path d="M26 20L40 16" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M26 20L20 26" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M24 28L30 40" stroke="C" stroke-width="3.5" stroke-linecap="round"/><path d="M24 28L16 38" stroke="C" stroke-width="3.5" stroke-linecap="round"/>',
 };
 var P=[
-  {id:'lun',dow:0,label:'LUN',name:'Pectoraux — Triceps',sub:'2 Pecs · 3 Triceps',color:'#ff4d1c',exercises:[
-    {id:'ab_lun',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',banner:'before',bannerStyle:'bonus',bannerName:'Ab Machine',tip:'Gainage abdominal - Contraction en bas'},
-    {id:'dipsLun',reps:'3×10',name:'Parallel Bar Dips',icon:'seatedDip',cat:'free',isBW:true,tip:'Poids du corps, buste penche en avant - Descente coudes a 90 degres, remonte sans verrouiller - Pecs bas + triceps - A faire en 1er'},
-    {id:'convergingPressLun',reps:'4×10',name:'Converging Chest Press',icon:'bench',cat:'assist',tip:'Poignees qui convergent en poussant - Pecs centre et bas - Contraction max quand les mains se rejoignent'},
-    {id:'pecDeckLun',reps:'3×12',name:'Pec Deck Fly',icon:'pecFly',cat:'assist',isIso:true,tip:'Bras a hauteur des epaules, coudes legerement flechis - Rapproche les poignees en contractant les pecs - Serre a fond, reviens lentement'},
-    {id:'cableOverheadTriLun',reps:'4×12',name:'Cable Overhead Triceps Extension',icon:'overhead',cat:'semi',pair:'tri',isUni:true,tip:'Poulie haute, corde derriere la tete - Coudes fixes pres des oreilles - Chef long du triceps - Superset avec le Pushdown'},
-    {id:'tricepsPush',reps:'4×12',name:'Cable Triceps Pushdown',icon:'tricepsPush',cat:'semi',pair:'tri',isUni:true,tip:'Un bras a la fois, coude colle au corps - Pousse vers le bas - Triceps - Superset avec l Overhead'},
+  {id:'lun',dow:0,label:'LUN',name:'Pectoraux — Triceps',sub:'2 Pecs · 3 Triceps · 1 Abdos',color:'#ff4d1c',exercises:[
+    {id:'dipsLun',reps:'3×6–12',name:'Parallel Bar Dips',icon:'seatedDip',cat:'free',isBW:true,tip:'Poids du corps, buste penche en avant - Descente coudes a 90 degres, remonte sans verrouiller - Pecs bas + triceps - A faire en 1er'},
+    {id:'dbBenchLun',reps:'4×6–10',name:'Dumbbell Bench Press',icon:'bench',cat:'free',isDB:true,tip:'Allonge sur banc plat, un haltere dans chaque main - Descends les halteres a hauteur de poitrine, coudes a 45 degres - Pousse en rapprochant les halteres en haut - Pecs complets, amplitude plus grande qu a la machine'},
+    {id:'pecDeckLun',reps:'3×10–15',name:'Pec Deck Fly',icon:'pecFly',cat:'assist',isIso:true,tip:'Bras a hauteur des epaules, coudes legerement flechis - Rapproche les poignees en contractant les pecs - Serre a fond, reviens lentement'},
+    {id:'cableOverheadTriLun',reps:'4×10–15',name:'Cable Overhead Triceps Extension',icon:'overhead',cat:'semi',pair:'tri',isUni:true,tip:'Poulie haute, corde derriere la tete - Coudes fixes pres des oreilles - Chef long du triceps - Superset avec le Pushdown'},
+    {id:'tricepsPush',reps:'4×10–15',name:'Cable Triceps Pushdown',icon:'tricepsPush',cat:'semi',pair:'tri',isUni:true,tip:'Un bras a la fois, coude colle au corps - Pousse vers le bas - Triceps - Superset avec l Overhead'},
+    {id:'reverseCrunchLun',reps:'3×12–15',name:'Reverse Crunch',icon:'abMachine',cat:'free',isBW:true,tip:'Allonge sur le dos, genoux flechis - Ramene les genoux vers la poitrine en decollant le bassin du sol - Bas des abdos - Descente lente, sans elan'},
   ]},
-  {id:'mer',dow:1,label:'MAR',name:'Ischios — Fessiers — Intérieur Cuisses',sub:'2 Fessiers · 2 Ischios · 1 Adducteurs · 1 Gainage',color:'#f5a623',exercises:[
-    {id:'ab_mer',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',banner:'before',bannerStyle:'bonus',bannerName:'Ab Machine',tip:'Gainage abdominal - Contraction en bas'},
-    {id:'hipThrustSam',reps:'4×8',name:'Hip Thrust Machine',icon:'glueKick',cat:'semi',isPlate:true,tip:'Dos contre le pad, pousse les hanches vers le haut - Contracte fort les fessiers en haut 1 sec - Le meilleur pour la fermete, va lourd'},
-    {id:'backExtMer',reps:'3×12',name:'45° Back Extension',icon:'backExt',cat:'semi',isPlate:true,tip:'Charniere de hanche, buste qui descend puis remonte - Ischios et fessiers etires en bas - Serre les fessiers en haut, dos neutre - Lest contre la poitrine'},
-    {id:'seatedCurlMer',reps:'3×12',name:'Seated Leg Curl',icon:'legCurl',cat:'assist',tip:'Ramene les talons sous le siege - Ischios en position etiree (plus de croissance) - Descente lente 3 sec'},
-    {id:'hipAdductSam',reps:'3×15',name:'Hip Adduction (Inner)',icon:'hipAbduct',cat:'assist',tip:'Rapproche les jambes contre la resistance - Interieur de la cuisse (adducteurs) - Contraction forte au centre 1 sec'},
-    {id:'kickbackMer',reps:'3×15',name:'Cable Glute Kickback',icon:'glueKick',cat:'semi',isUni:true,tip:'Poulie basse, sangle a la cheville - Pousse la jambe en arriere, contracte le fessier en fin de course - Une jambe a la fois, finisher'},
-    {id:'plancheMer',reps:'3×45 sec',name:'Front Plank',icon:'abMachine',cat:'free',isBW:true,tip:'Sur les coudes et les orteils, corps droit - Abdos et fessiers contractes - Tiens 30 a 60 sec'},
+  {id:'mer',dow:1,label:'MAR',name:'Ischios — Fessiers — Intérieur Cuisses',sub:'2 Fessiers · 2 Ischios · 1 Adducteurs · 1 Abdos · 1 Gainage',color:'#f5a623',exercises:[
+    {id:'hipThrustSam',reps:'4×6–10',name:'Hip Thrust Machine',icon:'glueKick',cat:'semi',isPlate:true,tip:'Dos contre le pad, pousse les hanches vers le haut - Contracte fort les fessiers en haut 1 sec - Le meilleur pour la fermete, va lourd'},
+    {id:'backExtMer',reps:'3×10–15',name:'45° Back Extension',icon:'backExt',cat:'semi',isPlate:true,tip:'Charniere de hanche, buste qui descend puis remonte - Ischios et fessiers etires en bas - Serre les fessiers en haut, dos neutre - Lest contre la poitrine'},
+    {id:'seatedCurlMer',reps:'3×8–12',name:'Seated Leg Curl',icon:'legCurl',cat:'assist',tip:'Ramene les talons sous le siege - Ischios en position etiree (plus de croissance) - Descente lente 3 sec'},
+    {id:'hipAdductSam',reps:'3×10–15',name:'Hip Adduction (Inner)',icon:'hipAbduct',cat:'assist',tip:'Rapproche les jambes contre la resistance - Interieur de la cuisse (adducteurs) - Contraction forte au centre 1 sec'},
+    {id:'kickbackMer',reps:'3×10–15',name:'Cable Glute Kickback',icon:'glueKick',cat:'semi',isUni:true,tip:'Poulie basse, sangle a la cheville - Pousse la jambe en arriere, contracte le fessier en fin de course - Une jambe a la fois, finisher'},
+    {id:'plancheMer',reps:'3×30–60 sec',name:'Front Plank',icon:'abMachine',cat:'free',isBW:true,tip:'Sur les coudes et les orteils, corps droit - Abdos et fessiers contractes - Tiens 30 a 60 sec'},
+    {id:'ab_mer',reps:'3×10–15',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',tip:'Enroule le buste vers le bas, contraction 1 sec - Abdos (grand droit) - Remonte lentement'},
   ]},
-  {id:'jeu',dow:2,label:'MER',name:'Épaules — Bras',sub:'3 Épaules · 3 Bras · 1 Trapèze',color:'#a855f7',exercises:[
-    {id:'ab_jeu',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',banner:'before',bannerStyle:'bonus',bannerName:'Ab Machine',tip:'Gainage abdominal - Contraction en bas'},
-    {id:'shoulderPress',reps:'4×10',name:'Machine Shoulder Press',icon:'shoulderPress',cat:'assist',tip:'Assis dos cale, pousse les poignees vers le haut - Deltoide complet - Mouvement stable, descente controlee'},
-    {id:'cableLateralJeu',reps:'3×15',name:'Cable Lateral Raise',icon:'lateralRaise',cat:'semi',isUni:true,tip:'Cable bas, un bras a la fois - Ecarte jusqu a hauteur d epaule - Deltoide lateral, tension constante'},
-    {id:'facePullJeu',reps:'3×15',name:'Cable Face Pull',icon:'facePull',cat:'semi',tip:'Corde a la poulie haute, coudes hauts - Tire vers le visage - Epaules arriere + trapezes moyens - Excellent pour la posture'},
-    {id:'cableCurlJeu',reps:'3×12',name:'Cable Biceps Curl',icon:'preacher',cat:'semi',tip:'Poulie basse, coudes fixes contre le corps - Monte en contractant fort, tension constante - Prise supination, mouvement different du jeudi'},
-    {id:'cableHammerCurlJeu',reps:'3×12',name:'Cable Hammer Curl',icon:'lateralRaise',cat:'semi',tip:'Corde a la poulie basse, prise neutre (paumes face a face) - Coudes fixes, remonte sans tourner les poignets - Biceps + brachial, angle different du Cable Curl'},
-    {id:'tricepsKickbackJeu',reps:'3×12',name:'Cable Triceps Kickback',icon:'tricepsPush',cat:'semi',isUni:true,tip:'Poulie basse, buste penche en avant, coude colle au corps a hauteur des cotes - Etend l avant-bras vers l arriere - Triceps, angle different du lundi (chef lateral, bras derriere le corps)'},
-    {id:'shrug',reps:'4×12',name:'Dumbbell Shrug',icon:'shoulderPress',cat:'free',isDB:true,tip:'Un haltere dans chaque main - Hausse les epaules vers les oreilles - Trapezes, contraction en haut - Ne roule pas les epaules'},
+  {id:'jeu',dow:2,label:'MER',name:'Épaules — Bras',sub:'3 Épaules · 3 Bras · 1 Trapèze · 1 Abdos',color:'#a855f7',exercises:[
+    {id:'shoulderPress',reps:'4×8–12',name:'Machine Shoulder Press',icon:'shoulderPress',cat:'assist',tip:'Assis dos cale, pousse les poignees vers le haut - Deltoide complet - Mouvement stable, descente controlee'},
+    {id:'cableLateralJeu',reps:'3×12–15',name:'Cable Lateral Raise',icon:'lateralRaise',cat:'semi',isUni:true,tip:'Cable bas, un bras a la fois - Ecarte jusqu a hauteur d epaule - Deltoide lateral, tension constante'},
+    {id:'facePullJeu',reps:'3×12–15',name:'Cable Face Pull',icon:'facePull',cat:'semi',tip:'Corde a la poulie haute, coudes hauts - Tire vers le visage - Epaules arriere + trapezes moyens - Excellent pour la posture'},
+    {id:'cableCurlJeu',reps:'3×8–12',name:'Cable Biceps Curl',icon:'preacher',cat:'semi',tip:'Poulie basse, coudes fixes contre le corps - Monte en contractant fort, tension constante - Prise supination, mouvement different du jeudi'},
+    {id:'cableHammerCurlJeu',reps:'3×10–12',name:'Cable Hammer Curl',icon:'lateralRaise',cat:'semi',tip:'Corde a la poulie basse, prise neutre (paumes face a face) - Coudes fixes, remonte sans tourner les poignets - Biceps + brachial, angle different du Cable Curl'},
+    {id:'tricepsKickbackJeu',reps:'3×10–15',name:'Cable Triceps Kickback',icon:'tricepsPush',cat:'semi',isUni:true,tip:'Poulie basse, buste penche en avant, coude colle au corps a hauteur des cotes - Etend l avant-bras vers l arriere - Triceps, angle different du lundi (chef lateral, bras derriere le corps)'},
+    {id:'shrug',reps:'4×10–15',name:'Dumbbell Shrug',icon:'shoulderPress',cat:'free',isDB:true,tip:'Un haltere dans chaque main - Hausse les epaules vers les oreilles - Trapezes, contraction en haut - Ne roule pas les epaules'},
+    {id:'cableCrunchJeu',reps:'3×10–15',name:'Cable Crunch',icon:'abMachine',cat:'semi',tip:'A genoux face a la poulie haute, corde derriere la tete - Enroule le buste vers le sol en rapprochant les coudes des cuisses - Abdos en charge, les hanches ne bougent pas'},
   ]},
-  {id:'mar',dow:3,label:'JEU',name:'Dos — Biceps',sub:'3 Dos · 1 Biceps · 2 Lombaires',color:'#3d8bff',exercises:[
-    {id:'ab_mar',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',banner:'before',bannerStyle:'bonus',bannerName:'Ab Machine',tip:'Gainage abdominal - Contraction en bas'},
-    {id:'pullupMar',reps:'4×8',name:'Assisted Pull-Up Machine',icon:'pullup',cat:'assist',tip:'Traction assistee, prise large - Tire le corps vers le haut - Grand dorsal (largeur)'},
-    {id:'seatedCableRowMar',reps:'4×10',name:'Seated Row Machine',icon:'seatedRow',cat:'assist',tip:'Poitrine contre le pad, tire les poignees vers le ventre - Coudes pres du corps - Milieu du dos et rhomboides (epaisseur)'},
-    {id:'straightArmMar',reps:'3×15',name:'Straight-Arm Pulldown',icon:'latPull',cat:'semi',tip:'Poulie haute, bras tendus - Tire vers les cuisses sans plier les coudes - Isole le grand dorsal (largeur)'},
-    {id:'ezBarCurlMar',reps:'3×10',name:'EZ Bar Curl',icon:'preacher',cat:'semi',isDB:true,tip:'Barre EZ, prise supination - Coudes colles au corps - Descente lente 3 sec - Fait quand encore frais'},
-    {id:'pullThroughMar',reps:'3×15',name:'Cable Pull-Through',icon:'pullThrough',cat:'semi',tip:'Poulie basse dans le dos, corde entre les jambes - Charniere de hanche, pousse les hanches vers l avant pour te redresser - Lombaires et fessiers, mouvement controle et securise, pas de charge directe sur le dos'},
-    {id:'lumbarMachineVen',reps:'3×12',name:'Lower Back Extension Machine',icon:'backExt',cat:'assist',tip:'Assis, dos cale contre le dossier articule - Pousse le dos en arriere pour etendre la colonne - Lombaires en isolation, contraction en fin de mouvement'},
+  {id:'mar',dow:3,label:'JEU',name:'Dos — Biceps',sub:'3 Dos · 1 Biceps · 2 Lombaires · 1 Abdos',color:'#3d8bff',exercises:[
+    {id:'pullupMar',reps:'4×6–10',name:'Assisted Pull-Up Machine',icon:'pullup',cat:'assist',tip:'Traction assistee, prise large - Tire le corps vers le haut - Grand dorsal (largeur)'},
+    {id:'seatedCableRowMar',reps:'4×8–12',name:'Divergent Seated Row',icon:'seatedRow',cat:'assist',tip:'Poitrine contre le pad, tire les poignees vers le ventre - Coudes pres du corps - Milieu du dos et rhomboides (epaisseur)'},
+    {id:'straightArmMar',reps:'3×12–15',name:'Straight-Arm Pulldown',icon:'latPull',cat:'semi',tip:'Poulie haute, bras tendus - Tire vers les cuisses sans plier les coudes - Isole le grand dorsal (largeur)'},
+    {id:'ezBarCurlMar',reps:'3×8–12',name:'EZ Bar Curl',icon:'preacher',cat:'semi',isDB:true,tip:'Barre EZ, prise supination - Coudes colles au corps - Descente lente 3 sec - Fait quand encore frais'},
+    {id:'pullThroughMar',reps:'3×12–15',name:'Cable Pull-Through',icon:'pullThrough',cat:'semi',tip:'Poulie basse dans le dos, corde entre les jambes - Charniere de hanche, pousse les hanches vers l avant pour te redresser - Lombaires et fessiers, mouvement controle et securise, pas de charge directe sur le dos'},
+    {id:'lumbarMachineVen',reps:'3×10–15',name:'Lower Back Extension Machine',icon:'backExt',cat:'assist',tip:'Assis, dos cale contre le dossier articule - Pousse le dos en arriere pour etendre la colonne - Lombaires en isolation, contraction en fin de mouvement'},
+    {id:'ab_mar',reps:'3×10–15',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',tip:'Enroule le buste vers le bas, contraction 1 sec - Abdos (grand droit) - Remonte lentement'},
   ]},
-  {id:'sam',dow:4,label:'VEN',name:'Quadriceps — Ischios — Fessiers — Mollets',sub:'2 Quadriceps · 1 Ischios · 1 Fessier · 1 Mollet · 1 Oblique',color:'#06b6d4',exercises:[
-    {id:'ab_sam',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',banner:'before',bannerStyle:'bonus',bannerName:'Ab Machine',tip:'Gainage abdominal - Contraction en bas'},
-    {id:'hackSquat',reps:'4×10',name:'Hack Squat Machine',icon:'squat',cat:'semi',isPlate:true,tip:'Pieds largeur epaules - Descend cuisses paralleles ou plus bas - Quadriceps, dos plat contre le coussin - Mouvement principal'},
-    {id:'legExtSam',reps:'3×15',name:'Leg Extension',icon:'legExt',cat:'assist',isIso:true,tip:'Chevilles sous le pad, tends les jambes - Contraction max en haut 1 sec - Quadriceps isolation, descente lente'},
-    {id:'lyingCurlSam',reps:'3×12',name:'Lying Leg Curl',icon:'legCurl',cat:'assist',tip:'Allonge sur le ventre, talons sous le pad - Ramene les talons vers les fesses - Ischios - Contraction en haut, descente lente 3 sec'},
-    {id:'hipAbductSam',reps:'3×15',name:'Hip Abduction (Outer)',icon:'hipAbduct',cat:'assist',tip:'Ecarte les jambes contre la resistance - Moyen fessier (haut et cote de la fesse) - Contraction forte en fin d ecartement - Donne le galbe arrondi'},
-    {id:'seatedCalfSam',reps:'4×15',name:'Seated Calf Raise',icon:'calf',cat:'semi',isPlate:true,tip:'Genoux flechis sous le pad - Monte sur la pointe des pieds - Contraction max en haut, amplitude complete'},
-    {id:'woodchopperVen',reps:'3×15',name:'Cable Woodchopper',icon:'facePull',cat:'semi',isUni:true,tip:'Poulie haute, debout de cote - Tire en diagonale de l epaule vers la hanche opposee - Obliques en rotation - Gaine le tronc, alterne les deux cotes'},
+  {id:'sam',dow:4,label:'VEN',name:'Quadriceps — Ischios — Fessiers — Mollets',sub:'2 Quadriceps · 1 Ischios · 1 Fessier · 1 Mollet · 1 Oblique · 1 Abdos',color:'#06b6d4',exercises:[
+    {id:'hackSquat',reps:'4×8–12',name:'Hack Squat Machine',icon:'squat',cat:'semi',isPlate:true,tip:'Pieds largeur epaules - Descend cuisses paralleles ou plus bas - Quadriceps, dos plat contre le coussin - Mouvement principal'},
+    {id:'bulgarianSam',reps:'3×8–12',name:'Bulgarian Split Squat',icon:'squat',cat:'free',isDB:true,isUni:true,tip:'Pied arriere pose sur un banc, un haltere dans chaque main - Descends le genou arriere vers le sol, buste droit - Pousse dans le talon avant - Quadriceps + fessier, une jambe a la fois'},
+    {id:'lyingCurlSam',reps:'3×8–12',name:'Lying Leg Curl',icon:'legCurl',cat:'assist',tip:'Allonge sur le ventre, talons sous le pad - Ramene les talons vers les fesses - Ischios - Contraction en haut, descente lente 3 sec'},
+    {id:'hipAbductSam',reps:'3×12–20',name:'Hip Abduction (Outer)',icon:'hipAbduct',cat:'assist',tip:'Ecarte les jambes contre la resistance - Moyen fessier (haut et cote de la fesse) - Contraction forte en fin d ecartement - Donne le galbe arrondi'},
+    {id:'seatedCalfSam',reps:'4×10–15',name:'Seated Calf Raise',icon:'calf',cat:'semi',isPlate:true,tip:'Genoux flechis sous le pad - Monte sur la pointe des pieds - Contraction max en haut, amplitude complete'},
+    {id:'woodchopperVen',reps:'3×12–15',name:'Cable Woodchopper',icon:'facePull',cat:'semi',isUni:true,tip:'Poulie haute, debout de cote - Tire en diagonale de l epaule vers la hanche opposee - Obliques en rotation - Gaine le tronc, alterne les deux cotes'},
+    {id:'hangingKneeRaiseVen',reps:'3×8–15',name:'Hanging Knee Raise',icon:'pullup',cat:'free',isBW:true,tip:'Suspendu a la barre (ou appui sur les coudes a la chaise romaine) - Monte les genoux vers la poitrine en enroulant le bassin - Bas des abdos - Sans balancer'},
   ]},
 ];
 
@@ -162,7 +162,7 @@ var CONFIG={
   storagePrefix:'anthony_',
   title:'ANTHONY',
   accentColor:'#ff4d1c',
-  configVersion:4,
+  configVersion:5,
   deadline:'2026-09-29',
   deadlineLabel:'RÉVISION DU PROGRAMME',
   deadlineDateText:'30 Juillet 2026',
@@ -173,12 +173,6 @@ var CONFIG={
   excludedFromProgress:['warmup'],
   // Seul Anthony a des exercices unilatéraux affichant ce badge.
   extraBadge:function(ex){return ex.isUni?'<span class="bdg bun">💪 Unilatéral</span>':'';},
-  // Bannière bonus AVEC icône SVG (les 2 autres n'ont pas d'icône -> défaut moteur).
-  bonusBanner:{
-    icon:'<svg width="24" height="24" viewBox="0 0 28 28" fill="none"><rect x="4" y="8" width="20" height="14" rx="3" fill="rgba(168,85,247,.2)" stroke="#a855f7" stroke-width="1.5"/><line x1="4" y1="13" x2="24" y2="13" stroke="#a855f7" stroke-width="1"/><line x1="14" y1="8" x2="14" y2="22" stroke="#a855f7" stroke-width="1"/><rect x="7" y="10" width="4" height="2.5" rx="1" fill="#a855f7"/><rect x="17" y="10" width="4" height="2.5" rx="1" fill="#a855f7"/></svg>',
-    defaultLabel:'AVANT LA SÉANCE',
-    repsText:'4×12 reps'
-  },
   // Objectifs STAT (pas de souci de santé -> le plus exigeant des 3).
   statsTarget:{missPenalty:3,missThreshold:3,missExtraPenalty:2,missedDayPenalty:4,weightProgressTargetPct:30,weightBonusMax:15,weightLookbackDays:18},
   icons:ICONS,
