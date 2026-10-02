@@ -110,48 +110,44 @@ var ICONS={
     treadmill:'<line x1="4" y1="56" x2="60" y2="56" stroke="C" stroke-width="1" opacity=".3"/><path d="M6 50L54 32" stroke="C" stroke-width="5" stroke-linecap="round" opacity=".35"/><line x1="8" y1="50" x2="8" y2="56" stroke="C" stroke-width="3" stroke-linecap="round"/><line x1="52" y1="34" x2="52" y2="56" stroke="C" stroke-width="3" stroke-linecap="round"/><line x1="50" y1="34" x2="46" y2="14" stroke="C" stroke-width="2.5" stroke-linecap="round"/><line x1="40" y1="16" x2="52" y2="12" stroke="C" stroke-width="2.5" stroke-linecap="round"/><circle cx="28" cy="12" r="4" fill="C"/><path d="M26 16L24 28" stroke="C" stroke-width="3.5" stroke-linecap="round"/><path d="M26 20L40 16" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M26 20L20 26" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M24 28L30 40" stroke="C" stroke-width="3.5" stroke-linecap="round"/><path d="M24 28L16 38" stroke="C" stroke-width="3.5" stroke-linecap="round"/>',
 };
 var P=[
-  {id:'lun',dow:0,label:'LUN',name:'Pectoraux — Triceps',sub:'2 Pecs · 3 Triceps · 1 Abdos',color:'#ff4d1c',exercises:[
+  {id:'lun',dow:0,label:'LUN',name:'Pectoraux — Triceps',sub:'1 Abdos · 2 Pecs · 2 Triceps · 1 Cardio',color:'#ff4d1c',exercises:[
     {id:'reverseCrunchLun',reps:'3×12–15',name:'Reverse Crunch',icon:'abMachine',cat:'free',isBW:true,tip:'Allonge sur le dos, genoux flechis - Ramene les genoux vers la poitrine en decollant le bassin du sol - Bas des abdos - Descente lente, sans elan'},
     {id:'dbBenchLun',reps:'4×6–10',name:'Dumbbell Bench Press',icon:'bench',cat:'free',isDB:true,tip:'Allonge sur banc plat, un haltere dans chaque main - Descends les halteres a hauteur de poitrine, coudes a 45 degres - Pousse en rapprochant les halteres en haut - Pecs complets, amplitude plus grande qu a la machine'},
-    {id:'dipsLun',reps:'3×6–12',name:'Parallel Bar Dips',icon:'seatedDip',cat:'free',isBW:true,tip:'Poids du corps, buste penche en avant - Descente coudes a 90 degres, remonte sans verrouiller - Pecs bas + triceps - Juste apres le Bench, tant que tu es frais'},
     {id:'pecDeckLun',reps:'3×10–15',name:'Pec Deck Fly',icon:'pecFly',cat:'assist',isIso:true,tip:'Bras a hauteur des epaules, coudes legerement flechis - Rapproche les poignees en contractant les pecs - Serre a fond, reviens lentement'},
     {id:'cableOverheadTriLun',reps:'4×10–15',name:'Cable Overhead Triceps Extension',icon:'overhead',cat:'semi',pair:'tri',tip:'Poulie haute, corde derriere la tete - Coudes fixes pres des oreilles - Chef long du triceps - Superset avec le Pushdown'},
     {id:'tricepsPush',reps:'4×10–15 / côté',name:'Cable Triceps Pushdown',icon:'tricepsPush',cat:'semi',pair:'tri',isUni:true,tip:'Un bras a la fois, coude colle au corps - Pousse vers le bas - Triceps - Superset avec l Overhead'},
-    {id:'walkLun',name:'Incline Treadmill Walk',icon:'treadmill',cat:'cardio',banner:'after',bannerName:'Marche inclinée tapis',tip:''},
+    {id:'walkLun',reps:'15–20 min',name:'Incline Treadmill Walk',icon:'treadmill',cat:'cardio',tip:'Tapis incline 8-12 pourcent, 5-6 km/h - Rythme ou tu peux encore parler - Brule les graisses (ventre, poignees d amour) sans fatiguer les muscles - En fin de seance'},
   ]},
-  {id:'mer',dow:1,label:'MAR',name:'Fessiers — Ischios',sub:'3 Fessiers · 2 Ischios · 1 Abdos',color:'#f5a623',exercises:[
+  {id:'mer',dow:1,label:'MAR',name:'Fessiers — Ischios',sub:'1 Abdos · 2 Fessiers · 2 Ischios',color:'#f5a623',exercises:[
     {id:'ab_mer',reps:'3×10–15',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',tip:'Enroule le buste vers le bas, contraction 1 sec - Abdos (grand droit) - Remonte lentement'},
     {id:'hipThrustSam',reps:'4×6–10',name:'Hip Thrust Machine',icon:'glueKick',cat:'semi',isPlate:true,tip:'Dos contre le pad, pousse les hanches vers le haut - Contracte fort les fessiers en haut 1 sec - Le meilleur pour la fermete, va lourd'},
     {id:'backExtMer',reps:'3×10–15',name:'45° Back Extension',icon:'backExt',cat:'semi',isPlate:true,tip:'Charniere de hanche, buste qui descend puis remonte - Ischios et fessiers etires en bas - Serre les fessiers en haut, dos neutre - Lest contre la poitrine'},
     {id:'seatedCurlMer',reps:'3×8–12',name:'Seated Leg Curl',icon:'legCurl',cat:'assist',tip:'Ramene les talons sous le siege - Ischios en position etiree (plus de croissance) - Descente lente 3 sec'},
-    {id:'pullThroughMar',reps:'3×12–15',name:'Cable Pull-Through',icon:'pullThrough',cat:'semi',tip:'Poulie basse dans le dos, corde entre les jambes - Charniere de hanche, pousse les hanches vers l avant pour te redresser - Fessiers et ischios sans grossir la cuisse, pas de charge directe sur le dos'},
     {id:'kickbackMer',reps:'3×10–15 / côté',name:'Cable Glute Kickback',icon:'glueKick',cat:'semi',isUni:true,tip:'Poulie basse, sangle a la cheville - Pousse la jambe en arriere, contracte le fessier en fin de course - Une jambe a la fois, finisher'},
   ]},
-  {id:'jeu',dow:2,label:'MER',name:'Dos — Biceps',sub:'3 Dos · 2 Biceps · 1 Abdos',color:'#3d8bff',exercises:[
-    {id:'cableCrunchJeu',reps:'3×10–15',name:'Cable Crunch',icon:'abMachine',cat:'semi',tip:'A genoux face a la poulie haute, corde derriere la tete - Enroule le buste vers le sol en rapprochant les coudes des cuisses - Abdos en charge, les hanches ne bougent pas'},
+  {id:'jeu',dow:2,label:'MER',name:'Dos — Biceps',sub:'1 Abdos · 2 Dos · 2 Biceps · 1 Cardio',color:'#3d8bff',exercises:[
+    {id:'sidePlankJeu',reps:'3×30–45 sec / côté',name:'Side Plank',icon:'abMachine',cat:'free',isBW:true,isUni:true,tip:'Sur le coude et le bord du pied, corps bien droit - Hanches hautes, ne les laisse pas tomber - Obliques et taille en gainage statique - Chaque cote'},
     {id:'pullupMar',reps:'4×6–10',name:'Assisted Pull-Up Machine',icon:'pullup',cat:'assist',tip:'Traction assistee, prise large - Tire le corps vers le haut - Grand dorsal (largeur)'},
     {id:'seatedCableRowMar',reps:'4×8–12',name:'Divergent Seated Row',icon:'seatedRow',cat:'assist',tip:'Poitrine contre le pad, tire les poignees vers le ventre - Coudes pres du corps - Milieu du dos et rhomboides (epaisseur)'},
-    {id:'straightArmMar',reps:'3×12–15',name:'Straight-Arm Pulldown',icon:'latPull',cat:'semi',tip:'Poulie haute, bras tendus - Tire vers les cuisses sans plier les coudes - Isole le grand dorsal (largeur)'},
     {id:'ezBarCurlMar',reps:'3×8–12',name:'EZ Bar Curl',icon:'preacher',cat:'semi',isDB:true,tip:'Barre EZ, prise supination - Coudes colles au corps - Descente lente 3 sec - Premier exercice biceps du jour, charge la plus lourde'},
     {id:'cableHammerCurlJeu',reps:'3×10–12',name:'Cable Hammer Curl',icon:'lateralRaise',cat:'semi',tip:'Corde a la poulie basse, prise neutre (paumes face a face) - Coudes fixes, remonte sans tourner les poignets - Biceps + brachial (epaisseur du bras), angle different de l EZ Curl'},
-    {id:'walkJeu',name:'Incline Treadmill Walk',icon:'treadmill',cat:'cardio',banner:'after',bannerName:'Marche inclinée tapis',tip:''},
+    {id:'walkJeu',reps:'15–20 min',name:'Incline Treadmill Walk',icon:'treadmill',cat:'cardio',tip:'Tapis incline 8-12 pourcent, 5-6 km/h - Rythme ou tu peux encore parler - Brule les graisses (ventre, poignees d amour) sans fatiguer les muscles - En fin de seance'},
   ]},
-  {id:'mar',dow:3,label:'JEU',name:'Épaules — Haut des Pecs — Dos',sub:'1 Haut des pecs · 2 Épaules · 1 Dos · 1 Arrière d\'épaule · 1 Abdos',color:'#a855f7',exercises:[
+  {id:'mar',dow:3,label:'JEU',name:'Épaules — Haut des Pecs — Dos',sub:'1 Abdos · 1 Haut des pecs · 2 Épaules · 1 Dos · 1 Arrière d\'épaule',color:'#a855f7',exercises:[
     {id:'ab_mar',reps:'3×10–15',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',tip:'Enroule le buste vers le bas, contraction 1 sec - Abdos (grand droit) - Remonte lentement'},
     {id:'inclineChestPressLun',reps:'3×8–12',name:'Incline Chest Press Machine',icon:'incline',cat:'assist',tip:'Assis, dossier incline 30-45 degres - Pousse les poignees vers le haut - Haut des pecs - Machine guidee, descente controlee'},
     {id:'shoulderPress',reps:'4×8–12',name:'Machine Shoulder Press',icon:'shoulderPress',cat:'assist',tip:'Assis dos cale, pousse les poignees vers le haut - Deltoide complet - Mouvement stable, descente controlee'},
-    {id:'neutralRowJeu',reps:'3×10–12',name:'Seated Cable Row (Neutral Grip)',icon:'seatedRow',cat:'semi',tip:'Assis a la poulie basse, poignee prise neutre (paumes face a face) - Tire vers le nombril en serrant les omoplates, buste fixe - Milieu du dos + arriere d epaule - Deuxieme seance dos de la semaine'},
+    {id:'closePulldownJeu',reps:'3×10–12',name:'Close-Grip Lat Pulldown',icon:'latPull',cat:'semi',tip:'Poignee prise neutre serree - Tire vers le haut de la poitrine, coudes le long du corps - Bas du grand dorsal (different des tractions prise large du mercredi) - Remonte lentement'},
     {id:'cableLateralJeu',reps:'3×12–15 / côté',name:'Cable Lateral Raise',icon:'lateralRaise',cat:'semi',isUni:true,tip:'Cable bas, un bras a la fois - Ecarte jusqu a hauteur d epaule - Deltoide lateral, tension constante'},
     {id:'reverseFlyJeu',reps:'3×12–15',name:'Reverse Pec Deck (Rear Delt Fly)',icon:'rearDelt',cat:'assist',isIso:true,tip:'Assis face au dossier, bras tendus a hauteur d epaules - Ecarte les bras vers l arriere en serrant les omoplates - Deltoide arriere en isolation, complement du Face Pull'},
   ]},
-  {id:'sam',dow:4,label:'VEN',name:'Jambes — Bras',sub:'1 Quadriceps · 1 Ischios · 1 Fessier · 2 Bras · 1 Abdos',color:'#06b6d4',exercises:[
+  {id:'sam',dow:4,label:'VEN',name:'Jambes — Bras',sub:'1 Abdos · 1 Quadriceps · 1 Fessier · 2 Bras · 1 Cardio',color:'#06b6d4',exercises:[
     {id:'pallofVen',reps:'3×10–15 / côté',name:'Pallof Press',icon:'facePull',cat:'semi',isUni:true,tip:'Debout de cote a la poulie (hauteur poitrine), poignee contre le sternum - Tends les bras devant toi et resiste a la rotation 2 sec - Obliques et sangle abdominale, sans epaissir la taille - Chaque cote'},
     {id:'hackSquat',reps:'3×12–15',name:'Hack Squat Machine',icon:'squat',cat:'semi',isPlate:true,tip:'Pieds largeur epaules, charge moderee - Descend cuisses paralleles - Quadriceps, dos plat contre le coussin - Series longues 12-15 reps pour tonifier sans grossir la cuisse'},
-    {id:'lyingCurlSam',reps:'3×8–12',name:'Lying Leg Curl',icon:'legCurl',cat:'assist',tip:'Allonge sur le ventre, talons sous le pad - Ramene les talons vers les fesses - Ischios - Contraction en haut, descente lente 3 sec'},
     {id:'hipAbductSam',reps:'3×12–20',name:'Hip Abduction (Outer)',icon:'hipAbduct',cat:'assist',tip:'Ecarte les jambes contre la resistance - Moyen fessier (haut et cote de la fesse) - Contraction forte en fin d ecartement - Donne le galbe arrondi'},
     {id:'inclineCurlVen',reps:'3×10–12',name:'Incline Dumbbell Curl',icon:'preacher',cat:'free',isDB:true,pair:'arms',tip:'Banc incline a 45-60 degres, bras pendants derriere le buste - Monte sans avancer les coudes - Biceps en etirement maximal (le plus efficace pour la masse) - Descente lente'},
-    {id:'overheadDbVen',reps:'3×10–12',name:'Overhead Dumbbell Extension',icon:'overhead',cat:'free',isDB:true,pair:'arms',tip:'Assis, un haltere tenu a deux mains au-dessus de la tete - Descends derriere la nuque, coudes serres et pointes vers le haut - Chef long du triceps etire - Superset avec l Incline Curl'},
-    {id:'walkVen',name:'Incline Treadmill Walk',icon:'treadmill',cat:'cardio',banner:'after',bannerName:'Marche inclinée tapis',tip:''},
+    {id:'skullCrusherVen',reps:'3×10–12',name:'EZ Bar Skull Crusher',icon:'bench',cat:'free',isDB:true,pair:'arms',tip:'Allonge sur banc plat, barre EZ bras tendus au-dessus du visage - Plie seulement les coudes pour descendre la barre vers le front - Triceps (chef long + median), angle different du lundi - Superset avec l Incline Curl'},
+    {id:'walkVen',reps:'15–20 min',name:'Incline Treadmill Walk',icon:'treadmill',cat:'cardio',tip:'Tapis incline 8-12 pourcent, 5-6 km/h - Rythme ou tu peux encore parler - Brule les graisses (ventre, poignees d amour) sans fatiguer les muscles - En fin de seance'},
   ]},
 ];
 
@@ -160,7 +156,7 @@ var CONFIG={
   storagePrefix:'anthony_',
   title:'ANTHONY',
   accentColor:'#ff4d1c',
-  configVersion:9,
+  configVersion:10,
   deadline:'2026-11-12',
   deadlineLabel:'RÉVISION DU PROGRAMME',
   deadlineDateText:'12 Novembre 2026',
@@ -171,9 +167,6 @@ var CONFIG={
   excludedFromProgress:['warmup'],
   // Seul Anthony a des exercices unilatéraux affichant ce badge.
   extraBadge:function(ex){return ex.isUni?'<span class="bdg bun">💪 Unilatéral</span>':'';},
-  // Marche inclinee en fin de seance (LUN/MER/VEN) : bannière bonus, ni cochable
-  // ni comptee dans les 6 exercices max du jour.
-  bonusBanner:{icon:null,defaultLabel:'APRÈS LA SÉANCE',repsText:'15–20 min'},
   // Objectifs STAT (pas de souci de santé -> le plus exigeant des 3).
   statsTarget:{missPenalty:3,missThreshold:3,missExtraPenalty:2,missedDayPenalty:4,weightProgressTargetPct:30,weightBonusMax:15,weightLookbackDays:18},
   icons:ICONS,
