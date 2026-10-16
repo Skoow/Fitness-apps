@@ -19,6 +19,10 @@ select{-webkit-appearance:none;appearance:none}
 .hdr-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .ttl{font-family:Impact,sans-serif;font-size:clamp(2rem,8vw,3.2rem);letter-spacing:2px;line-height:.95}
 .ttl span{color:#ff4d1c}
+/* Prénom + ♂ toujours sur une ligne : le badge PROGRAMME (fourchettes de reps, ex « 3×30–45 sec ») se réduit à la place. */
+.ttl{white-space:nowrap;flex-shrink:0}
+.hdr-top>div:last-child{min-width:0!important;padding:8px 10px!important}
+.hdr-top>div:last-child>div:last-child{font-size:clamp(14px,4.6vw,20px)!important}
 .wbadge{text-align:center;border-radius:12px;padding:8px 12px;min-width:72px}
 .wl{font-size:9px;color:#6b6b78;font-weight:700;letter-spacing:1px}
 .wv{font-family:Impact,sans-serif;font-size:2rem;line-height:1}
@@ -115,7 +119,7 @@ var P=[
     {id:'dbBenchLun',reps:'4×6–10',name:'Dumbbell Bench Press',icon:'bench',cat:'free',isDB:true,tip:'Allonge sur banc plat, un haltere dans chaque main - Descends les halteres a hauteur de poitrine, coudes a 45 degres - Pousse en rapprochant les halteres en haut - Pecs complets, amplitude plus grande qu a la machine'},
     {id:'dipsLun',reps:'3×6–12',name:'Parallel Bar Dips',icon:'seatedDip',cat:'free',isBW:true,tip:'Poids du corps, buste penche en avant - Descente coudes a 90 degres, remonte sans verrouiller - Pecs bas + triceps - Juste apres le Bench, tant que tu es frais'},
     {id:'cableOverheadTriLun',reps:'4×10–15',name:'Cable Overhead Triceps Extension',icon:'overhead',cat:'semi',pair:'tri',tip:'Poulie haute, corde derriere la tete - Coudes fixes pres des oreilles - Chef long du triceps - Superset avec le Pushdown, meme poulie haute'},
-    {id:'tricepsPush',reps:'4×10–15 / côté',name:'Cable Triceps Pushdown',icon:'tricepsPush',cat:'semi',pair:'tri',isUni:true,tip:'Un bras a la fois, coude colle au corps - Pousse vers le bas - Triceps - Superset avec l Overhead, meme poulie haute'},
+    {id:'tricepsPush',reps:'4×10–15',name:'Cable Triceps Pushdown',icon:'tricepsPush',cat:'semi',pair:'tri',isUni:true,tip:'Un bras a la fois, coude colle au corps - Pousse vers le bas - Triceps - Superset avec l Overhead, meme poulie haute'},
     {id:'walkLun',reps:'15–20 min',name:'Incline Treadmill Walk',icon:'treadmill',cat:'cardio',tip:'Tapis incline 8-12 pourcent, 5-6 km/h - Rythme ou tu peux encore parler - Brule les graisses (ventre, poignees d amour) sans fatiguer les muscles - En fin de seance'},
   ]},
   {id:'mer',dow:1,label:'MAR',name:'Fessiers — Ischios — Mollets — Trapèzes',sub:'1 Abdos · 1 Fessiers · 2 Ischios · 1 Mollets · 1 Trapèzes',color:'#f5a623',exercises:[
@@ -127,8 +131,8 @@ var P=[
     {id:'shrug',reps:'3×10–15',name:'Dumbbell Shrug',icon:'shoulderPress',cat:'free',isDB:true,tip:'Un haltere dans chaque main, bras tendus - Hausse les epaules vers les oreilles - Trapezes, contraction 1 sec en haut - Ne roule pas les epaules'},
   ]},
   {id:'jeu',dow:2,label:'MER',name:'Dos — Biceps',sub:'2 Abdos · 2 Dos · 2 Biceps',color:'#3d8bff',exercises:[
-    {id:'sidePlankJeu',reps:'3×30–45 sec / côté',name:'Side Plank',icon:'abMachine',cat:'free',isBW:true,isUni:true,tip:'Sur le coude et le bord du pied, corps bien droit - Hanches hautes, ne les laisse pas tomber - Obliques et taille en gainage statique - Chaque cote'},
-    {id:'sideBendJeu',reps:'3×15–20 / côté',name:'Dumbbell Side Bend',icon:'lateralRaise',cat:'free',isDB:true,isUni:true,tip:'Debout, un haltere LEGER dans une main, l autre main sur la hanche - Penche-toi sur le cote puis remonte en contractant l oblique oppose - Series longues et charge legere pour tonifier la taille sans l epaissir - Chaque cote'},
+    {id:'sidePlankJeu',reps:'3×30–45 sec',name:'Side Plank',icon:'abMachine',cat:'free',isBW:true,isUni:true,tip:'Sur le coude et le bord du pied, corps bien droit - Hanches hautes, ne les laisse pas tomber - Obliques et taille en gainage statique - Chaque cote'},
+    {id:'sideBendJeu',reps:'3×15–20',name:'Dumbbell Side Bend',icon:'lateralRaise',cat:'free',isDB:true,isUni:true,tip:'Debout, un haltere LEGER dans une main, l autre main sur la hanche - Penche-toi sur le cote puis remonte en contractant l oblique oppose - Series longues et charge legere pour tonifier la taille sans l epaissir - Chaque cote'},
     {id:'pullupMar',reps:'4×6–10',name:'Assisted Pull-Up Machine',icon:'pullup',cat:'assist',tip:'Traction assistee, prise large - Tire le corps vers le haut - Grand dorsal (largeur)'},
     {id:'seatedCableRowMar',reps:'4×8–12',name:'Divergent Seated Row',icon:'seatedRow',cat:'assist',tip:'Poitrine contre le pad, tire les poignees vers le ventre - Coudes pres du corps - Milieu du dos et rhomboides (epaisseur)'},
     {id:'ezBarCurlMar',reps:'3×8–12',name:'EZ Bar Curl',icon:'preacher',cat:'semi',isDB:true,tip:'Barre EZ, prise supination - Coudes colles au corps - Descente lente 3 sec - Premier exercice biceps du jour, charge la plus lourde'},
@@ -139,11 +143,11 @@ var P=[
     {id:'convergingPressLun',reps:'3×8–12',name:'Converging Chest Press',icon:'bench',cat:'assist',tip:'Regle le siege pour que les poignees soient a mi-poitrine - Pousse jusqu a presque tendre les bras, epaules collees au dossier - Poignees qui convergent : contraction max quand les mains se rejoignent - Pecs + avant d epaule'},
     {id:'shoulderPress',reps:'4×8–12',name:'Machine Shoulder Press',icon:'shoulderPress',cat:'assist',tip:'Assis dos cale, pousse les poignees vers le haut - Deltoide complet - Mouvement stable, descente controlee'},
     {id:'closePulldownJeu',reps:'3×10–12',name:'Close-Grip Lat Pulldown',icon:'latPull',cat:'semi',tip:'Poignee prise neutre serree - Tire vers le haut de la poitrine, coudes le long du corps - Bas du grand dorsal (different des tractions prise large du mercredi) - Remonte lentement'},
-    {id:'cableLateralJeu',reps:'3×12–15 / côté',name:'Cable Lateral Raise',icon:'lateralRaise',cat:'semi',isUni:true,tip:'Cable bas, un bras a la fois - Ecarte jusqu a hauteur d epaule - Deltoide lateral, tension constante'},
+    {id:'cableLateralJeu',reps:'3×12–15',name:'Cable Lateral Raise',icon:'lateralRaise',cat:'semi',isUni:true,tip:'Cable bas, un bras a la fois - Ecarte jusqu a hauteur d epaule - Deltoide lateral, tension constante'},
     {id:'reverseFlyJeu',reps:'3×12–15',name:'Reverse Pec Deck (Rear Delt Fly)',icon:'rearDelt',cat:'assist',isIso:true,tip:'Assis face au dossier, bras tendus a hauteur d epaules - Ecarte les bras vers l arriere en serrant les omoplates - Deltoide arriere en isolation + milieu du dos - Bon pour la posture, epaules en arriere'},
   ]},
   {id:'sam',dow:4,label:'VEN',name:'Jambes — Bras',sub:'1 Abdos · 1 Quadriceps · 1 Fessier · 2 Bras · 1 Cardio',color:'#06b6d4',exercises:[
-    {id:'pallofVen',reps:'3×10–15 / côté',name:'Pallof Press',icon:'facePull',cat:'semi',isUni:true,tip:'Debout de cote a la poulie (hauteur poitrine), poignee contre le sternum - Tends les bras devant toi et resiste a la rotation 2 sec - Obliques et sangle abdominale, sans epaissir la taille - Chaque cote'},
+    {id:'pallofVen',reps:'3×10–15',name:'Pallof Press',icon:'facePull',cat:'semi',isUni:true,tip:'Debout de cote a la poulie (hauteur poitrine), poignee contre le sternum - Tends les bras devant toi et resiste a la rotation 2 sec - Obliques et sangle abdominale, sans epaissir la taille - Chaque cote'},
     {id:'hackSquat',reps:'3×12–15',name:'Hack Squat Machine',icon:'squat',cat:'semi',isPlate:true,tip:'Pieds largeur epaules, charge moderee - Descend cuisses paralleles - Quadriceps, dos plat contre le coussin - Series longues 12-15 reps pour tonifier sans grossir la cuisse'},
     {id:'hipAbductSam',reps:'3×12–20',name:'Hip Abduction (Outer)',icon:'hipAbduct',cat:'assist',tip:'Ecarte les jambes contre la resistance - Moyen fessier (haut et cote de la fesse) - Contraction forte en fin d ecartement - Donne le galbe arrondi'},
     {id:'inclineCurlVen',reps:'3×10–12',name:'Incline Dumbbell Curl',icon:'preacher',cat:'free',isDB:true,pair:'arms',tip:'Banc incline a 45-60 degres, bras pendants derriere le buste - Monte sans avancer les coudes - Biceps en etirement maximal (le plus efficace pour la masse) - Descente lente - Superset avec le Skull Crusher sur le meme banc'},
@@ -157,7 +161,7 @@ var CONFIG={
   storagePrefix:'anthony_',
   title:'ANTHONY',
   accentColor:'#ff4d1c',
-  configVersion:18,
+  configVersion:19,
   deadline:'2026-11-12',
   deadlineLabel:'RÉVISION DU PROGRAMME',
   deadlineDateText:'12 Novembre 2026',
