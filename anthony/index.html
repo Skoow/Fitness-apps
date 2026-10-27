@@ -21,6 +21,8 @@ select{-webkit-appearance:none;appearance:none}
 .ttl span{color:#ff4d1c}
 /* Prénom + ♂ toujours sur une ligne : le badge PROGRAMME (fourchettes de reps, ex « 3×30–45 sec ») se réduit à la place. */
 .ttl{white-space:nowrap;flex-shrink:0}
+/* Pastille series x reps centree sous le nom de l exercice. */
+.excnt>.exnm+div{text-align:center}
 .hdr-top>div:last-child{min-width:0!important;padding:8px 10px!important}
 .hdr-top>div:last-child>div:last-child{font-size:clamp(14px,4.6vw,20px)!important}
 .wbadge{text-align:center;border-radius:12px;padding:8px 12px;min-width:72px}
@@ -117,10 +119,10 @@ var P=[
   {id:'lun',dow:0,label:'LUN',name:'Pectoraux — Triceps',sub:'1 Abdos · 3 Pecs · 2 Triceps',color:'#ff4d1c',exercises:[
     {id:'reverseCrunchLun',reps:'3×12–15',name:'Reverse Crunch',icon:'abMachine',cat:'free',isBW:true,tip:'Allonge sur le dos, genoux flechis - Ramene les genoux vers la poitrine en decollant le bassin du sol - Bas des abdos - Descente lente, sans elan'},
     {id:'dbBenchLun',reps:'4×6–10',name:'Dumbbell Bench Press',icon:'bench',cat:'free',isDB:true,tip:'Allonge sur banc plat, un haltere dans chaque main - Descends les halteres a hauteur de poitrine, coudes a 45 degres - Pousse en rapprochant les halteres en haut - Pecs complets, amplitude plus grande qu a la machine'},
-    {id:'dipsLun',reps:'3×6–12',name:'Parallel Bar Dips',icon:'seatedDip',cat:'free',isBW:true,tip:'Poids du corps, buste penche en avant - Descente coudes a 90 degres, remonte sans verrouiller - Pecs bas + triceps - Juste apres le Bench, tant que tu es frais'},
+    {id:'dipsLun',reps:'3×6–12',name:'Parallel Bar Dips',icon:'seatedDip',cat:'free',isBW:true,tip:'Buste penche en avant - Descente coudes a 90 degres, remonte sans verrouiller - Pecs bas + triceps - Des que 12 reps sont faciles : ajoute du poids (ceinture lestee ou haltere entre les pieds)'},
     {id:'pecDeckLun',reps:'3×10–15',name:'Pec Deck Fly',icon:'pecFly',cat:'assist',isIso:true,tip:'Bras a hauteur des epaules, coudes legerement flechis - Rapproche les poignees en contractant les pecs - Serre a fond 1 sec, reviens lentement - Isolation des pecs apres les Dips'},
-    {id:'cableOverheadTriLun',reps:'4×10–15',name:'Cable Overhead Triceps Extension',icon:'overhead',cat:'semi',pair:'tri',tip:'Poulie haute, corde derriere la tete - Coudes fixes pres des oreilles - Chef long du triceps - Superset avec le Pushdown, meme poulie haute'},
-    {id:'tricepsPush',reps:'4×10–15',name:'Cable Triceps Pushdown',icon:'tricepsPush',cat:'semi',pair:'tri',isUni:true,tip:'Un bras a la fois, coude colle au corps - Pousse vers le bas - Triceps - Superset avec l Overhead, meme poulie haute'},
+    {id:'cableOverheadTriLun',reps:'4×10–15',name:'Cable Overhead Triceps Extension',icon:'overhead',cat:'semi',pair:'tri',tip:'Poulie haute, corde derriere la tete - Coudes fixes pres des oreilles, descends loin derriere la tete (etirement max) - Chef long du triceps : remplit tout l arriere du bras - Superset avec le Pushdown, meme poulie'},
+    {id:'tricepsPush',reps:'4×10–15',name:'Cable Triceps Pushdown',icon:'tricepsPush',cat:'semi',pair:'tri',isUni:true,tip:'Un bras a la fois, coude colle au corps - Tends le bras a fond en bas, 1 sec de contraction - Chef lateral (fer a cheval, largeur du bras) - DERNIERE SERIE : drop set, baisse de 30 pourcent et continue jusqu a l echec'},
   ]},
   {id:'mer',dow:1,label:'MAR',name:'Fessiers — Ischios — Mollets — Trapèzes',sub:'1 Abdos · 1 Fessiers · 2 Ischios · 1 Mollets · 1 Trapèzes',color:'#f5a623',exercises:[
     {id:'ab_mer',reps:'3×10–15',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',tip:'Enroule le buste vers le bas, contraction 1 sec - Abdos (grand droit) - Remonte lentement'},
@@ -135,24 +137,24 @@ var P=[
     {id:'sideBendJeu',reps:'3×15–20',name:'Dumbbell Side Bend',icon:'lateralRaise',cat:'free',isDB:true,isUni:true,tip:'Debout, un haltere LEGER dans une main, l autre main sur la hanche - Penche-toi sur le cote puis remonte en contractant l oblique oppose - Series longues et charge legere pour tonifier la taille sans l epaissir - Chaque cote'},
     {id:'pullupMar',reps:'4×6–10',name:'Assisted Pull-Up Machine',icon:'pullup',cat:'assist',tip:'Traction assistee, prise large - Tire le corps vers le haut - Grand dorsal (largeur)'},
     {id:'seatedCableRowMar',reps:'4×8–12',name:'Divergent Seated Row',icon:'seatedRow',cat:'assist',tip:'Poitrine contre le pad, tire les poignees vers le ventre - Coudes pres du corps - Milieu du dos et rhomboides (epaisseur)'},
-    {id:'ezBarCurlMar',reps:'3×8–12',name:'EZ Bar Curl',icon:'preacher',cat:'semi',isDB:true,tip:'Barre EZ, prise supination - Coudes colles au corps - Descente lente 3 sec - Premier exercice biceps du jour, charge la plus lourde'},
-    {id:'cableHammerCurlJeu',reps:'3×10–12',name:'Cable Hammer Curl',icon:'lateralRaise',cat:'semi',tip:'Corde a la poulie basse, prise neutre (paumes face a face) - Coudes fixes, remonte sans tourner les poignets - Biceps + brachial (epaisseur du bras), angle different de l EZ Curl'},
+    {id:'preacherCurlJeu',reps:'4×8–12',name:'EZ Preacher Curl',icon:'preacher',cat:'free',isDB:true,tip:'Pupitre, barre EZ, aisselles collees au coussin - Descends jusqu a bras presque tendu, pause 1 sec en bas - Bas du biceps (comble le creux pres du coude) - DERNIERE SERIE : a l echec, ajoute 5-6 demi-reps dans la moitie basse'},
+    {id:'cableHammerCurlJeu',reps:'3×10–12',name:'Cable Hammer Curl',icon:'lateralRaise',cat:'semi',tip:'Corde a la poulie basse, prise neutre (paumes face a face) - Coudes fixes, remonte sans tourner les poignets - Brachial : pousse le biceps vers le haut et epaissit le bras - DERNIERE SERIE : drop set, baisse de 30 pourcent et continue'},
   ]},
   {id:'mar',dow:3,label:'JEU',name:'Pecs — Épaules — Dos',sub:'1 Abdos · 1 Pecs · 2 Épaules · 1 Dos · 1 Arrière d\'épaule',color:'#a855f7',exercises:[
     {id:'ab_mar',reps:'3×10–15',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',tip:'Enroule le buste vers le bas, contraction 1 sec - Abdos (grand droit) - Remonte lentement'},
     {id:'convergingPressLun',reps:'3×8–12',name:'Converging Chest Press',icon:'bench',cat:'assist',tip:'Regle le siege pour que les poignees soient a mi-poitrine - Pousse jusqu a presque tendre les bras, epaules collees au dossier - Poignees qui convergent : contraction max quand les mains se rejoignent - Pecs + avant d epaule'},
     {id:'shoulderPress',reps:'4×8–12',name:'Machine Shoulder Press',icon:'shoulderPress',cat:'assist',tip:'Assis dos cale, pousse les poignees vers le haut - Deltoide complet - Mouvement stable, descente controlee'},
-    {id:'closePulldownJeu',reps:'3×10–12',name:'Close-Grip Lat Pulldown',icon:'latPull',cat:'semi',tip:'Poignee prise neutre serree - Tire vers le haut de la poitrine, coudes le long du corps - Bas du grand dorsal (different des tractions prise large du mercredi) - Remonte lentement'},
+    {id:'closePulldownJeu',reps:'3×8–12',name:'Close-Grip Underhand Lat Pulldown',icon:'latPull',cat:'semi',tip:'Barre droite, prise SUPINATION (paumes vers toi) ecartement des epaules - Tire vers le haut de la poitrine, coudes le long du corps - Dos + biceps tres sollicites (3e seance biceps de la semaine) - Remonte lentement, bras bien tendus en haut'},
     {id:'cableLateralJeu',reps:'3×12–15',name:'Cable Lateral Raise',icon:'lateralRaise',cat:'semi',isUni:true,tip:'Cable bas, un bras a la fois - Ecarte jusqu a hauteur d epaule - Deltoide lateral, tension constante'},
     {id:'reverseFlyJeu',reps:'3×12–15',name:'Reverse Pec Deck (Rear Delt Fly)',icon:'rearDelt',cat:'assist',isIso:true,tip:'Assis face au dossier, bras tendus a hauteur d epaules - Ecarte les bras vers l arriere en serrant les omoplates - Deltoide arriere en isolation + milieu du dos - Bon pour la posture, epaules en arriere'},
   ]},
-  {id:'sam',dow:4,label:'VEN',name:'Jambes — Bras',sub:'1 Abdos · 1 Quadriceps · 2 Fessiers · 2 Bras',color:'#06b6d4',exercises:[
+  {id:'sam',dow:4,label:'VEN',name:'Bras — Jambes',sub:'1 Abdos · 2 Bras · 1 Quadriceps · 2 Fessiers',color:'#06b6d4',exercises:[
     {id:'pallofVen',reps:'3×10–15',name:'Pallof Press',icon:'facePull',cat:'semi',isUni:true,tip:'Debout de cote a la poulie (hauteur poitrine), poignee contre le sternum - Tends les bras devant toi et resiste a la rotation 2 sec - Obliques et sangle abdominale, sans epaissir la taille - Chaque cote'},
+    {id:'inclineCurlVen',reps:'4×10–12',name:'Incline Dumbbell Curl',icon:'preacher',cat:'free',isDB:true,pair:'arms',tip:'Banc incline a 45-60 degres, bras pendants derriere le buste - Monte sans avancer les coudes, paumes vers le haut - Pic du biceps (longue portion en etirement) - Pause 1 sec bras tendu en bas - Superset avec le Skull Crusher sur le meme banc'},
+    {id:'skullCrusherVen',reps:'4×10–12',name:'Incline Dumbbell Skull Crusher',icon:'incline',cat:'free',isDB:true,pair:'arms',tip:'Sur le MEME banc incline que le curl, un haltere dans chaque main bras tendus au-dessus de la tete - Plie seulement les coudes pour descendre les halteres pres des oreilles - Triceps (chef long + median), angle different du lundi - Superset avec l Incline Curl, sans changer de poste'},
     {id:'hackSquat',reps:'3×12–15',name:'Hack Squat Machine',icon:'squat',cat:'semi',isPlate:true,tip:'Pieds largeur epaules, charge moderee - Descend cuisses paralleles - Quadriceps, dos plat contre le coussin - Series longues 12-15 reps pour tonifier sans grossir la cuisse'},
     {id:'hipAbductSam',reps:'3×12–20',name:'Hip Abduction (Outer)',icon:'hipAbduct',cat:'assist',tip:'Ecarte les jambes contre la resistance - Moyen fessier (haut et cote de la fesse) - Contraction forte en fin d ecartement - Donne le galbe arrondi'},
     {id:'kickbackMer',reps:'3×12–15',name:'Cable Glute Kickback',icon:'glueKick',cat:'semi',isUni:true,tip:'Poulie basse, sangle a la cheville - Pousse la jambe en arriere, contracte le fessier 1 sec en fin de course - Galbe le fessier sans grossir la cuisse - Une jambe a la fois'},
-    {id:'inclineCurlVen',reps:'3×10–12',name:'Incline Dumbbell Curl',icon:'preacher',cat:'free',isDB:true,pair:'arms',tip:'Banc incline a 45-60 degres, bras pendants derriere le buste - Monte sans avancer les coudes - Biceps en etirement maximal (le plus efficace pour la masse) - Descente lente - Superset avec le Skull Crusher sur le meme banc'},
-    {id:'skullCrusherVen',reps:'3×10–12',name:'Incline Dumbbell Skull Crusher',icon:'incline',cat:'free',isDB:true,pair:'arms',tip:'Sur le MEME banc incline que le curl, un haltere dans chaque main bras tendus au-dessus de la tete - Plie seulement les coudes pour descendre les halteres pres des oreilles - Triceps (chef long + median), angle different du lundi - Superset avec l Incline Curl, sans changer de poste'},
   ]},
 ];
 
@@ -161,11 +163,13 @@ var CONFIG={
   storagePrefix:'anthony_',
   title:'ANTHONY',
   accentColor:'#ff4d1c',
-  configVersion:20,
+  configVersion:21,
   deadline:'2026-11-12',
   deadlineLabel:'RÉVISION DU PROGRAMME',
   deadlineDateText:'12 Novembre 2026',
   defaultReps:'4×15 reps',
+  // Series x reps affichees directement sur chaque exercice (plus lisible que le seul badge en haut a droite).
+  showRepsChip:true,
   // Chez Anthony, le cardio COMPTE dans la progression du jour (X/N) et dans
   // la note — seul l'échauffement en est exclu (le défaut moteur exclut aussi
   // le cardio ; on le remplace donc ici pour lui seul).
