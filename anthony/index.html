@@ -19,12 +19,12 @@ select{-webkit-appearance:none;appearance:none}
 .hdr-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .ttl{font-family:Impact,sans-serif;font-size:clamp(2rem,8vw,3.2rem);letter-spacing:2px;line-height:.95}
 .ttl span{color:#ff4d1c}
-/* Prénom + ♂ toujours sur une ligne : le badge PROGRAMME (fourchettes de reps, ex « 3×30–45 sec ») se réduit à la place. */
+/* Prénom + ♂ toujours sur une seule ligne. */
 .ttl{white-space:nowrap;flex-shrink:0}
 /* Pastille series x reps centree sous le nom de l exercice. */
 .excnt>.exnm+div{text-align:center}
-.hdr-top>div:last-child{min-width:0!important;padding:8px 10px!important}
-.hdr-top>div:last-child>div:last-child{font-size:clamp(14px,4.6vw,20px)!important}
+/* Badge PROGRAMME en haut a droite masque : les series x reps sont affichees sur chaque exercice. */
+.hdr-top>div:last-child{display:none}
 .wbadge{text-align:center;border-radius:12px;padding:8px 12px;min-width:72px}
 .wl{font-size:9px;color:#6b6b78;font-weight:700;letter-spacing:1px}
 .wv{font-family:Impact,sans-serif;font-size:2rem;line-height:1}
@@ -163,7 +163,7 @@ var CONFIG={
   storagePrefix:'anthony_',
   title:'ANTHONY',
   accentColor:'#ff4d1c',
-  configVersion:21,
+  configVersion:22,
   deadline:'2026-11-12',
   deadlineLabel:'RÉVISION DU PROGRAMME',
   deadlineDateText:'12 Novembre 2026',
