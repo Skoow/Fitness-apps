@@ -23,8 +23,6 @@ select{-webkit-appearance:none;appearance:none}
 .ttl{white-space:nowrap;flex-shrink:0}
 /* Pastille series x reps centree sous le nom de l exercice. */
 .excnt>.exnm+div{text-align:center}
-/* Badge PROGRAMME en haut a droite masque : les series x reps sont affichees sur chaque exercice. */
-.hdr-top>div:last-child{display:none}
 .wbadge{text-align:center;border-radius:12px;padding:8px 12px;min-width:72px}
 .wl{font-size:9px;color:#6b6b78;font-weight:700;letter-spacing:1px}
 .wv{font-family:Impact,sans-serif;font-size:2rem;line-height:1}
@@ -84,7 +82,7 @@ select{-webkit-appearance:none;appearance:none}
 </head>
 <body>
 <div id="app"></div>
-<script src="../engine.js?v=5.0"></script>
+<script src="../engine.js?v=5.1"></script>
 <script>
 var ICONS={
     bench:'<rect x="4" y="36" width="56" height="8" rx="2" fill="C" opacity=".25"/><rect x="4" y="28" width="10" height="16" rx="2" fill="C" opacity=".3"/><rect x="6" y="10" width="52" height="4" rx="1" fill="C"/><rect x="4" y="6" width="4" height="8" rx="1" fill="C"/><rect x="56" y="6" width="4" height="8" rx="1" fill="C"/><circle cx="32" cy="26" r="4" fill="C"/><path d="M28 30L20 44" stroke="C" stroke-width="4" stroke-linecap="round"/><path d="M36 30L44 44" stroke="C" stroke-width="4" stroke-linecap="round"/><path d="M28 32L36 32" stroke="C" stroke-width="3" stroke-linecap="round"/><path d="M20 44L18 54" stroke="C" stroke-width="3.5" stroke-linecap="round"/><path d="M44 44L46 54" stroke="C" stroke-width="3.5" stroke-linecap="round"/>',
@@ -163,13 +161,23 @@ var CONFIG={
   storagePrefix:'anthony_',
   title:'ANTHONY',
   accentColor:'#ff4d1c',
-  configVersion:22,
+  configVersion:23,
   deadline:'2026-11-12',
   deadlineLabel:'RÉVISION DU PROGRAMME',
   deadlineDateText:'12 Novembre 2026',
   defaultReps:'4×15 reps',
   // Series x reps affichees directement sur chaque exercice (plus lisible que le seul badge en haut a droite).
   showRepsChip:true,
+  // Badge en haut a droite : la DATE DU JOUR (jour en titre, ex « LUNDI » / « 27 Oct »)
+  // au lieu des series x reps, qui sont deja sur chaque exercice.
+  programBadge:function(){
+    var tz={timeZone:'Europe/Paris'};
+    var now=new Date();
+    var wd=now.toLocaleDateString('fr-FR',{timeZone:tz.timeZone,weekday:'long'});
+    var d=now.toLocaleDateString('fr-FR',{timeZone:tz.timeZone,day:'numeric'});
+    var m=now.toLocaleDateString('fr-FR',{timeZone:tz.timeZone,month:'short'}).replace('.','');
+    return {label:wd,value:d+' '+m.charAt(0).toUpperCase()+m.slice(1)};
+  },
   // Chez Anthony, le cardio COMPTE dans la progression du jour (X/N) et dans
   // la note — seul l'échauffement en est exclu (le défaut moteur exclut aussi
   // le cardio ; on le remplace donc ici pour lui seul).

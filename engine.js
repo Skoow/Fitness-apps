@@ -3,7 +3,7 @@
 // Tout ce qui est écrit ICI est le comportement par défaut partagé par les 3.
 // Une personne dont le programme a un besoin réel (et un seul) peut le
 // redéfinir depuis SON PROPRE index.html via un des "hooks" du CONFIG
-// (resolveDayIndex, renderWeightRow, extraBadge) — le moteur ne connaît
+// (resolveDayIndex, renderWeightRow, extraBadge, programBadge) — le moteur ne connaît
 // alors rien du cas particulier, il délègue simplement.
 //
 // Chaque index.html fournit un objet CONFIG (voir les 3 dossiers) puis appelle
@@ -32,7 +32,7 @@ var WEIGHT_OPTIONS_PLATE=(function(){var a=['—'];for(var i=2;i<=160;i+=2){a.pu
 //    UNIQUEMENT quand on modifie SA config perso (ses exercices, ses journées,
 //    ses réglages…), sans toucher au moteur. Chacun garde son PATCH quand le
 //    moteur bouge : qui était en 2.4.1 passe en 2.5.1 lors d'une maj moteur.
-var ENGINE_VERSION='5.0';
+var ENGINE_VERSION='5.1';
 
 // Valeurs PARTAGÉES par défaut. Tout ce qui est identique d'une personne à
 // l'autre vit ICI, pas dupliqué dans chaque config. Une config perso ne
@@ -583,8 +583,13 @@ function nextGuidedExercise(){
 // message court à la place. Styles en ligne -> aucune dépendance CSS par app.
 function programBadgeHTML(){
   var ac=CONFIG.accentColor;
+  var label='PROGRAMME';
   var value;
-  if(isVacationOn())value='Vacances';
+  // Hook : une personne peut remplacer le contenu du badge (ex : la date du
+  // jour chez Anthony) en fournissant CONFIG.programBadge() -> {label,value}.
+  var custom=CONFIG.programBadge?CONFIG.programBadge():null;
+  if(custom){label=custom.label;value=custom.value;}
+  else if(isVacationOn())value='Vacances';
   else if(TI<0)value='Repos';
   else{
     var nx=nextGuidedExercise();
@@ -594,7 +599,7 @@ function programBadgeHTML(){
   // séries×reps du prochain exercice à faire (aucun nom d'exo). Dynamique : il
   // avance au suivant à chaque validation. Repos/Vacances/Terminé -> mot court.
   return '<div style="background:'+ac+'26;border:1.5px solid '+ac+';border-radius:14px;padding:8px 16px;min-width:96px;text-align:center">'
-    +'<div style="font-size:8px;font-weight:800;letter-spacing:1.5px;color:'+ac+';opacity:.85;text-transform:uppercase">PROGRAMME</div>'
+    +'<div style="font-size:8px;font-weight:800;letter-spacing:1.5px;color:'+ac+';opacity:.85;text-transform:uppercase">'+label+'</div>'
     +'<div style="font-size:24px;font-weight:900;color:'+ac+';line-height:1.05;margin-top:2px">'+value+'</div>'
     +'</div>';
 }
