@@ -32,7 +32,7 @@ var WEIGHT_OPTIONS_PLATE=(function(){var a=['—'];for(var i=2;i<=160;i+=2){a.pu
 //    UNIQUEMENT quand on modifie SA config perso (ses exercices, ses journées,
 //    ses réglages…), sans toucher au moteur. Chacun garde son PATCH quand le
 //    moteur bouge : qui était en 2.4.1 passe en 2.5.1 lors d'une maj moteur.
-var ENGINE_VERSION='5.1';
+var ENGINE_VERSION='5.2';
 
 // Valeurs PARTAGÉES par défaut. Tout ce qui est identique d'une personne à
 // l'autre vit ICI, pas dupliqué dans chaque config. Une config perso ne
@@ -304,12 +304,23 @@ function computeWeightBonus(history){
   }
   if(!ref)return 0; // pas encore de recul -> pas de bonus (mais aucun malus)
   var refWeights=ref.weights||{};
+  // Machines ASSISTÉES (ex : traction assistée) : le poids choisi AIDE à
+  // monter, donc progresser = le BAISSER. Ces exercices portent
+  // lowerIsBetter:true dans la config ; une baisse y compte comme une hausse.
+  var lowerIsBetter={};
+  for(var d=0;d<CONFIG.days.length;d++){
+    for(var e=0;e<CONFIG.days[d].exercises.length;e++){
+      var exd=CONFIG.days[d].exercises[e];
+      if(exd.lowerIsBetter)lowerIsBetter[exd.id]=true;
+    }
+  }
   var up=0,total=0;
   for(var id in S.weights){
     var cur=S.weights[id],prev=refWeights[id];
     if(!cur||cur==='—'||prev===undefined)continue;
     total++;
-    if(parseFloat(cur)>parseFloat(prev))up++;
+    var c=parseFloat(cur),p=parseFloat(prev);
+    if(lowerIsBetter[id]?c<p:c>p)up++;
   }
   if(total===0)return 0;
   var pctUp=up/total*100;
