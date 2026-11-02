@@ -32,7 +32,7 @@ var WEIGHT_OPTIONS_PLATE=(function(){var a=['—'];for(var i=2;i<=160;i+=2){a.pu
 //    UNIQUEMENT quand on modifie SA config perso (ses exercices, ses journées,
 //    ses réglages…), sans toucher au moteur. Chacun garde son PATCH quand le
 //    moteur bouge : qui était en 2.4.1 passe en 2.5.1 lors d'une maj moteur.
-var ENGINE_VERSION='5.2';
+var ENGINE_VERSION='5.3';
 
 // Valeurs PARTAGÉES par défaut. Tout ce qui est identique d'une personne à
 // l'autre vit ICI, pas dupliqué dans chaque config. Une config perso ne
@@ -1065,8 +1065,10 @@ function blkHTML(block,day){
     +'<div class="sshdr" style="background:'+gc+'25"><span class="sslbl" style="color:'+gc+'">'+CONFIG.supersetHeaderText+'</span></div>'
     +block.exercises.map(function(ex,i){
       var last=i===block.exercises.length-1;
-      return '<div class="sswrap"><div class="ssnum" style="background:'+gc+'">'+(i+1)+'</div>'
-        +exHTML(ex,day)+'</div>'
+      // Le numéro (1, 2) est placé DANS la ligne de l'exercice, juste à gauche
+      // de l'icône et centré sur elle ; la ligne prend toute la largeur du
+      // bloc, donc une fois l'exercice fait, tout le rectangle passe en vert.
+      return '<div class="sswrap" style="padding-left:0">'+exHTML(ex,day,{num:i+1,color:gc})+'</div>'
         +(!last?'<div class="ssbetween"><span class="ssarr" style="color:'+gc+'">↓ SANS REPOS, PASSE AU 2ÈME</span></div>':'');
     }).join('')
     +'<div class="ssftr" style="border-top:1px dashed '+gc+'30"><span style="color:'+gc+'">&#9201; '+CONFIG.supersetFooterText+'</span></div>'
@@ -1128,7 +1130,9 @@ function extraBadgeHTML(ex){
   return CONFIG.extraBadge?(CONFIG.extraBadge(ex)||''):'';
 }
 
-function exHTML(ex,day){
+// ss (optionnel) : {num, color} quand l'exercice est dans un superset ->
+// pastille numérotée affichée à gauche de l'icône.
+function exHTML(ex,day,ss){
   var done=!!S.done[ex.id];
   var ec=exCol(ex,day.color);
   var reps=getReps(ex);
@@ -1146,8 +1150,11 @@ function exHTML(ex,day){
   // que le rectangle de poids ne soit plus isolé sur le fond. Une ligne de
   // séparation verte, un peu plus épaisse, délimite deux exercices faits
   // d'affilée (sinon tout serait vert d'un bloc).
+  var ssNum=ss?'<div class="ssnum" style="position:static;flex:0 0 22px;width:22px;height:22px;font-size:12px;align-self:center;background:'+(done?CONFIG.weightColors.fresh:ss.color)+'">'+ss.num+'</div>':'';
+  if(ss&&wRow)wRow='<div style="padding-left:32px">'+wRow+'</div>'; // reste aligné sous le texte malgré la pastille
   return '<div class="exrow" style="'+(done?'background:rgba(46,204,113,.08);border-bottom:2px solid rgba(46,204,113,.38)':'')+'">'
     +'<div class="extap" data-id="'+ex.id+'" style="background:transparent">'
+    +ssNum
     +'<div class="exicon" style="align-self:center;background:'+(done?'rgba(46,204,113,.1)':'#111113')+';border-color:'+(done?'rgba(46,204,113,.3)':'#252528')+'">'+mkIcon(ex.icon,done?CONFIG.weightColors.fresh:ec,52)+'</div>'
     +'<div class="excnt">'
     +'<div class="exnm" style="text-align:center;color:'+(done?CONFIG.weightColors.fresh:CONFIG.exerciseNameColor)+'">'+ex.name+'</div>'
