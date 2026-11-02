@@ -121,7 +121,7 @@ var P=[
   {id:'lun',dow:0,label:'LUN',name:'Pectoraux — Triceps',sub:'1 Abdos · 2 Pecs · 2 Triceps',color:'#ff4d1c',exercises:[
     {id:'ab_mer',reps:'3×10–15',name:'Ab Machine (Crunch)',icon:'abMachine',cat:'assist',tip:'Enroule le buste vers le bas, contraction 1 sec - Abdos (grand droit) - Remonte lentement'},
     {id:'dbBenchLun',reps:'4×6–10',name:'Dumbbell Bench Press',icon:'bench',cat:'free',isDB:true,tip:'Allonge sur banc plat, un haltere dans chaque main - Descends les halteres a hauteur de poitrine, coudes a 45 degres - Pousse en rapprochant les halteres en haut - Pecs complets, amplitude plus grande qu a la machine'},
-    {id:'dipsLun',reps:'4×6–12',name:'Parallel Bar Dips',icon:'seatedDip',cat:'free',isDB:true,tip:'Buste penche en avant - Descente coudes a 90 degres, remonte sans verrouiller - Pecs bas + triceps - Poids = LEST ajoute (ceinture ou haltere entre les pieds) : laisse vide tant que tu fais sans lest, ajoute-en des que 12 reps sont faciles'},
+    {id:'dipsLun',reps:'4×6–12',name:'Parallel Bar Dips',icon:'seatedDip',cat:'free',isBW:true,tip:'Poids du corps, buste penche en avant - Descente coudes a 90 degres, remonte sans verrouiller - Pecs bas + triceps - Progresse en ajoutant des reps, puis une descente lente sur 3 sec'},
     {id:'cableOverheadTriLun',reps:'4×10–15',name:'Cable Overhead Triceps Extension',icon:'overhead',cat:'semi',pair:'tri',tip:'Poulie haute, corde derriere la tete - Coudes fixes pres des oreilles, descends loin derriere la tete (etirement max) - Chef long du triceps : remplit tout l arriere du bras - Superset avec le Pushdown : meme poulie, MEME CORDE, rien a changer'},
     {id:'tricepsPush',reps:'4×10–15',name:'Cable Triceps Pushdown',icon:'tricepsPush',cat:'semi',pair:'tri',tip:'Meme corde que l Overhead, a deux mains - Coudes colles au corps, pousse vers le bas et ecarte la corde en bas, 1 sec de contraction - Chef lateral (fer a cheval, largeur du bras) - DERNIERE SERIE : drop set, baisse de 30 pourcent et continue jusqu a l echec'},
   ]},
@@ -162,7 +162,7 @@ var CONFIG={
   storagePrefix:'anthony_',
   title:'ANTHONY',
   accentColor:'#ff4d1c',
-  configVersion:26,
+  configVersion:27,
   deadline:'2026-11-12',
   deadlineLabel:'RÉVISION DU PROGRAMME',
   deadlineDateText:'12 Novembre 2026',
